@@ -11,3 +11,133 @@ project/plugins/project/
 
 # Scala-IDE specific
 .scala_dependencies
+
+.project
+.settings
+war/WEB-INF/appengine-generated/
+war/WEB-INF/classes/
+.gradle/
+.classpath
+bin/
+build/
+logs
+project/project
+project/target
+target
+.target
+tmp
+.history
+dist
+bin
+.project
+.cache
+.classpath
+.settings
+
+*.class
+*.log
+
+# sbt specific
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+
+# Worksheets
+.worksheet
+*.sc
+
+# Temp Files
+*.*~
+
+
+# eclipse conf file
+.settings
+.classpath
+.project
+.manager
+*.cache
+
+/.idea/
+.idea/
+.idea_modules/
+/project/boot/
+/project/plugins/project
+target/
+lib_managed/
+src_managed/
+test-output/
+*.iml
+
+bower_components
+node_modules
+.project
+.settings
+war/WEB-INF/appengine-generated/
+war/WEB-INF/classes/
+.gradle/
+.classpath
+bin/
+build/
+logs
+project/project
+project/target
+target
+.target
+tmp
+.history
+dist
+bin
+.project
+.cache
+.classpath
+.settings
+
+*.class
+*.log
+
+# sbt specific
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+
+# Worksheets
+.worksheet
+*.sc
+
+# Temp Files
+*.*~
+
+
+# eclipse conf file
+.settings
+.classpath
+.project
+.manager
+*.cache
+
+/.idea/
+.idea/
+.idea_modules/
+/project/boot/
+/project/plugins/project
+target/
+lib_managed/
+src_managed/
+test-output/
+*.iml
+
+bower_components
+node_modules
+src/main/resources/frontend/web/dist
