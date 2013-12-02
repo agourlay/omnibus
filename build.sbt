@@ -4,8 +4,6 @@ assemblySettings
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-atmosSettings
-
 jarName in assembly := "omnibus.jar"
 
 test in assembly := {}
@@ -44,21 +42,21 @@ resolvers ++= Seq(
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 
 libraryDependencies ++= {
-  val akkaVersion   = "2.2.3"
-  val sprayVersion  = "1.2-RC4"
+  val akkaVersion       = "2.2.3"
+  val sprayVersion      = "1.2-RC4"
+  val sprayJsonVersion  = "1.2.5"
+  val logbackVersion    = "1.0.13"
+  val specs2Version     = "2.2.3"
   Seq(
        "io.spray"               %   "spray-can"         % sprayVersion               withSources() 
       ,"io.spray"               %   "spray-routing"     % sprayVersion               withSources()
-      ,"io.spray"               %   "spray-caching"     % sprayVersion               withSources()
       ,"io.spray"               %   "spray-testkit"     % sprayVersion    % "test"   withSources()
-      ,"io.spray"               %%  "spray-json"        % "1.2.5"                    withSources()
+      ,"io.spray"               %%  "spray-json"        % sprayJsonVersion           withSources()
       ,"com.typesafe.akka"      %%  "akka-actor"        % akkaVersion                withSources()
       ,"com.typesafe.akka"      %%  "akka-slf4j"        % akkaVersion                withSources()
       ,"com.typesafe.akka"      %%  "akka-testkit"      % akkaVersion     % "test"   withSources()
-      ,"joda-time"              %   "joda-time"         % "2.3"                      withSources()
-      ,"ch.qos.logback"         %   "logback-classic"   % "1.0.13"                   withSources()
-      ,"junit"                  %   "junit"             % "4.11"          % "test"   withSources()
-      ,"org.specs2"             %%  "specs2"            % "2.2.3"         % "test"   withSources()  
+      ,"ch.qos.logback"         %   "logback-classic"   % logbackVersion             withSources()
+      ,"org.specs2"             %%  "specs2"            % specs2Version   % "test"   withSources()  
   )
 }
 
