@@ -15,6 +15,7 @@ import spray.can.Http
 import omnibus.service.OmnibusRest
 import omnibus.service.TopicService
 import omnibus.service.SubscriptionService
+import omnibus.domain.TopicRepository
 
 object Boot extends App with Configuration{
  
@@ -23,14 +24,20 @@ object Boot extends App with Configuration{
 
   implicit val system = ActorSystem(systemName)
   implicit def executionContext = system.dispatcher
-      
-  val topicService = system.actorOf(Props(classOf[TopicService])
-                          .withRouter(SmallestMailboxRouter(Runtime.getRuntime.availableProcessors)), "topic-service")
+  val routerSize = Runtime.getRuntime.availableProcessors * 2
 
-  val subscriptionService = system.actorOf(Props(classOf[SubscriptionService])
-                          .withRouter(SmallestMailboxRouter(Runtime.getRuntime.availableProcessors)), "subscription-service")
+  // parent of the topic tree 
+  val topicRepository = system.actorOf(Props(classOf[TopicRepository]), "topic-repository")
+  
+  // responsible for managing the topicRepository    
+  val topicService = system.actorOf(Props(classOf[TopicService], topicRepository)
+                           .withRouter(SmallestMailboxRouter(routerSize)), "topic-service")
 
-  val httpService = system.actorOf(Props(classOf[OmnibusRest], topicService, subscriptionService), "http-service")
+  // responsible for managing subscribers
+  val subsService = system.actorOf(Props(classOf[SubscriptionService], topicService)
+                          .withRouter(SmallestMailboxRouter(routerSize)), "subscription-service")
+
+  val httpService = system.actorOf(Props(classOf[OmnibusRest], topicService, subsService), "http-service")
   
   IO(Http) ! Http.Bind(httpService, "localhost", port = port) 
 }

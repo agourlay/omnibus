@@ -1,19 +1,36 @@
 package omnibus.service
 
-import akka.actor.Actor
+import akka.actor._
 import akka.actor.ActorLogging
 
 import omnibus.service.TopicServiceProtocol._
+import omnibus.domain.TopicRepositoryProtocol._
 
 
-class TopicService extends Actor with ActorLogging {
+class TopicService(topicRepository: ActorRef) extends Actor with ActorLogging {
     
   def receive = {
-    case CreateTopic(topic)              => sender ! "Create topic " + topic + "\n\n"
-    case DeleteTopic(topic)              => sender ! "Delete topic " + topic + "\n\n"
-    case CheckTopic(topic)               => sender ! "Check topic " + topic + "\n\n"
-    case PublishToTopic(topic, message)  => sender ! "Message " + message + " pushed to" +" topic" + "\n\n"
+    case CreateTopic(topic)              => sender ! createTopic(topic)
+    case DeleteTopic(topic)              => sender ! deleteTopic(topic)
+    case CheckTopic(topic)               => sender ! checkTopic(topic)
+    case PublishToTopic(topic, message)  => sender ! publishToTopic(topic, message)
   }
+
+  def createTopic(topic : String) : String = {
+    s"Topic $topic created" 
+  } 
+
+  def deleteTopic(topic : String) : String = {
+    s"Topic $topic deleted" 
+  } 
+
+  def checkTopic(topic : String) : String = {
+    s"Checking topic $topic" 
+  } 
+
+  def publishToTopic(topic : String, message : String) : String = {
+    s"Publising message to topic $topic" 
+  } 
 
 }
 

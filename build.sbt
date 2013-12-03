@@ -39,11 +39,9 @@ resolvers ++= Seq(
   ,"spray nightly"      at "http://nightlies.spray.io/"
 )
 
-testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
-
 libraryDependencies ++= {
   val akkaVersion       = "2.2.3"
-  val sprayVersion      = "1.2-RC4"
+  val sprayVersion      = "1.2.0"
   val sprayJsonVersion  = "1.2.5"
   val logbackVersion    = "1.0.13"
   val specs2Version     = "2.2.3"

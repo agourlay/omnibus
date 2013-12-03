@@ -4,23 +4,61 @@ import akka.actor._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.collection.mutable.ListBuffer
 
 import omnibus.domain.TopicProtocol._
 
 class Topic extends Actor with ActorLogging {
 
   implicit def executionContext = context.dispatcher
-
-  var messages : Seq[Message] = Seq.empty[Message]
-  var subscribers = Map.empty[String, String]
+  
+  var messages : ListBuffer[Message] = ListBuffer.empty[Message]
+  var subscribers : ListBuffer[ActorPath] = ListBuffer.empty[ActorPath]
 
   def receive = {
-    case SubscriberNumber => sender ! subscribers.size.toString
+  	case PublishMessage(message) => publishMessage(message)
+  	case Subscribe(subscriber)   => subscribe(subscriber)
+  	case Unsubscribe(subscriber) => unsubscribe(subscriber)
+    case SubscriberNumber        => sender ! subscribers.size.toString
+    case CreateSubTopic(topics)  => createSubTopic(topics)
   }
+
+  def publishMessage(message : Message) = {
+  	messages += message
+  	// push to subscribers
+    subscribers.foreach{ actorPath =>
+    	context.actorSelection(actorPath) ! message
+    }
+    // forward message to sub-topics
+    context.children foreach { child ⇒
+      child ! TopicProtocol.PublishMessage(message)
+    }	   
+  }
+
+  def subscribe(subscriber : ActorRef) = {
+    subscribers += subscriber.path
+  }
+
+  def unsubscribe(subscriber : ActorRef) = {
+  	subscribers -= subscriber.path
+  }
+
+  def createSubTopic(topics : List[String]) = topics match{ 
+  	case head :: tail => createTopicAndForward(head , tail)
+  	case _            => log.debug("No more sub topic to create")
+  }
+
+  def createTopicAndForward(subTopic : String, topics : List[String]) = {
+    val subTopicActor = context.actorOf(Props(classOf[Topic]))
+    subTopicActor ! TopicProtocol.CreateSubTopic(topics)
+  }
+
 }
 
 object TopicProtocol {
-  case object Subscribe
-  case object Unsubscribe
+  case class PublishMessage(message : Message)
+  case class Subscribe(subscriber : ActorRef)
+  case class Unsubscribe(subscriber : ActorRef)
+  case class CreateSubTopic(topics : List[String])
   case object SubscriberNumber
 }
