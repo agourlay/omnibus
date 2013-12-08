@@ -8,12 +8,12 @@ import scala.collection.mutable.ListBuffer
 
 import omnibus.domain.TopicProtocol._
 
-class Topic extends Actor with ActorLogging {
+class Topic(val topic:String) extends Actor with ActorLogging {
 
   implicit def executionContext = context.dispatcher
   
   var messages : ListBuffer[Message] = ListBuffer.empty[Message]
-  var subscribers : ListBuffer[ActorPath] = ListBuffer.empty[ActorPath]
+  var subscribers : Set[ActorRef] = Set.empty[ActorRef]
 
   def receive = {
   	case PublishMessage(message) => publishMessage(message)
@@ -21,26 +21,31 @@ class Topic extends Actor with ActorLogging {
   	case Unsubscribe(subscriber) => unsubscribe(subscriber)
     case SubscriberNumber        => sender ! subscribers.size.toString
     case CreateSubTopic(topics)  => createSubTopic(topics)
+    case Terminated(refSub)      => subscribers -= refSub
   }
 
   def publishMessage(message : Message) = {
   	messages += message
   	// push to subscribers
-    subscribers.foreach{ actorPath =>
-    	context.actorSelection(actorPath) ! message
+    subscribers.foreach{ actorRef =>
+    	actorRef ! message
     }
     // forward message to sub-topics
     context.children foreach { child ⇒
-      child ! TopicProtocol.PublishMessage(message)
+      child ! SubscriberProtocol.PushMessage(message)
     }	   
   }
 
   def subscribe(subscriber : ActorRef) = {
-    subscribers += subscriber.path
+    context.watch(subscriber)
+    subscribers += subscriber
+    subscriber ! SubscriberProtocol.AcknowledgeSub(self)
   }
 
   def unsubscribe(subscriber : ActorRef) = {
-  	subscribers -= subscriber.path
+    context.unwatch(subscriber)
+  	subscribers -= subscriber
+    subscriber ! SubscriberProtocol.AcknowledgeUnsub(self)
   }
 
   def createSubTopic(topics : List[String]) = topics match{ 
@@ -49,7 +54,7 @@ class Topic extends Actor with ActorLogging {
   }
 
   def createTopicAndForward(subTopic : String, topics : List[String]) = {
-    val subTopicActor = context.actorOf(Props(classOf[Topic]))
+    val subTopicActor = context.actorOf(Props(classOf[Topic], topic+"/"+subTopic))
     subTopicActor ! TopicProtocol.CreateSubTopic(topics)
   }
 

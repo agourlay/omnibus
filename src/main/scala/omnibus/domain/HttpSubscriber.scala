@@ -15,34 +15,43 @@ import scala.concurrent.Future
 import scala.collection.mutable.ListBuffer
 
 import omnibus.domain.JsonSupport._
-import omnibus.util._
-import omnibus.domain.HttpSubscribeProtocol._
 
 
-class HttpSubscriber(responder: ActorRef) extends StreamingResponse(responder) {
-
-  implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(3 seconds)	
+class HttpSubscriber(responder:ActorRef, topics:Set[ActorRef]) extends Subscriber(responder, topics) {
   
-  var subscriptions : ListBuffer[String] = ListBuffer.empty[String]
+    val EventStreamType = register(
+                            MediaType.custom(
+                              mainType = "text",
+                              subType = "event-stream",
+                              compressible = false,
+                              binary = false
+                            ))
 
-  override def startText = "Streaming subscription...\n"
+  val responseStart = HttpResponse(
+      entity  = HttpEntity(EventStreamType, startText),
+      headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
+      )
+
+  responder ! ChunkedResponseStart(responseStart) 
+
+  val startText = "Streaming subscription...\n"
 
   override def receive = {
-    case message : Message              => pushMessage(message)
-    case AcknowledgeSubscription(topic) => ackSubscription(topic)
-    case _                              => super.receive   
+    case m : Message => pushMessageSSE(m)
+      
+    case ev: Http.ConnectionClosed => {
+      log.debug("Stopping response streaming due to {}", ev)
+      context.stop(self)
+    }
+     
+    case ReceiveTimeout => responder ! MessageChunk(":\n") // Comment to keep connection alive  
+
+    case _              => super.receive   
   }
 
-  def pushMessage(message : Message) = {
+  def pushMessageSSE(message : Message) = {
     val nextChunk = MessageChunk("data: "+ formatMessage.write(message) +"\n\n")
     responder ! nextChunk 
   }
 
-  def ackSubscription(topicName : String) = subscriptions += topicName
-
-}
-
-object HttpSubscribeProtocol {
-  case class AcknowledgeSubscription(topicName : String)
 }
