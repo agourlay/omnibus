@@ -46,15 +46,16 @@ libraryDependencies ++= {
   val logbackVersion    = "1.0.13"
   val specs2Version     = "2.2.3"
   Seq(
-       "io.spray"               %   "spray-can"         % sprayVersion               withSources() 
-      ,"io.spray"               %   "spray-routing"     % sprayVersion               withSources()
-      ,"io.spray"               %   "spray-testkit"     % sprayVersion    % "test"   withSources()
-      ,"io.spray"               %%  "spray-json"        % sprayJsonVersion           withSources()
-      ,"com.typesafe.akka"      %%  "akka-actor"        % akkaVersion                withSources()
-      ,"com.typesafe.akka"      %%  "akka-slf4j"        % akkaVersion                withSources()
-      ,"com.typesafe.akka"      %%  "akka-testkit"      % akkaVersion     % "test"   withSources()
-      ,"ch.qos.logback"         %   "logback-classic"   % logbackVersion             withSources()
-      ,"org.specs2"             %%  "specs2"            % specs2Version   % "test"   withSources()  
+       "io.spray"            %   "spray-can"                      % sprayVersion               withSources() 
+      ,"io.spray"            %   "spray-routing"                  % sprayVersion               withSources()
+      ,"io.spray"            %   "spray-testkit"                  % sprayVersion    % "test"   withSources()
+      ,"io.spray"            %%  "spray-json"                     % sprayJsonVersion           withSources()
+      ,"com.typesafe.akka"   %%  "akka-actor"                     % akkaVersion                withSources()
+      ,"com.typesafe.akka"   %%  "akka-persistence-experimental"  % akkaVersion                withSources()
+      ,"com.typesafe.akka"   %%  "akka-slf4j"                     % akkaVersion                withSources()
+      ,"com.typesafe.akka"   %%  "akka-testkit"                   % akkaVersion     % "test"   withSources()
+      ,"ch.qos.logback"      %   "logback-classic"                % logbackVersion             withSources()
+      ,"org.specs2"          %%  "specs2"                         % specs2Version   % "test"   withSources()  
   )
 }
 
