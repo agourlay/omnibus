@@ -31,11 +31,11 @@ object Boot extends App with Configuration{
   
   // responsible for managing the topicRepository    
   val topicService = system.actorOf(Props(classOf[TopicService], topicRepository)
-                           .withRouter(SmallestMailboxRouter(routerSize)), "topic-service")
+                           .withRouter(SmallestMailboxPool(routerSize)), "topic-service")
 
   // responsible for managing subscribers
   val subsService = system.actorOf(Props(classOf[SubscriptionService], topicService)
-                          .withRouter(SmallestMailboxRouter(routerSize)), "subscription-service")
+                          .withRouter(SmallestMailboxPool(routerSize)), "subscription-service")
 
   val httpService = system.actorOf(Props(classOf[OmnibusRest], topicService, subsService), "http-service")
   
