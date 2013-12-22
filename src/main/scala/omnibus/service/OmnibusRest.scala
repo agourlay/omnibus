@@ -11,18 +11,16 @@ import spray.can.Http
 import spray.can.server.Stats
 
 import scala.concurrent.duration._
-import scala.concurrent.duration._
 import scala.concurrent.Future
 
 import DefaultJsonProtocol._
 import reflect.ClassTag
 
 import omnibus.domain.JsonSupport._
-import omnibus.service.TopicServiceProtocol._
-import omnibus.service.SubscriptionServiceProtocol._
+import omnibus.service.OmnibusServiceProtocol._
 
 
-class OmnibusRest(topicService: ActorRef, subscriptionService: ActorRef) extends HttpServiceActor with ActorLogging{
+class OmnibusRest(omnibusService: ActorRef) extends HttpServiceActor with ActorLogging{
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(10 seconds)
 
@@ -32,27 +30,29 @@ class OmnibusRest(topicService: ActorRef, subscriptionService: ActorRef) extends
     path("topics" / Rest) { topic =>
       post {
         complete {
-          (topicService ? TopicServiceProtocol.CreateTopic(topic)).mapTo[String]
+          (omnibusService ? OmnibusServiceProtocol.CreateTopic(topic)).mapTo[String]
           }
         } ~
         put {
           entity(as[String]) { message =>
             complete {
-              (topicService ? TopicServiceProtocol.PublishToTopic(topic, message)).mapTo[String]
+              (omnibusService ? OmnibusServiceProtocol.PublishToTopic(topic, message)).mapTo[String]
             }
           }
         } ~
         delete {
           complete {
-            (topicService ? TopicServiceProtocol.DeleteTopic(topic)).mapTo[String]
+            (omnibusService ? OmnibusServiceProtocol.DeleteTopic(topic)).mapTo[String]
           }
         } ~
-        get { ctx =>
-          subscriptionService ! SubscriptionServiceProtocol.HttpSubscribeToTopic(topic, ctx.responder)
+        parameters('mode ? "simple") { mode => 
+          get { ctx =>
+            omnibusService ! OmnibusServiceProtocol.HttpSubToTopic(topic, ctx.responder, mode)
+          }  
         } ~
         head {
           complete {
-            (topicService ? TopicServiceProtocol.CheckTopic(topic)).mapTo[String]
+            (omnibusService ? OmnibusServiceProtocol.CheckTopic(topic)).mapTo[String]
           }
         }
       }

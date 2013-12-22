@@ -26,8 +26,6 @@ class Subscriber(val responder:ActorRef,  val topics:Set[ActorRef]) extends Acto
     case PushMessage(message : Message) => responder ! message
     case StopSubscription => self ! PoisonPill
   }
-
-
 }
 
 object SubscriberProtocol {

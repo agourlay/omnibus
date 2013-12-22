@@ -19,13 +19,13 @@ import omnibus.domain.JsonSupport._
 
 class HttpSubscriber(responder:ActorRef, topics:Set[ActorRef]) extends Subscriber(responder, topics) {
   
-    val EventStreamType = register(
-                            MediaType.custom(
-                              mainType = "text",
-                              subType = "event-stream",
-                              compressible = false,
-                              binary = false
-                            ))
+  val EventStreamType = register(
+                          MediaType.custom(
+                            mainType = "text",
+                            subType = "event-stream",
+                            compressible = false,
+                            binary = false
+                          ))
 
   val responseStart = HttpResponse(
       entity  = HttpEntity(EventStreamType, startText),

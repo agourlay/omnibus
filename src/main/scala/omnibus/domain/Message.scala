@@ -2,4 +2,4 @@ package omnibus.domain
 
 import spray.json._
 
-case class Message(timestamp : Long, topicName : String, payload :JsValue) 
+case class Message(topicName : String, payload : String, timestamp : Long = System.currentTimeMillis / 1000)

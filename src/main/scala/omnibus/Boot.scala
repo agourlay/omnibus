@@ -12,10 +12,8 @@ import scala.language.postfixOps
 
 import spray.can.Http
 
-import omnibus.service.OmnibusRest
-import omnibus.service.TopicService
-import omnibus.service.SubscriptionService
-import omnibus.domain.TopicRepository
+import omnibus.service._
+import omnibus.repository._
 
 object Boot extends App with Configuration{
  
@@ -28,16 +26,14 @@ object Boot extends App with Configuration{
 
   // parent of the topic tree 
   val topicRepository = system.actorOf(Props(classOf[TopicRepository]), "topic-repository")
+
+  // parent of the subscriber tree
+  val subRepository = system.actorOf(Props(classOf[SubscriberRepository]), "subscriber-repository")
   
-  // responsible for managing the topicRepository    
-  val topicService = system.actorOf(Props(classOf[TopicService], topicRepository)
-                           .withRouter(SmallestMailboxPool(routerSize)), "topic-service")
+  val omnibusService = system.actorOf(Props(classOf[OmnibusService], topicRepository, subRepository)
+                           .withRouter(SmallestMailboxPool(routerSize)), "omnibus-service")
 
-  // responsible for managing subscribers
-  val subsService = system.actorOf(Props(classOf[SubscriptionService], topicService)
-                          .withRouter(SmallestMailboxPool(routerSize)), "subscription-service")
-
-  val httpService = system.actorOf(Props(classOf[OmnibusRest], topicService, subsService), "http-service")
+  val httpService = system.actorOf(Props(classOf[OmnibusRest], omnibusService), "omnibus-http")
   
   IO(Http) ! Http.Bind(httpService, "localhost", port = port) 
 }
