@@ -26,15 +26,17 @@ class TopicRepository extends Actor with ActorLogging {
   }
 
   def createTopicActor(topicName : String) = {
-    val topicsList = topicName.split("/").toList
+    val topicsList = topicName.split('/').toList
     val topicRoot = topicsList.head
-
+     log.info(topicRoot)
     if (rootTopics.contains(topicRoot)) {
-      log.info(s"Root topic $topicRoot already exist, forward to sub topics")
+      log.info(s"Root topic $topicRoot already exist, forward to sub topic")
       rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail)
     } else {
       log.info(s"Creating new root topic $topicRoot")
-      rootTopics += (topicRoot -> context.actorOf(Props(classOf[Topic], topicRoot), topicRoot))
+      val newRootTopic = context.actorOf(Props(classOf[Topic], topicRoot), topicRoot)
+      rootTopics += (topicRoot -> newRootTopic)
+      newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail)
     }
   }
 

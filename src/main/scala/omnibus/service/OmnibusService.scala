@@ -10,6 +10,7 @@ import scala.util._
 
 import omnibus.service.OmnibusServiceProtocol._
 import omnibus.repository._
+import omnibus.domain._
 
 import reflect.ClassTag
 
@@ -46,14 +47,17 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo : ActorRef) extends Act
   } 
 
   def httpSubscribeToTopic(topicName : String, responder : ActorRef, mode : String) {
+    log.info(s"Demand to subscribe to $topicName with mode $mode")
+    log.info(splitMultiTopic(topicName).toString)
+    val reactMode = ReactiveMode.withName(mode)
     val actorTopics : List[Future[Option[ActorRef]]] = for (topic <- splitMultiTopic(topicName))
                                                yield (topicRepo ? TopicRepositoryProtocol.LookupTopicActor(topic)).mapTo[Option[ActorRef]]
     Future.sequence(actorTopics).onComplete {
-      case Failure(error)        => log.info(error.getMessage())
+      case Failure(error)           => log.info("error occured while subscribing to topic " + error.getMessage())
       case Success(optTopicRefList) => {
         val topicRefList : List[ActorRef] = optTopicRefList.filter(_ != None).map(_.get)
         if (topicRefList.nonEmpty) {
-          subscriberRepo ! SubscriberRepositoryProtocol.CreateHttpSub(topicRefList.toSet, responder)
+          subscriberRepo ! SubscriberRepositoryProtocol.CreateHttpSub(topicRefList.toSet, responder, reactMode)
         } else {
           log.info("Cannot create sub on empty topic list")
         }  
@@ -61,8 +65,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo : ActorRef) extends Act
     }                                               
   }
 
-  def splitMultiTopic(topics : String) : List[String] = topics.split("/+").toList
-
+  def splitMultiTopic(topics : String) : List[String] = topics.split('+').toList
 }
 
 object OmnibusServiceProtocol {

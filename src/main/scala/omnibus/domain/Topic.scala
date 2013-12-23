@@ -14,6 +14,7 @@ class Topic(val topic:String) extends Actor with ActorLogging {
   
   var messages : ListBuffer[Message] = ListBuffer.empty[Message]
   var subscribers : Set[ActorRef] = Set.empty[ActorRef]
+  var subTopics : Map[String, ActorRef] = Map.empty[String, ActorRef]
 
   override def preStart(): Unit = {
     val myPath = self.path
@@ -27,6 +28,8 @@ class Topic(val topic:String) extends Actor with ActorLogging {
     case SubscriberNumber        => sender ! subscribers.size.toString
     case CreateSubTopic(topics)  => createSubTopic(topics)
     case Terminated(refSub)      => subscribers -= refSub
+    case Replay(refSub)          => replayHistory(refSub)
+    case Last(refSub)            => lastMessage(refSub)
   }
 
   def publishMessage(message : Message) = {
@@ -36,8 +39,8 @@ class Topic(val topic:String) extends Actor with ActorLogging {
     	actorRef ! message
     }
     // forward message to sub-topics
-    context.children foreach { child ⇒
-      child ! SubscriberProtocol.PushMessage(message)
+    subTopics.values foreach { subTopic ⇒
+      subTopic ! TopicProtocol.PublishMessage(message)
     }	   
   }
 
@@ -59,16 +62,38 @@ class Topic(val topic:String) extends Actor with ActorLogging {
   }
 
   def createTopicAndForward(subTopic : String, topics : List[String]) = {
-    val subTopicActor = context.actorOf(Props(classOf[Topic], topic+"/"+subTopic))
-    subTopicActor ! TopicProtocol.CreateSubTopic(topics)
+    log.info(s"Create sub topic $subTopic and forward $topics")
+    if (subTopics.contains(subTopic)) {
+      log.info(s"sub topic $subTopic subTopic exist, forward to sub topics")
+      subTopics(subTopic) ! TopicProtocol.CreateSubTopic(topics)
+    }else {
+      val subTopicActor = context.actorOf(Props(classOf[Topic], subTopic), subTopic)
+      subTopics += (subTopic -> subTopicActor)
+      subTopicActor ! TopicProtocol.CreateSubTopic(topics)
+    }
   }
 
+  def replayHistory(refSub : ActorRef) = {
+    if (messages.nonEmpty) {
+      messages foreach { message =>
+        refSub ! message
+      }
+    }
+  }
+
+  def lastMessage(refSub : ActorRef) = {
+    if (messages.nonEmpty) {
+      refSub ! messages.head  
+    }
+  }
 }
 
 object TopicProtocol {
   case class PublishMessage(message : Message)
   case class Subscribe(subscriber : ActorRef)
   case class Unsubscribe(subscriber : ActorRef)
+  case class Replay(subscriber : ActorRef)
+  case class Last(subscriber : ActorRef)
   case class CreateSubTopic(topics : List[String])
   case object SubscriberNumber
 }

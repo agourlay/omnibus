@@ -16,9 +16,10 @@ import scala.concurrent.Future
 import scala.collection.mutable.ListBuffer
 
 import omnibus.domain.JsonSupport._
+import omnibus.domain.ReactiveMode._
 
 
-class HttpSubscriber(responder:ActorRef, topics:Set[ActorRef]) extends Subscriber(responder, topics) {
+class HttpSubscriber(responder:ActorRef, topics:Set[ActorRef], mode : ReactiveMode) extends Subscriber(responder, topics, mode) {
   
   lazy val EventStreamType = register(
                           MediaType.custom(
@@ -33,7 +34,8 @@ class HttpSubscriber(responder:ActorRef, topics:Set[ActorRef]) extends Subscribe
       headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
       )
 
-  val startText = "Streaming subscription...\n"
+  val topicsPath = prettySubscription()
+  val startText = s"... Streaming subscription for topics $topicsPath\n"
 
   override def preStart(): Unit = {
     responder ! ChunkedResponseStart(responseStart) 
@@ -41,15 +43,12 @@ class HttpSubscriber(responder:ActorRef, topics:Set[ActorRef]) extends Subscribe
   }
 
   override def receive = {
-    case m : Message => pushMessageSSE(m)
-      
+    case m : Message => pushMessageSSE(m)     
     case ev: Http.ConnectionClosed => {
       log.debug("Stopping response streaming due to {}", ev)
       context.stop(self)
     }
-     
     case ReceiveTimeout => responder ! MessageChunk(":\n") // Comment to keep connection alive  
-
     case _              => super.receive   
   }
 
