@@ -4,11 +4,11 @@
 
 An awesome reactive HTTP message bus.
 
-tl;dr : you can easily create huge topic hierarchy and then push messages or listen at any level in the tree. 
+Push text messages using an HTTP api and receive subscriptions streamed by server-sent-event
+
+*tl;dr : you can easily create huge hierarchy of nested topics and then push messages or listen at any level in the tree.* 
 
 ### Classic bus features
-
-Push unstructured text messages on a rest api and receive subscribtion streamed by server-sent-event
 
 Topics are trees, you can create them easily with a POST request.
 
@@ -16,9 +16,11 @@ Create the nested topic "/example/nested"
 
 > curl -X POST http://localhost:8080/topics/example/nested
 
-You can push data to the topic
+You can push data to the topic.
 
 > curl -X PUT http://localhost:8080/topics/example/nested -d "a message"
+
+If you publish a message at the "/example" level, all subtopics will receive it as well.
 
 And finally you can subscribe to notification on a topic
 
@@ -49,6 +51,9 @@ Modes are specified by url parameter
 
 > data: {"topicName":"example/nested","payload":"old message","timestamp":1387813403}
 
+Of course you are free to use reactive modes on composed subscriptions.
+
+> curl -X GET http://localhost:8080/topics/example/nested+stuff/blabla+thingy/blabla?mode=replay
 
 ### Unrealistic roadmap
 
