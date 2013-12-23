@@ -1,14 +1,16 @@
 # Omnibus [![Build Status](https://travis-ci.org/agourlay/omnibus.png?branch=master)](https://travis-ci.org/agourlay/omnibus)
 
-**WARNING : this is a BIG MESS in progress**
+**WARNING : THIS IS A BIG MESS IN PROGRESS**
 
 An awesome reactive HTTP message bus.
 
-### features
+tl;dr : you can easily create huge topic hierarchy and then push messages or listen at any level in the tree. 
+
+### Classic bus features
 
 Push unstructured text messages on a rest api and receive subscribtion streamed by server-sent-event
 
-Topics are trees, you can create them easily
+Topics are trees, you can create them easily with a POST request.
 
 Create the nested topic "/example/nested"
 
@@ -18,11 +20,13 @@ You can push data to the topic
 
 > curl -X PUT http://localhost:8080/topics/example/nested -d "a message"
 
-And finally you can subscribe
+And finally you can subscribe to notification on a topic
+
 > curl -X GET http://localhost:8080/topics/example/nested
+
 >... Streaming subscription for topics /example/nested
 
-### More features
+### More great features
 
 You can compose subscriptions with the char '+'
 
@@ -34,9 +38,9 @@ Omnibus supports reactive modes in order to retrieve more infos from topics.
 
 The supported mode are: 
 
-- simple : regular subscription (default one)
-- last   : get last message on topic and following
-- replay  : get all past message on topic and then
+- simple : regular subscription (default one if not specified)
+- last   : get last message on a topic and the following
+- replay : get all past message on topic and the following
 
 Modes are specified by url parameter
 > curl -X GET http://localhost:8080/topics/example/nested
@@ -45,15 +49,15 @@ Modes are specified by url parameter
 
 > data: {"topicName":"example/nested","payload":"old message","timestamp":1387813403}
 
+
 ### Unrealistic roadmap
 
 - support completely Server-Sent-Event specification (Last-event-Seen header)
 
 - provide statistics per topics
 
+- persist content of topic for crash recovery
+
 - deploy bus in cluster
 
 - support other protocols (websockets)
-
-
-
