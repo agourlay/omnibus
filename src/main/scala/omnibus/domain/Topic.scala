@@ -15,6 +15,11 @@ class Topic(val topic:String) extends Actor with ActorLogging {
   var messages : ListBuffer[Message] = ListBuffer.empty[Message]
   var subscribers : Set[ActorRef] = Set.empty[ActorRef]
 
+  override def preStart(): Unit = {
+    val myPath = self.path
+    log.info(s"Creating new root topic $myPath")
+  }
+
   def receive = {
   	case PublishMessage(message) => publishMessage(message)
   	case Subscribe(subscriber)   => subscribe(subscriber)

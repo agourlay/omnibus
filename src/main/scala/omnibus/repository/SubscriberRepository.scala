@@ -16,16 +16,18 @@ class SubscriberRepository extends Actor with ActorLogging {
     case CreateSub(topics, responder)     => createHttpSub(topics, responder)
   }
 
-  def createHttpSub(topics : List[String], responder : ActorRef) = {
+  def createHttpSub(topics : Set[ActorRef], responder : ActorRef) = {
+    log.info("Creating http sub on topics " + topics )
   	context.actorOf(Props(classOf[HttpSubscriber], responder, topics))
   }
 
-  def createSub(topics : List[String], responder : ActorRef) = {
+  def createSub(topics : Set[ActorRef], responder : ActorRef) = {
+    log.info("Creating sub on topics " + topics )
   	context.actorOf(Props(classOf[Subscriber], responder, topics))
   }
 }
 
 object SubscriberRepositoryProtocol {
-   case class CreateHttpSub(topics : List[String], responder : ActorRef)
-   case class CreateSub(topics : List[String], responder : ActorRef)
+   case class CreateHttpSub(topics : Set[ActorRef], responder : ActorRef)
+   case class CreateSub(topics : Set[ActorRef], responder : ActorRef)
 }

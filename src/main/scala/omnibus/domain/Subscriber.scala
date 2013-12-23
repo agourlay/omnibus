@@ -14,11 +14,12 @@ class Subscriber(val responder:ActorRef,  val topics:Set[ActorRef]) extends Acto
   var pendingTopic : Set[ActorRef] = topics
   var topicListened : Set[ActorRef] = Set.empty[ActorRef]
 
-
-  for(topic <- topics){
-  	topic ! TopicProtocol.Subscribe(self)
+  override def preStart(): Unit = {
+    log.info("Creating sub on topics " + topics )
+    for(topic <- topics){
+     topic ! TopicProtocol.Subscribe(self)
+    }
   }
-
 
   def receive = {
   	case AcknowledgeSub(topicRef) => {topicListened += topicRef; pendingTopic -= topicRef}

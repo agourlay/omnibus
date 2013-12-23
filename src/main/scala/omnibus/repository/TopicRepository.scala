@@ -21,6 +21,7 @@ class TopicRepository extends Actor with ActorLogging {
     case CreateTopicActor(topic)             => createTopicActor(topic)
     case DeleteTopicActor(topic)             => deleteTopicActor(topic)
     case CheckTopicActor(topic)              => sender ! checkTopicActor(topic)
+    case LookupTopicActor(topic)             => sender ! lookUpTopicActor(topic)
     case PublishToTopicActor(topic, message) => publishToTopicActor(topic, message)
   }
 
@@ -28,37 +29,43 @@ class TopicRepository extends Actor with ActorLogging {
     val topicsList = topicName.split("/").toList
     val topicRoot = topicsList.head
 
-    if (rootTopics.contains(topicRoot)) rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail)
-    else rootTopics += (topicRoot -> context.actorOf(Props(classOf[Topic], topicRoot)))
-    
+    if (rootTopics.contains(topicRoot)) {
+      log.info(s"Root topic $topicRoot already exist, forward to sub topics")
+      rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail)
+    } else {
+      log.info(s"Creating new root topic $topicRoot")
+      rootTopics += (topicRoot -> context.actorOf(Props(classOf[Topic], topicRoot), topicRoot))
+    }
   }
 
   def publishToTopicActor(topicName : String, message : String) = {
-    lookupTopic(topicName) match {
+    lookUpTopicActor(topicName) match {
       case Some(topicRef) => topicRef ! TopicProtocol.PublishMessage( new Message(topicName, message) )
       case None           => log.info(s"trying to push to non existing topic $topicName")
     }
   }
 
-  def lookupTopic(topic : String) : Option[ActorRef] = {
-    implicit val timeout = akka.util.Timeout(1 seconds)
-    val selection : Future[ActorRef] = context.actorSelection(topic).resolveOne
-    val topicRef : Try[ActorRef] = selection.value.get
+  // FIX : find a proper way to implement this
+  def lookUpTopicActor(topic : String) : Option[ActorRef] = {
+    implicit val timeout = akka.util.Timeout(2 seconds)
+    log.info(s"Lookup for topic actor $topic")
+    val future : Future[ActorRef] = context.actorSelection(topic).resolveOne
+    val topicRef = try {Await.result(future, timeout.duration).asInstanceOf[ActorRef]}
     topicRef match {
-      case Success(ref) => Some(ref)
-      case Failure(err) => None  
+      case ref : ActorRef  => log.info(s"Lookup for topic actor $topic SUCCESS "); Some(ref)
+      case _               => log.info(s"Lookup for topic actor $topic FAILED "); None  
     }
   }
 
   def deleteTopicActor(topicName : String) = {
-    lookupTopic(topicName) match {
+    lookUpTopicActor(topicName) match {
       case Some(topicRef) => topicRef ! PoisonPill
       case None           => log.info(s"trying to delete non existing topic $topicName")
     }
   }
 
   def checkTopicActor(topicName : String) : Boolean = {
-    lookupTopic(topicName) match {
+    lookUpTopicActor(topicName) match {
       case Some(topicRef) => true
       case None           => false
     }
@@ -69,5 +76,6 @@ object TopicRepositoryProtocol {
   case class CreateTopicActor(topicName : String)
   case class DeleteTopicActor(topicName : String)
   case class CheckTopicActor(topicName : String)
+  case class LookupTopicActor(topicName : String)
   case class PublishToTopicActor(topicName : String, message : String)
 }

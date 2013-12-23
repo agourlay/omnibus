@@ -2,42 +2,63 @@ package omnibus.service
 
 import akka.actor._
 import akka.actor.ActorLogging
+import akka.pattern._
+
+import scala.concurrent._
+import scala.concurrent.duration._
+import scala.util._
 
 import omnibus.service.OmnibusServiceProtocol._
 import omnibus.repository._
 
+import reflect.ClassTag
+
 class OmnibusService(topicRepo: ActorRef, subscriberRepo : ActorRef) extends Actor with ActorLogging {
-    
+  implicit def executionContext = context.dispatcher
+  implicit val timeout = akka.util.Timeout(5 seconds) 
+
   def receive = {
     case CreateTopic(topic)                      => sender ! createTopic(topic)
     case DeleteTopic(topic)                      => sender ! deleteTopic(topic)
-    case CheckTopic(topic)                       => sender ! checkTopic(topic)
+    case CheckTopic(topic)                       => checkTopic(topic, sender)
     case PublishToTopic(topic, message)          => sender ! publishToTopic(topic, message)
     case HttpSubToTopic(topic, responder, mode)  => httpSubscribeToTopic(topic, responder, mode)
   }
 
   def createTopic(topic : String) : String = {
     topicRepo ! TopicRepositoryProtocol.CreateTopicActor(topic)
-    s"Topic $topic created" 
+    s"Topic $topic created \n" 
   } 
 
   def deleteTopic(topic : String) : String = {
     topicRepo ! TopicRepositoryProtocol.DeleteTopicActor(topic)
-    s"Topic $topic deleted" 
+    s"Topic $topic deleted \n" 
   } 
 
-  def checkTopic(topic : String) : Boolean = {
-    topicRepo ! TopicRepositoryProtocol.CheckTopicActor(topic) 
-    true
+  def checkTopic(topic : String, replyTo : ActorRef) = {
+    val bool : Future[Boolean] = (topicRepo ? TopicRepositoryProtocol.CheckTopicActor(topic)).mapTo[Boolean] 
+    bool pipeTo replyTo
   } 
 
   def publishToTopic(topic : String, message : String) : String = {
     topicRepo ! TopicRepositoryProtocol.PublishToTopicActor(topic, message)
-    s"Publising message to topic $topic" 
+    s"Publising message to topic $topic \n" 
   } 
 
   def httpSubscribeToTopic(topicName : String, responder : ActorRef, mode : String) {
-    subscriberRepo ! SubscriberRepositoryProtocol.CreateHttpSub(splitMultiTopic(topicName), responder)
+    val actorTopics : List[Future[Option[ActorRef]]] = for (topic <- splitMultiTopic(topicName))
+                                               yield (topicRepo ? TopicRepositoryProtocol.LookupTopicActor(topic)).mapTo[Option[ActorRef]]
+    Future.sequence(actorTopics).onComplete {
+      case Failure(error)        => log.info(error.getMessage())
+      case Success(optTopicRefList) => {
+        val topicRefList : List[ActorRef] = optTopicRefList.filter(_ != None).map(_.get)
+        if (topicRefList.nonEmpty) {
+          subscriberRepo ! SubscriberRepositoryProtocol.CreateHttpSub(topicRefList.toSet, responder)
+        } else {
+          log.info("Cannot create sub on empty topic list")
+        }  
+      }  
+    }                                               
   }
 
   def splitMultiTopic(topics : String) : List[String] = topics.split("/+").toList
