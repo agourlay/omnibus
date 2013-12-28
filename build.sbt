@@ -12,7 +12,7 @@ organization := "com.agourlay"
 
 name := "omnibus"
 
-version := "0.1-SNAPSHOT"
+version := "0.0.1-SNAPSHOT"
 
 scalaVersion := "2.10.3"
 
@@ -49,6 +49,7 @@ libraryDependencies ++= {
        "io.spray"            %   "spray-can"                      % sprayVersion               withSources() 
       ,"io.spray"            %   "spray-routing"                  % sprayVersion               withSources()
       ,"io.spray"            %   "spray-testkit"                  % sprayVersion    % "test"   withSources()
+      ,"io.spray"            %   "spray-caching"                  % sprayVersion               withSources()
       ,"io.spray"            %%  "spray-json"                     % sprayJsonVersion           withSources()
       ,"com.typesafe.akka"   %%  "akka-actor"                     % akkaVersion                withSources()
       ,"com.typesafe.akka"   %%  "akka-persistence-experimental"  % akkaVersion                withSources()

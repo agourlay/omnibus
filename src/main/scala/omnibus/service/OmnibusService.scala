@@ -14,20 +14,22 @@ import omnibus.domain._
 
 import reflect.ClassTag
 
-class OmnibusService(topicRepo: ActorRef, subscriberRepo : ActorRef) extends Actor with ActorLogging {
+class OmnibusService(topicRepo : ActorRef, subscriberRepo : ActorRef) extends Actor with ActorLogging {
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(5 seconds) 
 
   def receive = {
-    case CreateTopic(topic)                      => sender ! createTopic(topic)
-    case DeleteTopic(topic)                      => sender ! deleteTopic(topic)
-    case CheckTopic(topic)                       => checkTopic(topic, sender)
-    case PublishToTopic(topic, message)          => sender ! publishToTopic(topic, message)
-    case HttpSubToTopic(topic, responder, mode)  => httpSubscribeToTopic(topic, responder, mode)
+    case CreateTopic(topic, message)                      => sender ! createTopic(topic, message)
+    case DeleteTopic(topic)                               => sender ! deleteTopic(topic)
+    case CheckTopic(topic)                                => checkTopic(topic, sender)
+    case PublishToTopic(topic, message)                   => sender ! publishToTopic(topic, message)
+    case SubToTopic(topic, responder, reactiveCmd, http)  => subToTopic(topic, responder, reactiveCmd, http)  pipeTo sender
+    case UnsubFromTopic(topic, subscriber)                => sender ! unsubscribeFromTopic(topic, subscriber)
   }
 
-  def createTopic(topic : String) : String = {
+  def createTopic(topic : String, message : String) : String = {
     topicRepo ! TopicRepositoryProtocol.CreateTopicActor(topic)
+    if (message.nonEmpty) publishToTopic(topic, message)
     s"Topic $topic created \n" 
   } 
 
@@ -37,43 +39,57 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo : ActorRef) extends Act
   } 
 
   def checkTopic(topic : String, replyTo : ActorRef) = {
-    val bool : Future[Boolean] = (topicRepo ? TopicRepositoryProtocol.CheckTopicActor(topic)).mapTo[Boolean] 
-    bool pipeTo replyTo
+    val bool = (topicRepo ? TopicRepositoryProtocol.CheckTopicActor(topic)).mapTo[Boolean] 
+    bool.map( value => if (value) s"Topic $topic exists" else s"Topic $topic does not exist") pipeTo replyTo
   } 
 
   def publishToTopic(topic : String, message : String) : String = {
     topicRepo ! TopicRepositoryProtocol.PublishToTopicActor(topic, message)
-    s"Publising message to topic $topic \n" 
+    s"Publishing message to topic $topic \n" 
   } 
 
-  def httpSubscribeToTopic(topicName : String, responder : ActorRef, mode : String) {
-    log.info(s"Demand to subscribe to $topicName with mode $mode")
-    log.info(splitMultiTopic(topicName).toString)
-    val reactMode = ReactiveMode.withName(mode)
-    val actorTopics : List[Future[Option[ActorRef]]] = for (topic <- splitMultiTopic(topicName))
-                                               yield (topicRepo ? TopicRepositoryProtocol.LookupTopicActor(topic)).mapTo[Option[ActorRef]]
-    Future.sequence(actorTopics).onComplete {
-      case Failure(error)           => log.info("error occured while subscribing to topic " + error.getMessage())
-      case Success(optTopicRefList) => {
-        val topicRefList : List[ActorRef] = optTopicRefList.filter(_ != None).map(_.get)
-        if (topicRefList.nonEmpty) {
-          subscriberRepo ! SubscriberRepositoryProtocol.CreateHttpSub(topicRefList.toSet, responder, reactMode)
-        } else {
-          log.info("Cannot create sub on empty topic list")
-        }  
-      }  
-    }                                               
+  def unsubscribeFromTopic(topic : String, subscriber : ActorRef) {
+    // TODO do we need this? 
   }
 
-  def splitMultiTopic(topics : String) : List[String] = topics.split('+').toList
+  def subToTopic(topicName : String, responder : ActorRef, reactiveCmd : ReactiveCmd, httpMode : Boolean) : Future[Boolean] = {
+    log.info(s"Request to subscribe to $topicName with reactive cmd $reactiveCmd")
+    val p = promise[Boolean]
+    val futurResult : Future[Boolean] = p.future
+
+    // Get all future topic ActorRef to subscribe to
+    val actorTopics = for (topic <- splitMultiTopic(topicName))
+                    yield (topicRepo ? TopicRepositoryProtocol.LookupTopicActor(topic)).mapTo[Option[ActorRef]]
+    
+    //List[Future[Option]] to Future[List[Option]]                 
+    Future.sequence(actorTopics).onComplete {
+      case Failure(error)           => {
+        log.info("an error occured while subscribing to topic " + error.getMessage())
+        promise.failure{new Exception("an error occured while subscribing to topic ")}
+      }  
+      case Success(optTopicRefList) => {
+        val topicRefList : List[ActorRef] = optTopicRefList.filter(_.nonEmpty).map(_.get)
+        if (topicRefList.nonEmpty) {
+          subscriberRepo ! SubscriberRepositoryProtocol.CreateSub(topicRefList.toSet, responder, reactiveCmd, httpMode) 
+          p.success(true)
+        } else {
+          log.info("Cannot create sub on empty topic list")
+          p.failure{new IllegalArgumentException("Cannot create sub on empty topic list")}
+        }  
+      }  
+    }
+    futurResult                                               
+  }
+
+  //TODO split on "+/" to allow cleaner composition /topics/blah+/blih (update readme) 
+  def splitMultiTopic(topics : String) : List[String] = topics.split("[/]\\+[/]").toList
 }
 
 object OmnibusServiceProtocol {
-  case class CreateTopic(topicName : String)
-  case class DeleteTopic(topicName : String)
-  case class CheckTopic(topicName : String)
-  case class PublishToTopic(topicName : String, message : String)
-  case class SubToTopic(topicName : String, subscriber : ActorRef, mode : String)
-  case class HttpSubToTopic(topicName : String, responder : ActorRef, mode : String)
-  case class UnsubscribeFromTopic(topicName : String, subscriber : ActorRef)
+  case class CreateTopic(topic : String, message : String)
+  case class DeleteTopic(topic : String)
+  case class CheckTopic(topic : String)
+  case class PublishToTopic(topic : String, message : String)
+  case class SubToTopic(topic : String, subscriber : ActorRef, reactiveCmd : ReactiveCmd, http : Boolean)
+  case class UnsubFromTopic(topic: String, subscriber : ActorRef)
 }

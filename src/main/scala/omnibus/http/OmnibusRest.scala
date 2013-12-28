@@ -1,4 +1,4 @@
-package omnibus.service
+package omnibus.http
 
 import akka.pattern._
 import akka.actor._
@@ -12,25 +12,31 @@ import spray.can.server.Stats
 
 import scala.concurrent.duration._
 import scala.concurrent.Future
+import scala.util._
 
 import DefaultJsonProtocol._
 import reflect.ClassTag
 
-import omnibus.domain.JsonSupport._
+import omnibus.http.JsonSupport._
+import omnibus.domain._
+import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 
 
 class OmnibusRest(omnibusService: ActorRef) extends HttpServiceActor with ActorLogging{
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(10 seconds)
+  implicit val timeout = akka.util.Timeout(5 seconds)
 
   def receive = runRoute(topicsRoute ~ statsRoute)
       
   def topicsRoute = 
     path("topics" / Rest) { topic =>
-      post {
-        complete {
-          (omnibusService ? OmnibusServiceProtocol.CreateTopic(topic)).mapTo[String]
+      validate(!topic.isEmpty, "topic name cannot be empty \n") {
+        post {
+          entity(as[String]) { message =>
+            complete {
+              (omnibusService ? OmnibusServiceProtocol.CreateTopic(topic, message)).mapTo[String]
+            }
           }
         } ~
         put {
@@ -45,17 +51,19 @@ class OmnibusRest(omnibusService: ActorRef) extends HttpServiceActor with ActorL
             (omnibusService ? OmnibusServiceProtocol.DeleteTopic(topic)).mapTo[String]
           }
         } ~
-        parameters('mode ? "simple") { mode => 
+        parameters('mode.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveInput) { reactiveInput => 
           get { ctx =>
-            omnibusService ! OmnibusServiceProtocol.HttpSubToTopic(topic, ctx.responder, mode)
+            //TODO Use case class extraction on parameters directly on reactiveCmd with require validation 
+            val reactiveCmd = ReactiveCmd(reactiveInput)
+            val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(topic, ctx.responder, reactiveCmd, true)).mapTo[Boolean]
+            future.onComplete{
+              case Success(result) => log.debug("Alles klar, let's stream") 
+              case Failure(result) => ctx.complete(s"topic '$topic' not found \n")
+            }
           }  
-        } ~
-        head {
-          complete {
-            (omnibusService ? OmnibusServiceProtocol.CheckTopic(topic)).mapTo[String]
-          }
         }
       }
+    }
 
   def statsRoute = 
     path("stats") {
