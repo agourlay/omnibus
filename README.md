@@ -1,13 +1,13 @@
 Omnibus [![Build Status](https://travis-ci.org/agourlay/omnibus.png?branch=master)](https://travis-ci.org/agourlay/omnibus)
 =========
 
-Omnibus is an HTTP friendly reactive message bus which means :
+Omnibus is an HTTP-friendly reactive message bus which means :
 
  - Topic hierachies and subscriptions are managed via a rest API.
- - Updates are streamed by Server-Sent-Event which can be easily consumed by javascript frontends as well. 
+ - Updates are streamed by [Server-Sent-Event](http://www.html5rocks.com/en/tutorials/eventsource/basics/) which can be easily consumed by javascript frontends. 
  - With reactive modes it is possible to replay specific parts of the events.
  - Subscriptions can be composed via the url keywords `+`.
- - It can be easily integrated in an existing Akka application.
+ - It can be easily integrated in an existing [Akka](http://akka.io/) application.
 
 **This is still a work in progress, any API is likely to change** 
  
@@ -53,11 +53,17 @@ The supported modes are:
 
 - simple   : classic subscription (default one if not specified)
 - last     : get last message on a topic and the following
+  - e.g http://localhost:8080/topics/stock/nasdaq?mode=last
 - replay   : get all past messages on topic and the following
+  - e.g http://localhost:8080/topics/customer/order?mode=replay
 - since-id : all the past events since a given event-id and the following
+  - e.g http://localhost:8080/topics/worldcup?mode=since-id&since=120
 - since-ts : all the past events since a given unix timestamp and the following
-- between-id : all the events between two given event-id (e.g ?mode=between-id&since=1&to=2)
-- between-ts : all the events between two given unix timestamp (e.g ?mode=between-ts&since=1388250283&to=1388250552)
+  -e.g  http://localhost:8080/topics/logs?mode=since-ts&since=1388250283
+- between-id : all the events between two given event-id 
+  - e.g http://localhost:8080/topics/worldcup?mode=between-id&since=12&to=200
+- between-ts : all the events between two given unix timestamp
+  -e.g  http://localhost:8080/topics/logs?mode=between-ts&since=1388250283&to=1388250552
 
 Modes are specified by url parameter
 > curl -X GET http://localhost:8080/topics/results/basketball?mode=between-id&since=1&to=2

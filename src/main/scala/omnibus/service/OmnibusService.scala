@@ -81,7 +81,6 @@ class OmnibusService(topicRepo : ActorRef, subscriberRepo : ActorRef) extends Ac
     futurResult                                               
   }
 
-  //TODO split on "+/" to allow cleaner composition /topics/blah+/blih (update readme) 
   def splitMultiTopic(topics : String) : List[String] = topics.split("[/]\\+[/]").toList
 }
 
