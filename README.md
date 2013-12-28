@@ -59,11 +59,11 @@ The supported modes are:
 - since-id : all the past events since a given event-id and the following
   - e.g http://localhost:8080/topics/worldcup?mode=since-id&since=120
 - since-ts : all the past events since a given unix timestamp and the following
-  -e.g  http://localhost:8080/topics/logs?mode=since-ts&since=1388250283
+  - e.g  http://localhost:8080/topics/logs?mode=since-ts&since=1388250283
 - between-id : all the events between two given event-id 
   - e.g http://localhost:8080/topics/worldcup?mode=between-id&since=12&to=200
 - between-ts : all the events between two given unix timestamp
-  -e.g  http://localhost:8080/topics/logs?mode=between-ts&since=1388250283&to=1388250552
+  - e.g  http://localhost:8080/topics/logs?mode=between-ts&since=1388250283&to=1388250552
 
 Modes are specified by url parameter
 > curl -X GET http://localhost:8080/topics/results/basketball?mode=between-id&since=1&to=2
@@ -108,9 +108,11 @@ This starts Omnibus on port 8888 (if not specified as args, the default one is 8
 
 It is possible to integrate Omnibus in an existing Akka application.
 
-Add the latest omnibus.jar to your application with sbt
+Add the latest omnibus.jar to your application with sbt (not yet released)
 
-"com.agourlay" % "omnibus" % 0.0.1 // not yet released  
+```
+"com.agourlay" % "omnibus" % 0.0.1
+```
 
 and then call :
 
