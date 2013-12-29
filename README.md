@@ -96,7 +96,7 @@ You can compose subscriptions with the char '+' in order to merge notifications 
 
 Of course you are free to use reactive modes on composed subscriptions. Just be ready to handle the flow of data if you target a root topic with the replay mode :D
 
-### Usage and installation
+## Usage and installation
 
 There are two ways of running Omnibus
 

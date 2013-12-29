@@ -22,3 +22,10 @@ object MessageObj {
       "timestamp: " + message.timestamp + "\n\n")
   }
 }
+
+object PropagationDirection extends Enumeration {
+  type PropagationDirection = Value
+
+  val UP = Value("up")
+  val DOWN = Value("down")
+}

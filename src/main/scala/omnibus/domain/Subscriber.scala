@@ -27,17 +27,6 @@ class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiv
     // subscribe to every topic
     for (topic <- topics) { topic ! TopicProtocol.Subscribe(self) }
 
-    // apply mode
-    reactiveCmd.mode match {
-      case ReactiveMode.REPLAY     => askReplay()
-      case ReactiveMode.LAST       => askLast()
-      case ReactiveMode.SINCE_ID   => askSinceID(reactiveCmd.since.get)
-      case ReactiveMode.SINCE_TS   => askSinceTS(reactiveCmd.since.get)
-      case ReactiveMode.BETWEEN_ID => askBetweenID(reactiveCmd.since.get, reactiveCmd.to.get)
-      case ReactiveMode.BETWEEN_TS => askBetweenTS(reactiveCmd.since.get, reactiveCmd.to.get)
-      case ReactiveMode.SIMPLE     => log.debug("simple subscription")
-    }
-
     // schedule pending retry every minute
     system.scheduler.schedule(1 minute, 1 minute, self, SubscriberProtocol.RefreshTopics)
   }
@@ -84,35 +73,15 @@ class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiv
     for (topic <- pendingTopic) { topic ! TopicProtocol.Subscribe(self) }
   }
 
-  def askReplay() {
-    for (topic <- topics) { topic ! TopicProtocol.Replay(self) }
-  }
-
-  def askBetweenID(startId: Long, endId: Long) {
-    for (topic <- topics) { topic ! TopicProtocol.BetweenID(self, startId, endId) }
-  }
-
-  def askBetweenTS(startTs: Long, endTs: Long) {
-    for (topic <- topics) { topic ! TopicProtocol.BetweenTS(self, startTs, endTs) }
-  }
-
-  def askSinceID(id: Long) {
-    for (topic <- topics) { topic ! TopicProtocol.SinceID(self, id) }
-  }
-
-  def askSinceTS(ts: Long) {
-    for (topic <- topics) { topic ! TopicProtocol.SinceTS(self, ts) }
-  }
-
-  def askLast() {
-    for (topic <- topics) { topic ! TopicProtocol.Last(self) }
-  }
-
   def ackSubscription(topicRef: ActorRef) = {
     topicListened += topicRef
     pendingTopic -= topicRef
     context.watch(topicRef)
     log.debug(s"subscriber successfully subscribed to $topicRef")
+    // we are successfully registered to the topic, let's use the reactive cm if not simple
+    if (reactiveCmd.mode != ReactiveMode.SIMPLE){
+      topicRef ! TopicProtocol.SetupReactiveMode(self, reactiveCmd)
+    }
   }
 
   def prettySubscription(topicToDisplay: Set[ActorRef]): String = {

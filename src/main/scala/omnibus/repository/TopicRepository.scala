@@ -31,11 +31,12 @@ class TopicRepository extends Actor with ActorLogging {
   val mostAskedTopic: Cache[Option[ActorRef]] = LruCache(maxCapacity = 100, timeToLive = 1 minute)
 
   def receive = {
-    case CreateTopicActor(topic)             => createTopic(topic)
-    case DeleteTopicActor(topic)             => deleteTopic(topic)
-    case CheckTopicActor(topic)              => sender ! checkTopic(topic)
-    case LookupTopicActor(topic)             => sender ! lookUpTopicWithCache(topic)
-    case PublishToTopicActor(topic, message) => publishToTopic(topic, message)
+    case CreateTopicActor(topic)              => createTopic(topic)
+    case DeleteTopicActor(topic)              => deleteTopic(topic)
+    case CheckTopicActor(topic)               => sender ! checkTopic(topic)
+    case LookupTopicActor(topic)              => sender ! lookUpTopicWithCache(topic)
+    case PublishToTopicActor(topic, message)  => publishToTopic(topic, message)
+    case TopicProtocol.Propagation            => log.debug("message propoagation reached TopicRepository")
   }
 
   def createTopic(topicName: String) = {

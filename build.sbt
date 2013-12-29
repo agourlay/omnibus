@@ -40,23 +40,25 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.3-M2"
-  val sprayVersion      = "1.3-M2"
-  val sprayJsonVersion  = "1.2.5"
-  val logbackVersion    = "1.0.13"
-  val specs2Version     = "2.2.3"
+  val akkaV       = "2.3-M2"
+  val sprayV      = "1.3-M2"
+  val sprayJsonV  = "1.2.5"
+  val logbackV    = "1.0.13"
+  val specs2V     = "2.2.3"
+  val scalaCheckV = "1.11.1"
   Seq(
-       "io.spray"            %   "spray-can"                      % sprayVersion               withSources() 
-      ,"io.spray"            %   "spray-routing"                  % sprayVersion               withSources()
-      ,"io.spray"            %   "spray-testkit"                  % sprayVersion    % "test"   withSources()
-      ,"io.spray"            %   "spray-caching"                  % sprayVersion               withSources()
-      ,"io.spray"            %%  "spray-json"                     % sprayJsonVersion           withSources()
-      ,"com.typesafe.akka"   %%  "akka-actor"                     % akkaVersion                withSources()
-      ,"com.typesafe.akka"   %%  "akka-persistence-experimental"  % akkaVersion                withSources()
-      ,"com.typesafe.akka"   %%  "akka-slf4j"                     % akkaVersion                withSources()
-      ,"com.typesafe.akka"   %%  "akka-testkit"                   % akkaVersion     % "test"   withSources()
-      ,"ch.qos.logback"      %   "logback-classic"                % logbackVersion             withSources()
-      ,"org.specs2"          %%  "specs2"                         % specs2Version   % "test"   withSources()  
+       "io.spray"            %   "spray-can"                      % sprayV                  withSources() 
+      ,"io.spray"            %   "spray-routing"                  % sprayV                  withSources()
+      ,"io.spray"            %   "spray-testkit"                  % sprayV       % "test"   withSources()
+      ,"io.spray"            %   "spray-caching"                  % sprayV                  withSources()
+      ,"io.spray"            %%  "spray-json"                     % sprayJsonV              withSources()
+      ,"com.typesafe.akka"   %%  "akka-actor"                     % akkaV                   withSources()
+      ,"com.typesafe.akka"   %%  "akka-persistence-experimental"  % akkaV                   withSources()
+      ,"com.typesafe.akka"   %%  "akka-slf4j"                     % akkaV                   withSources()
+      ,"com.typesafe.akka"   %%  "akka-testkit"                   % akkaV        % "test"   withSources()
+      ,"ch.qos.logback"      %   "logback-classic"                % logbackV                withSources()
+      ,"org.specs2"          %%  "specs2"                         % specs2V      % "test"   withSources()
+      ,"org.scalacheck"      %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
   )
 }
 

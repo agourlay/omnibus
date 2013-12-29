@@ -8,6 +8,7 @@ import scala.language.postfixOps
 import scala.collection.mutable.ListBuffer
 
 import omnibus.domain.TopicProtocol._
+import omnibus.domain.PropagationDirection._
 
 class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
@@ -32,26 +33,80 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   val receiveCommand: Receive = {
-    case PublishMessage(message)           => publishMessage(message)
-    case Subscribe(subscriber)             => subscribe(subscriber)
-    case Unsubscribe(subscriber)           => unsubscribe(subscriber)
-    case SubscriberNumber                  => sender ! subscribers.size.toString
-    case CreateSubTopic(topics)            => createSubTopic(topics)
-    case Terminated(refSub)                => subscribers -= refSub
-    case Replay(refSub)                    => replayHistory(refSub)
-    case Last(refSub)                      => lastMessage(refSub)
-    case SinceID(refSub, eventID)          => allMessagesSinceID(refSub, eventID)
-    case SinceTS(refSub, timestamp)        => allMessagesSinceTS(refSub, timestamp)
-    case BetweenID(refSub, startId, endID) => allMessagesBetweenID(refSub, startId, endID)
-    case BetweenTS(refSub, startTs, endTs) => allMessagesBetweenTS(refSub, startTs, endTs)
+    case PublishMessage(message)             => publishMessage(message)
+    case ForwardToSubscribers(message)       => forwardToSubscribers(message)
+    case Subscribe(subscriber)               => subscribe(subscriber)
+    case Unsubscribe(subscriber)             => unsubscribe(subscriber)
+    case SubscriberNumber                    => sender ! subscribers.size.toString
+    case CreateSubTopic(topics)              => createSubTopic(topics)
+    case Terminated(refSub)                  => subscribers -= refSub
+    case Replay(refSub)                      => forwardMessagesReplay(refSub)
+    case Last(refSub)                        => forwardLastMessage(refSub)
+    case SinceID(refSub, eventID)            => forwardMessagesSinceID(refSub, eventID)
+    case SinceTS(refSub, timestamp)          => forwardMessagesSinceTS(refSub, timestamp)
+    case BetweenID(refSub, startId, endID)   => forwardMessagesBetweenID(refSub, startId, endID)
+    case BetweenTS(refSub, startTs, endTs)   => forwardMessagesBetweenTS(refSub, startTs, endTs)
+    case SetupReactiveMode(refSub, reactCmd) => setupReactiveMode(refSub, reactCmd)
+    case Propagation(operation, direction)   => handlePropagation(operation, direction)
+  }
+
+  def handlePropagation(operation: Operation, direction: PropagationDirection) = {
+    propagateToDirection(operation, direction)
+    self ! operation
+  }
+
+  def applyReactiveCmd(refSub: ActorRef, cmd : ReactiveCmd) = {
+    cmd.mode match {
+      case ReactiveMode.REPLAY     => forwardMessagesReplay(refSub)
+      case ReactiveMode.LAST       => forwardLastMessage(refSub)
+      case ReactiveMode.SINCE_ID   => forwardMessagesSinceID(refSub, cmd.since.get)
+      case ReactiveMode.SINCE_TS   => forwardMessagesSinceTS(refSub, cmd.since.get)
+      case ReactiveMode.BETWEEN_ID => forwardMessagesBetweenID(refSub, cmd.since.get, cmd.to.get)
+      case ReactiveMode.BETWEEN_TS => forwardMessagesBetweenTS(refSub, cmd.since.get, cmd.to.get)
+      case ReactiveMode.SIMPLE     => log.debug("simple subscription")
+    }
+  }
+
+  def propagateToDirection(operation: Operation, direction: PropagationDirection) = direction match {
+    case PropagationDirection.UP   => propagateToParent(operation)
+    case PropagationDirection.DOWN => propagateToSubTopics(operation)
+  }
+
+  def propagateToParent(operation: Operation) = {
+    context.parent ! TopicProtocol.Propagation(operation, PropagationDirection.UP)
+  }
+
+  def propagateToSubTopics(operation: Operation) = {
+    subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.Propagation(operation, PropagationDirection.DOWN) }
+  }
+
+  def setupReactiveMode(refSub: ActorRef, cmd : ReactiveCmd) = {
+    applyReactiveCmd(refSub, cmd)
+    val reactiveMessageToFW = cmd.mode match {
+      case ReactiveMode.REPLAY     => TopicProtocol.Replay(refSub)
+      case ReactiveMode.LAST       => TopicProtocol.Last(refSub)
+      case ReactiveMode.SINCE_ID   => TopicProtocol.SinceID(refSub, cmd.since.get)
+      case ReactiveMode.SINCE_TS   => TopicProtocol.SinceTS(refSub, cmd.since.get)
+      case ReactiveMode.BETWEEN_ID => TopicProtocol.BetweenTS(refSub, cmd.since.get, cmd.to.get)
+      case ReactiveMode.BETWEEN_TS => TopicProtocol.BetweenTS(refSub, cmd.since.get, cmd.to.get)
+    }
+    // propagate up and down the topic tree
+    propagateToDirection(reactiveMessageToFW, PropagationDirection.UP)
+    propagateToDirection(reactiveMessageToFW, PropagationDirection.DOWN)
   }
 
   def publishMessage(message: Message) = {
+    // persist in topic state
     persist(message) { m => updateState(m) }
     // push to subscribers
-    subscribers.foreach { actorRef => actorRef ! message }
-    // forward message to sub-topics
-    subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.PublishMessage(message) }
+    forwardToSubscribers(message)
+    // forward message down and up the topic tree
+    propagateToDirection(ForwardToSubscribers(message), PropagationDirection.UP)
+    propagateToDirection(ForwardToSubscribers(message), PropagationDirection.DOWN)
+  }
+
+  def forwardToSubscribers(message: Message) = {
+    subscribers.foreach { actorRef => actorRef ! message }  // push to subscribers
   }
 
   def subscribe(subscriber: ActorRef) = {
@@ -85,51 +140,49 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     }
   }
 
-  def replayHistory(refSub: ActorRef) = {
-    if (state.events.nonEmpty) state.events foreach { message => refSub ! message }
-    subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.Replay(refSub) }
-  }
+  def forwardMessagesReplay(refSub: ActorRef) = if (state.events.nonEmpty) state.events foreach { message => refSub ! message }
 
-  def lastMessage(refSub: ActorRef) = {
-    if (state.events.nonEmpty) refSub ! state.events.head
-    subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.Last(refSub) }
-  }
+  def forwardLastMessage(refSub: ActorRef) = if (state.events.nonEmpty) refSub ! state.events.head
 
-  def allMessagesSinceID(refSub: ActorRef, eventID: Long) = {
+  def forwardMessagesSinceID(refSub: ActorRef, eventID: Long) = {
     state.events.filter(_.id > eventID)
       .foreach { message => refSub ! message }
-    subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.SinceID(refSub, eventID) }
   }
 
-  def allMessagesSinceTS(refSub: ActorRef, timestamp: Long) = {
+  def forwardMessagesSinceTS(refSub: ActorRef, timestamp: Long) = {
     state.events.filter(_.timestamp > timestamp)
       .foreach { message => refSub ! message }
-    subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.SinceTS(refSub, timestamp) }
   }
 
-  def allMessagesBetweenID(refSub: ActorRef, startId: Long, endId: Long) = {
+  def forwardMessagesBetweenID(refSub: ActorRef, startId: Long, endId: Long) = {
     state.events.filter(message => message.id >= startId && message.id <= endId)
       .foreach { message => refSub ! message }
-    subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.BetweenID(refSub, startId, endId) }
   }
 
-  def allMessagesBetweenTS(refSub: ActorRef, startTs: Long, endTs: Long) = {
+  def forwardMessagesBetweenTS(refSub: ActorRef, startTs: Long, endTs: Long) = {
     state.events.filter(message => message.timestamp >= startTs && message.timestamp <= endTs)
       .foreach { message => refSub ! message }
-    subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.BetweenTS(refSub, startTs, endTs) }
   }
 }
 
 object TopicProtocol {
-  case class PublishMessage(message: Message)
-  case class Subscribe(subscriber: ActorRef)
-  case class Unsubscribe(subscriber: ActorRef)
-  case class Replay(subscriber: ActorRef)
-  case class Last(subscriber: ActorRef)
-  case class SinceID(subscriber: ActorRef, eventId: Long)
-  case class SinceTS(subscriber: ActorRef, timestamp: Long)
-  case class BetweenID(subscriber: ActorRef, startId: Long, endID: Long)
-  case class BetweenTS(subscriber: ActorRef, startTs: Long, endTs: Long)
+  case class PublishMessage(message: Message) extends Operation
+  case class ForwardToSubscribers(message: Message) extends Operation
+  case class SetupReactiveMode(subscriber: ActorRef, cmd : ReactiveCmd) extends Operation
+  case class Subscribe(subscriber: ActorRef) extends Operation
+  case class Unsubscribe(subscriber: ActorRef) extends Operation
   case class CreateSubTopic(topics: List[String])
   case object SubscriberNumber
+
+  // ReactiveCmd operations
+  case class Replay(subscriber: ActorRef) extends Operation
+  case class Last(subscriber: ActorRef) extends Operation
+  case class SinceID(subscriber: ActorRef, eventId: Long) extends Operation
+  case class SinceTS(subscriber: ActorRef, timestamp: Long) extends Operation
+  case class BetweenID(subscriber: ActorRef, startId: Long, endID: Long) extends Operation
+  case class BetweenTS(subscriber: ActorRef, startTs: Long, endTs: Long) extends Operation
+
+  // container used to propagate operation in topic tree
+  case class Propagation(message: TopicProtocol.Operation, direction: PropagationDirection)
+  trait Operation{}
 }
