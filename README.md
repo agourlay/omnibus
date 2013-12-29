@@ -51,18 +51,24 @@ Omnibus supports reactive modes in order to replay specific sequence of events f
 
 The supported modes are: 
 
-- simple   : classic subscription (default one if not specified)
-- last     : get last message on a topic and the following
+- `simple`   : classic subscription (default one if not specified)
+
+- `last`     : get last message on a topic and the following events
   - e.g http://localhost:8080/topics/stock/nasdaq?mode=last
-- replay   : get all past messages on topic and the following
+
+- `replay`   : get all past messages on topic and the following events
   - e.g http://localhost:8080/topics/customer/order?mode=replay
-- since-id : all the past events since a given event-id and the following
+
+- `since-id` : all the past events since a given event-id and the following events
   - e.g http://localhost:8080/topics/worldcup?mode=since-id&since=120
-- since-ts : all the past events since a given unix timestamp and the following
+
+- `since-ts` : all the past events since a given unix timestamp and the following events
   - e.g  http://localhost:8080/topics/logs?mode=since-ts&since=1388250283
-- between-id : all the events between two given event-id 
+
+- `between-id` : all the events between two given event-id 
   - e.g http://localhost:8080/topics/worldcup?mode=between-id&since=12&to=200
-- between-ts : all the events between two given unix timestamp
+
+- `between-ts` : all the events between two given unix timestamp
   - e.g  http://localhost:8080/topics/logs?mode=between-ts&since=1388250283&to=1388250552
 
 Modes are specified by url parameter
@@ -99,7 +105,7 @@ There are two ways of running Omnibus
 Get the latest omnibus-standalone.jar or build from source with sbt assembly and run it.
 
 ```sh
-java -jar omnibus.jar 8888 &
+java -jar omnibus-standalone.jar 8888 &
 ```
 
 This starts Omnibus on port 8888 (if not specified as args, the default one is 8080).
@@ -108,10 +114,10 @@ This starts Omnibus on port 8888 (if not specified as args, the default one is 8
 
 It is possible to integrate Omnibus in an existing Akka application.
 
-Add the latest omnibus.jar to your application with sbt (not yet released)
+Add the latest omnibus.jar to your application by building from source with sbt `publishLocal`
 
 ```
-"com.agourlay" % "omnibus" % 0.0.1
+libraryDependencies += "com.agourlay" % "omnibus" % "0.1-SNAPSHOT"
 ```
 
 and then call :
@@ -139,8 +145,6 @@ omnibus.domain.Message(id : Long, topicName : String, payload : String, timestam
 ```
 
 ### Optimistic roadmap
-
-- [ ] persist content of topics on disk for crash recovery (akka-persistence)
 
 - [ ] support properly Server-Sent-Event specification (Last-Event-Id header...)
 

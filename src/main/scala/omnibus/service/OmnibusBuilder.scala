@@ -19,28 +19,28 @@ import omnibus.configuration._
 
 object OmnibusBuilder extends Configuration {
 
-  def start(httpPort : Int = defaultHttpPort) : OmnibusReceptionist = {
+  def start(httpPort: Int = defaultHttpPort): OmnibusReceptionist = {
 
     implicit val system = ActorSystem(systemName)
     implicit def executionContext = system.dispatcher
 
-    val log: Logger = LoggerFactory.getLogger("omnibusBuilder")  
+    val log: Logger = LoggerFactory.getLogger("omnibusBuilder")
 
     // parent of the topic tree 
     val topicRepository = system.actorOf(Props(classOf[TopicRepository]), "topic-repository")
 
     // parent of the subscriber tree
     val subRepository = system.actorOf(Props(classOf[SubscriberRepository]), "subscriber-repository")
-    
+
     // awesome service layer
     val omnibusService = system.actorOf(Props(classOf[OmnibusService], topicRepository, subRepository), "omnibus-service")
 
     val httpService = system.actorOf(Props(classOf[OmnibusRest], omnibusService), "omnibus-http")
-    
+
     log.info(s"Omnibus starting on port $httpPort ~~> ")
 
     IO(Http) ! Http.Bind(httpService, "localhost", port = httpPort)
-    
-    new OmnibusReceptionist(system, omnibusService) 
+
+    new OmnibusReceptionist(system, omnibusService)
   }
 }

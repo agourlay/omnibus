@@ -19,10 +19,9 @@ import omnibus.domain._
 import omnibus.domain.ReactiveMode._
 import omnibus.domain.SubscriberProtocol._
 
+class HttpSubscriber(responder: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd)
+    extends Subscriber(responder, topics, reactiveCmd) {
 
-class HttpSubscriber(responder:ActorRef, topics:Set[ActorRef], reactiveCmd : ReactiveCmd) 
-                     extends Subscriber(responder, topics, reactiveCmd) {
-  
   lazy val EventStreamType = register(
     MediaType.custom(
       mainType = "text",
@@ -33,7 +32,7 @@ class HttpSubscriber(responder:ActorRef, topics:Set[ActorRef], reactiveCmd : Rea
   )
 
   lazy val responseStart = HttpResponse(
-    entity  = HttpEntity(EventStreamType, startText),
+    entity = HttpEntity(EventStreamType, startText),
     headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
   )
 
@@ -43,15 +42,15 @@ class HttpSubscriber(responder:ActorRef, topics:Set[ActorRef], reactiveCmd : Rea
 
   override def preStart() = {
     super.preStart
-    responder ! ChunkedResponseStart(responseStart) 
+    responder ! ChunkedResponseStart(responseStart)
   }
 
   override def receive = ({
     case timeout: ReceiveTimeout   => responder ! MessageChunk(":\n") // Comment to keep connection alive      
-    case ev: Http.ConnectionClosed => log.info("Stopping response streaming due to {}", ev); context.stop(self) 
+    case ev: Http.ConnectionClosed => log.info("Stopping response streaming due to {}", ev); context.stop(self)
   }: Receive) orElse super.receive
 
-  override def formatMessagePayload(message : Message) = {
+  override def formatMessagePayload(message: Message) = {
     MessageObj.toMessageChunk(message)
   }
 }

@@ -22,14 +22,13 @@ import omnibus.domain._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 
-
-class OmnibusRest(omnibusService: ActorRef) extends HttpServiceActor with ActorLogging{
+class OmnibusRest(omnibusService: ActorRef) extends HttpServiceActor with ActorLogging {
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(5 seconds)
 
   def receive = runRoute(topicsRoute ~ statsRoute)
-      
-  def topicsRoute = 
+
+  def topicsRoute =
     path("topics" / Rest) { topic =>
       validate(!topic.isEmpty, "topic name cannot be empty \n") {
         post {
@@ -51,21 +50,21 @@ class OmnibusRest(omnibusService: ActorRef) extends HttpServiceActor with ActorL
             (omnibusService ? OmnibusServiceProtocol.DeleteTopic(topic)).mapTo[String]
           }
         } ~
-        parameters('mode.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveInput) { reactiveInput => 
+        parameters('mode.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveInput) { reactiveInput =>
           get { ctx =>
             //TODO Use case class extraction on parameters directly on reactiveCmd with require validation 
             val reactiveCmd = ReactiveCmd(reactiveInput)
             val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(topic, ctx.responder, reactiveCmd, true)).mapTo[Boolean]
-            future.onComplete{
-              case Success(result) => log.debug("Alles klar, let's stream") 
+            future.onComplete {
+              case Success(result) => log.debug("Alles klar, let's stream")
               case Failure(result) => ctx.complete(s"topic '$topic' not found \n")
             }
-          }  
+          }
         }
       }
     }
 
-  def statsRoute = 
+  def statsRoute =
     path("stats") {
       complete {
         (context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats]

@@ -4,7 +4,7 @@ assemblySettings
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-jarName in assembly := "omnibus.jar"
+jarName in assembly := "omnibus-standalone.jar"
 
 test in assembly := {}
 
@@ -12,7 +12,7 @@ organization := "com.agourlay"
 
 name := "omnibus"
 
-version := "0.0.1-SNAPSHOT"
+version := "0.1-SNAPSHOT"
 
 scalaVersion := "2.10.3"
 

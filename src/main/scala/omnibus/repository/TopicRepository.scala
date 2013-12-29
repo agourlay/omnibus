@@ -8,7 +8,7 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util._
 
-import spray.caching.{LruCache, Cache}
+import spray.caching.{ LruCache, Cache }
 
 import omnibus.domain._
 import omnibus.repository.TopicRepositoryProtocol._
@@ -18,7 +18,7 @@ class TopicRepository extends Actor with ActorLogging {
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(2 seconds)
 
-  var rootTopics : Map[String, ActorRef] = Map.empty[String, ActorRef]
+  var rootTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
 
   var _seqEventId = 0L
   def nextEventId = {
@@ -38,10 +38,9 @@ class TopicRepository extends Actor with ActorLogging {
     case PublishToTopicActor(topic, message) => publishToTopic(topic, message)
   }
 
-  def createTopic(topicName : String) = {
+  def createTopic(topicName: String) = {
     val topicsList = topicName.split('/').toList
     val topicRoot = topicsList.head
-
     if (rootTopics.contains(topicRoot)) {
       log.debug(s"Root topic $topicRoot already exist, forward to sub topic")
       rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail)
@@ -53,47 +52,47 @@ class TopicRepository extends Actor with ActorLogging {
     }
   }
 
-  def publishToTopic(topicName : String, message : String) = {
+  def publishToTopic(topicName: String, message: String) = {
     lookUpTopicWithCache(topicName) match {
-      case Some(topicRef) => topicRef ! TopicProtocol.PublishMessage( Message(nextEventId,topicName, message) )
-      case None           => log.debug(s"trying to push to non existing topic $topicName")
+      case Some(topicRef) => topicRef ! TopicProtocol.PublishMessage(Message(nextEventId, topicName, message))
+      case None => log.debug(s"trying to push to non existing topic $topicName")
     }
   }
 
-  def lookUpTopicWithCache(topic : String) : Option[ActorRef] = {
+  def lookUpTopicWithCache(topic: String): Option[ActorRef] = {
     log.debug(s"Lookup in cache for topic $topic")
     // TODO can setup None in cache...
-    val futureOpt :Future[Option[ActorRef]] = mostAskedTopic(topic){lookUpTopic(topic)}
+    val futureOpt: Future[Option[ActorRef]] = mostAskedTopic(topic) { lookUpTopic(topic) }
     // we block here to provide an API based on Option[]
     Await.result(futureOpt, timeout.duration).asInstanceOf[Option[ActorRef]]
   }
 
-  def lookUpTopic(topic : String) : Future[Option[ActorRef]] = {
-    log.info(s"Lookup for topic $topic")
-    val future : Future[ActorRef] = context.actorSelection(topic).resolveOne
-    future.map(actor => Some(actor)).recover{ case e: ActorNotFound => None }
+  def lookUpTopic(topic: String): Future[Option[ActorRef]] = {
+    log.debug(s"Lookup for topic $topic")
+    val future: Future[ActorRef] = context.actorSelection(topic).resolveOne
+    future.map(actor => Some(actor)).recover { case e: ActorNotFound => None }
   }
 
-  def deleteTopic(topicName : String) = {
-    log.info(s"trying to delete topic $topicName")
+  def deleteTopic(topicName: String) = {
+    log.debug(s"trying to delete topic $topicName")
     lookUpTopicWithCache(topicName) match {
       case Some(topicRef) => topicRef ! PoisonPill; mostAskedTopic.remove(topicName)
-      case None           => log.debug(s"trying to delete a non existing topic $topicName")
+      case None => log.debug(s"trying to delete a non existing topic $topicName")
     }
   }
 
-  def checkTopic(topicName : String) : Boolean = {
+  def checkTopic(topicName: String): Boolean = {
     lookUpTopicWithCache(topicName) match {
       case Some(topicRef) => true
-      case None           => false
+      case None => false
     }
   }
 }
 
 object TopicRepositoryProtocol {
-  case class CreateTopicActor(topicName : String)
-  case class DeleteTopicActor(topicName : String)
-  case class CheckTopicActor(topicName : String)
-  case class LookupTopicActor(topicName : String)
-  case class PublishToTopicActor(topicName : String, message : String)
+  case class CreateTopicActor(topicName: String)
+  case class DeleteTopicActor(topicName: String)
+  case class CheckTopicActor(topicName: String)
+  case class LookupTopicActor(topicName: String)
+  case class PublishToTopicActor(topicName: String, message: String)
 }

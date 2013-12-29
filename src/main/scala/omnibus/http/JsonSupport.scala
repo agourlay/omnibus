@@ -13,8 +13,8 @@ import DefaultJsonProtocol._
 
 import omnibus.domain._
 
-object JsonSupport{
-  
+object JsonSupport {
+
   implicit val formatMessage = jsonFormat4(Message)
   implicit val formatHttpServerStats = new RootJsonFormat[Stats] {
     def write(obj: Stats): JsValue = JsObject(

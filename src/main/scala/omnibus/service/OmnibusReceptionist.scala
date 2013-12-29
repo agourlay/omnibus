@@ -16,33 +16,33 @@ import omnibus.service.OmnibusServiceProtocol._
 import omnibus.repository._
 import omnibus.domain._
 
-class OmnibusReceptionist(system :ActorSystem, omnibusService: ActorRef) {
+class OmnibusReceptionist(system: ActorSystem, omnibusService: ActorRef) {
   implicit def executionContext = system.dispatcher
   implicit val timeout = akka.util.Timeout(2 seconds)
 
-  val log: Logger = LoggerFactory.getLogger("OmnibusReceptionist")  
+  val log: Logger = LoggerFactory.getLogger("OmnibusReceptionist")
 
-  def createTopic(topic : String, message : String) = {
-  	omnibusService ! OmnibusServiceProtocol.CreateTopic(topic, message)
+  def createTopic(topic: String, message: String) = {
+    omnibusService ! OmnibusServiceProtocol.CreateTopic(topic, message)
   }
-  	
-  def deleteTopic(topic : String) = omnibusService ! OmnibusServiceProtocol.DeleteTopic(topic)
 
-  def checkTopic(topic : String) : Future[Boolean] = {
-  	(omnibusService ? OmnibusServiceProtocol.CheckTopic(topic)).mapTo[Boolean]
-  }		
+  def deleteTopic(topic: String) = omnibusService ! OmnibusServiceProtocol.DeleteTopic(topic)
 
-  def publishToTopic(topic : String, message : String) = {
-  	omnibusService ! OmnibusServiceProtocol.PublishToTopic(topic, message)
+  def checkTopic(topic: String): Future[Boolean] = {
+    (omnibusService ? OmnibusServiceProtocol.CheckTopic(topic)).mapTo[Boolean]
   }
-  	
-  def subToTopic(topic : String, subscriber : ActorRef, mode : ReactiveCmd) = {
-  	omnibusService ! OmnibusServiceProtocol.SubToTopic(topic, subscriber, mode, false)
+
+  def publishToTopic(topic: String, message: String) = {
+    omnibusService ! OmnibusServiceProtocol.PublishToTopic(topic, message)
   }
-  	
-  def unsubFromTopic(topic : String, subscriber : ActorRef) = {
-  	omnibusService ! OmnibusServiceProtocol.UnsubFromTopic(topic, subscriber)
-  }	
+
+  def subToTopic(topic: String, subscriber: ActorRef, mode: ReactiveCmd) = {
+    omnibusService ! OmnibusServiceProtocol.SubToTopic(topic, subscriber, mode, false)
+  }
+
+  def unsubFromTopic(topic: String, subscriber: ActorRef) = {
+    omnibusService ! OmnibusServiceProtocol.UnsubFromTopic(topic, subscriber)
+  }
 
   def shutDownOmnibus() = system.shutdown
 }
