@@ -9,6 +9,7 @@ import scala.collection.mutable.ListBuffer
 
 import omnibus.domain.TopicProtocol._
 import omnibus.domain.PropagationDirection._
+import omnibus.domain.TopicStatProtocol._
 
 class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
@@ -20,6 +21,8 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   var subscribers: Set[ActorRef] = Set.empty[ActorRef]
   var subTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
+
+  val statHolder = context.actorOf(Props(classOf[TopicStatistics], topic, self))
 
   override def preStart() = {
     val myPath = self.path
@@ -37,9 +40,8 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     case ForwardToSubscribers(message)       => forwardToSubscribers(message)
     case Subscribe(subscriber)               => subscribe(subscriber)
     case Unsubscribe(subscriber)             => unsubscribe(subscriber)
-    case SubscriberNumber                    => sender ! subscribers.size.toString
     case CreateSubTopic(topics)              => createSubTopic(topics)
-    case Terminated(refSub)                  => subscribers -= refSub
+    case Terminated(refSub)                  => unsubscribe(refSub) //TODO not the perfect method for the job
     case Replay(refSub)                      => forwardMessagesReplay(refSub)
     case Last(refSub)                        => forwardLastMessage(refSub)
     case SinceID(refSub, eventID)            => forwardMessagesSinceID(refSub, eventID)
@@ -47,7 +49,11 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     case BetweenID(refSub, startId, endID)   => forwardMessagesBetweenID(refSub, startId, endID)
     case BetweenTS(refSub, startTs, endTs)   => forwardMessagesBetweenTS(refSub, startTs, endTs)
     case SetupReactiveMode(refSub, reactCmd) => setupReactiveMode(refSub, reactCmd)
+
     case Propagation(operation, direction)   => handlePropagation(operation, direction)
+
+    case m @ TopicStatProtocol.PastStats     => statHolder forward m
+    case m @ TopicStatProtocol.LiveStats     => statHolder forward m
   }
 
   def handlePropagation(operation: Operation, direction: PropagationDirection) = {
@@ -103,6 +109,8 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     // forward message down and up the topic tree
     propagateToDirection(ForwardToSubscribers(message), PropagationDirection.UP)
     propagateToDirection(ForwardToSubscribers(message), PropagationDirection.DOWN)
+    // report stats
+    statHolder ! message
   }
 
   def forwardToSubscribers(message: Message) = {
@@ -115,12 +123,16 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     subscriber ! SubscriberProtocol.AcknowledgeSub(self)
     // subscribe to all subtopics by default
     subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.Subscribe(subscriber) }
+    // report stats
+    statHolder ! TopicStatProtocol.SubscriberAdded
   }
 
   def unsubscribe(subscriber: ActorRef) = {
     context.unwatch(subscriber)
     subscribers -= subscriber
     subscriber ! SubscriberProtocol.AcknowledgeUnsub(self)
+    // report stats
+    statHolder ! TopicStatProtocol.SubscriberRemoved
   }
 
   def createSubTopic(topics: List[String]) = topics match {
@@ -137,6 +149,8 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
       val subTopicActor = context.actorOf(Props(classOf[Topic], subTopic), subTopic)
       subTopics += (subTopic -> subTopicActor)
       subTopicActor ! TopicProtocol.CreateSubTopic(topics)
+      // report stats
+      statHolder ! TopicStatProtocol.SubTopicAdded
     }
   }
 

@@ -5,8 +5,9 @@ import akka.actor._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-import omnibus.http._
-import omnibus.domain._
+import omnibus.http.HttpSubscriber
+import omnibus.domain.Subscriber
+import omnibus.domain.ReactiveCmd
 import omnibus.repository.SubscriberRepositoryProtocol._
 
 class SubscriberRepository extends Actor with ActorLogging {
