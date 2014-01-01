@@ -1,5 +1,5 @@
 
-package omnibus.domain
+package omnibus.domain.subscriber
 
 import spray.httpx.unmarshalling._
 import spray.http._
@@ -17,7 +17,7 @@ object ReactiveMode extends Enumeration {
 
 }
 
-import omnibus.domain.ReactiveMode._
+import omnibus.domain.subscriber.ReactiveMode._
 
 case class ReactiveCmd(val mode: ReactiveMode, val since: Option[Long], val to: Option[Long])
 case class ReactiveInput(val mode: String, val since: Option[Long], val to: Option[Long])

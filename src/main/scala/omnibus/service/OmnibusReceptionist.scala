@@ -15,6 +15,7 @@ import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 import omnibus.repository._
 import omnibus.domain._
+import omnibus.domain.subscriber._
 
 class OmnibusReceptionist(system: ActorSystem, omnibusService: ActorRef) {
   implicit def executionContext = system.dispatcher

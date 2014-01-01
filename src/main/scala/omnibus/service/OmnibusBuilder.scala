@@ -35,11 +35,12 @@ object OmnibusBuilder extends Configuration {
     // awesome service layer
     val omnibusService = system.actorOf(Props(classOf[OmnibusService], topicRepository, subRepository), "omnibus-service")
 
-    val httpService = system.actorOf(Props(classOf[OmnibusRest], omnibusService), "omnibus-http")
+    // HttpService actor exposing omnibus routes
+    val omnibusHttp = system.actorOf(Props(classOf[HttpEndpoint], omnibusService), "omnibus-http")
 
     log.info(s"Omnibus starting on port $httpPort ~~> ")
 
-    IO(Http) ! Http.Bind(httpService, "localhost", port = httpPort)
+    IO(Http) ! Http.Bind(omnibusHttp, "localhost", port = httpPort)
 
     new OmnibusReceptionist(system, omnibusService)
   }

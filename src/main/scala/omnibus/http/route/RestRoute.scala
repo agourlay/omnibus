@@ -1,4 +1,4 @@
-package omnibus.http
+package omnibus.http.route
 
 import akka.pattern._
 import akka.actor._
@@ -10,6 +10,9 @@ import spray.routing._
 import spray.can.Http
 import spray.can.server.Stats
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.util._
@@ -19,16 +22,18 @@ import reflect.ClassTag
 
 import omnibus.http.JsonSupport._
 import omnibus.domain._
+import omnibus.domain.subscriber._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 
-class OmnibusRest(omnibusService: ActorRef) extends HttpServiceActor with ActorLogging {
+class RestRoute(omnibusService: ActorRef) (implicit context: ActorContext) extends Directives {
+
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(5 seconds)
 
-  def receive = runRoute(topicsRoute ~ statsRoute)
+  val log: Logger = LoggerFactory.getLogger("omnibus.route.rest")
 
-  def topicsRoute =
+  val route =
     path("topics" / Rest) { topic =>
       validate(!topic.isEmpty, "topic name cannot be empty \n") {
         post {
@@ -45,11 +50,6 @@ class OmnibusRest(omnibusService: ActorRef) extends HttpServiceActor with ActorL
             }
           }
         } ~
-        delete {
-          complete {
-            (omnibusService ? OmnibusServiceProtocol.DeleteTopic(topic)).mapTo[String]
-          }
-        } ~
         parameters('mode.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveInput) { reactiveInput =>
           get { ctx =>
             //TODO Use case class extraction on parameters directly on reactiveCmd with require validation 
@@ -61,13 +61,6 @@ class OmnibusRest(omnibusService: ActorRef) extends HttpServiceActor with ActorL
             }
           }
         }
-      }
-    }
-
-  def statsRoute =
-    path("stats") {
-      complete {
-        (context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats]
       }
     }
 }

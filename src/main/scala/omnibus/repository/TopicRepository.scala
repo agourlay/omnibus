@@ -1,6 +1,7 @@
 package omnibus.repository
 
 import akka.actor._
+import akka.pattern._
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -11,6 +12,7 @@ import scala.util._
 import spray.caching.{ LruCache, Cache }
 
 import omnibus.domain._
+import omnibus.domain.topic._
 import omnibus.repository.TopicRepositoryProtocol._
 
 class TopicRepository extends Actor with ActorLogging {
@@ -36,6 +38,7 @@ class TopicRepository extends Actor with ActorLogging {
     case CheckTopicActor(topic)               => sender ! checkTopic(topic)
     case LookupTopicActor(topic)              => sender ! lookUpTopicWithCache(topic)
     case PublishToTopicActor(topic, message)  => publishToTopic(topic, message)
+    case TopicPastStatActor(topic, replyTo)   => topicPastStat(topic, replyTo)
     case TopicProtocol.Propagation            => log.debug("message propoagation reached TopicRepository")
   }
 
@@ -61,7 +64,7 @@ class TopicRepository extends Actor with ActorLogging {
   }
 
   def lookUpTopicWithCache(topic: String): Option[ActorRef] = {
-    log.debug(s"Lookup in cache for topic $topic")
+    log.info(s"Lookup in cache for topic $topic")
     // TODO can setup None in cache...
     val futureOpt: Future[Option[ActorRef]] = mostAskedTopic(topic) { lookUpTopic(topic) }
     // we block here to provide an API based on Option[]
@@ -69,7 +72,7 @@ class TopicRepository extends Actor with ActorLogging {
   }
 
   def lookUpTopic(topic: String): Future[Option[ActorRef]] = {
-    log.debug(s"Lookup for topic $topic")
+    log.info(s"Lookup for topic $topic")
     val future: Future[ActorRef] = context.actorSelection(topic).resolveOne
     future.map(actor => Some(actor)).recover { case e: ActorNotFound => None }
   }
@@ -88,6 +91,16 @@ class TopicRepository extends Actor with ActorLogging {
       case None => false
     }
   }
+
+  def topicPastStat(topicName: String, replyTo : ActorRef) {
+    val p = promise[List[TopicStatisticState]]
+    val futurResult= p.future
+    lookUpTopicWithCache(topicName) match {
+      case None => p.success(List.empty[TopicStatisticState])
+      case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.PastStats).mapTo[List[TopicStatisticState]])
+    }
+    futurResult pipeTo replyTo
+  }
 }
 
 object TopicRepositoryProtocol {
@@ -96,4 +109,5 @@ object TopicRepositoryProtocol {
   case class CheckTopicActor(topicName: String)
   case class LookupTopicActor(topicName: String)
   case class PublishToTopicActor(topicName: String, message: String)
+  case class TopicPastStatActor(topic: String, replyTo : ActorRef)
 }

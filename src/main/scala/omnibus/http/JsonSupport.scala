@@ -12,10 +12,11 @@ import spray.can.server.Stats
 import DefaultJsonProtocol._
 
 import omnibus.domain._
+import omnibus.domain.topic.TopicStatisticState
 
 object JsonSupport {
-
   implicit val formatMessage = jsonFormat4(Message)
+  implicit val formatTopicStats = jsonFormat5(TopicStatisticState)
   implicit val formatHttpServerStats = new RootJsonFormat[Stats] {
     def write(obj: Stats): JsValue = JsObject(
       "uptimeInMilli"      -> JsNumber(obj.uptime.toMillis),

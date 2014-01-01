@@ -1,14 +1,17 @@
-package omnibus.domain
+package omnibus.domain.subscriber
 
 import akka.actor._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-import omnibus.domain.SubscriberProtocol._
-import omnibus.domain.ReactiveMode._
+import omnibus.domain._
+import omnibus.domain.topic._
+import omnibus.domain.subscriber.SubscriberProtocol._
+import omnibus.domain.subscriber.ReactiveMode._
+import omnibus.http.streaming.HttpTopicSubscriber
 
-class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd)
+class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val http : Boolean)
     extends Actor with ActorLogging {
 
   implicit val system = context.system
@@ -24,6 +27,11 @@ class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiv
     val mode = reactiveCmd.mode
     log.info(s"Creating sub on topics $prettyTopics with mode $mode")
 
+    if (http) {
+      // HttpSubscriber will proxify the responder, cool huh?
+      responder = context.actorOf(Props(classOf[HttpTopicSubscriber], responder, mode, prettyTopics))
+    }
+
     // subscribe to every topic
     for (topic <- topics) { topic ! TopicProtocol.Subscribe(self) }
 
@@ -34,7 +42,7 @@ class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiv
   def receive = {
     case AcknowledgeSub(topicRef)   => ackSubscription(topicRef)
     case AcknowledgeUnsub(topicRef) => topicListened -= topicRef
-    case StopSubscription           => self ! PoisonPill
+    case StopSubscription           => stopSubscription()
     case PendingAckTopic            => sender ! prettySubscription(pendingTopic)
     case AcknowledgedTopic          => sender ! prettySubscription(topicListened)
     case RefreshTopics              => refreshTopics()
@@ -42,7 +50,10 @@ class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiv
     case message: Message           => sendMessage(message)
   }
 
-  def formatMessagePayload(msg: Message): Any = msg
+  def stopSubscription() {
+    log.info(s"End of sub $self")
+    self ! PoisonPill
+  }
 
   def notYetPlayed(msg: Message): Boolean = !idsSeen.contains(msg.id)
 
@@ -55,7 +66,7 @@ class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiv
   def sendMessage(msg: Message) = {
     // An event can only be played once by subscription
     if (notYetPlayed(msg) && filterAccordingMode(msg)) {
-      responder ! formatMessagePayload(msg)
+      responder ! msg
       idsSeen += msg.id
     }
   }

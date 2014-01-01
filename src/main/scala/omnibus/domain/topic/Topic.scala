@@ -1,4 +1,4 @@
-package omnibus.domain
+package omnibus.domain.topic
 
 import akka.actor._
 import akka.persistence._
@@ -7,9 +7,13 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.collection.mutable.ListBuffer
 
-import omnibus.domain.TopicProtocol._
+import omnibus.domain._
 import omnibus.domain.PropagationDirection._
-import omnibus.domain.TopicStatProtocol._
+import omnibus.domain.topic.TopicProtocol._
+import omnibus.domain.topic.TopicStatProtocol._
+import omnibus.domain.subscriber._
+import omnibus.domain.subscriber.ReactiveCmd
+import omnibus.domain.subscriber.ReactiveMode
 
 class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 

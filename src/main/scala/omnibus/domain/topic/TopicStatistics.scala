@@ -1,4 +1,4 @@
-package omnibus.domain
+package omnibus.domain.topic
 
 import akka.actor._
 
@@ -7,7 +7,7 @@ import scala.language.postfixOps
 import scala.collection.mutable.ListBuffer
 
 import omnibus.domain._
-import omnibus.domain.TopicStatProtocol._
+import omnibus.domain.topic.TopicStatProtocol._
 
 class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Actor with ActorLogging {
 
@@ -24,7 +24,7 @@ class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Ac
   var lastMeasureMillis = System.currentTimeMillis
 
   // TODO will store this somewhere somehow
-  var statHistory = ListBuffer.empty[TopicStatistiqueState]
+  var statHistory = ListBuffer.empty[TopicStatisticState]
 
   override def preStart() = {
     system.scheduler.schedule(intervalMeasure, intervalMeasure, self, TopicStatProtocol.StoringTick)
@@ -38,20 +38,20 @@ class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Ac
     case SubTopicAdded       => subTopicsNumber = subTopicsNumber + 1
     case SubTopicRemoved     => subTopicsNumber = subTopicsNumber - 1
     case StoringTick         => storeStats()
-    case PastStats           => sender ! statHistory
+    case PastStats           => sender ! statHistory.toList
     case LiveStats           => sender ! liveStats()
   }
 
-   def liveStats() : TopicStatistiqueState = {
+   def liveStats() : TopicStatisticState = {
     val intervalInSec = (System.currentTimeMillis - lastMeasureMillis)  / 1000
-    val throughputPerSec = intervalInSec
-    val currentStat = TopicStatistiqueState(topicName, throughputPerSec, subscribersNumber, subTopicsNumber)
+    val throughputPerSec = messageReceived / intervalInSec
+    val currentStat = TopicStatisticState(topicName, throughputPerSec, subscribersNumber, subTopicsNumber)
     currentStat
   }
 
   def storeStats() = {
     val throughputPerSec = messageReceived / intervalMeasure.toSeconds
-    val currentStat = TopicStatistiqueState(topicName, throughputPerSec, subscribersNumber, subTopicsNumber)
+    val currentStat = TopicStatisticState(topicName, throughputPerSec, subscribersNumber, subTopicsNumber)
     currentStat +=: statHistory
     messageReceived = 0
   }

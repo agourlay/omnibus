@@ -11,6 +11,7 @@ import scala.util._
 import omnibus.service.OmnibusServiceProtocol._
 import omnibus.repository._
 import omnibus.domain._
+import omnibus.domain.subscriber._
 
 import reflect.ClassTag
 
@@ -25,6 +26,8 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     case PublishToTopic(topic, message)                  => sender ! publishToTopic(topic, message)
     case SubToTopic(topic, responder, reactiveCmd, http) => subToTopic(topic, responder, reactiveCmd, http) pipeTo sender
     case UnsubFromTopic(topic, subscriber)               => sender ! unsubscribeFromTopic(topic, subscriber)
+    case TopicPastStat(topic)                            => topicRepo ! TopicRepositoryProtocol.TopicPastStatActor(topic, sender)
+    case LookupTopic(topic)                              => lookupTopic(topic) pipeTo sender
   }
 
   def createTopic(topic: String, message: String): String = {
@@ -52,14 +55,17 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     // TODO do we need this? 
   }
 
+  def lookupTopic(topic : String) : Future[Option[ActorRef]] = {
+    (topicRepo ? TopicRepositoryProtocol.LookupTopicActor(topic)).mapTo[Option[ActorRef]]
+  }
+
   def subToTopic(topicName: String, responder: ActorRef, reactiveCmd: ReactiveCmd, httpMode: Boolean): Future[Boolean] = {
     log.info(s"Request to subscribe to $topicName with reactive cmd $reactiveCmd")
     val p = promise[Boolean]
     val futurResult: Future[Boolean] = p.future
 
     // Get all future topic ActorRef to subscribe to
-    val actorTopics = for (topic <- splitMultiTopic(topicName))
-      yield (topicRepo ? TopicRepositoryProtocol.LookupTopicActor(topic)).mapTo[Option[ActorRef]]
+    val actorTopics = for (topic <- splitMultiTopic(topicName)) yield lookupTopic(topic)
 
     //List[Future[Option]] to Future[List[Option]]                 
     Future.sequence(actorTopics).onComplete {
@@ -91,4 +97,6 @@ object OmnibusServiceProtocol {
   case class PublishToTopic(topic: String, message: String)
   case class SubToTopic(topic: String, subscriber: ActorRef, reactiveCmd: ReactiveCmd, http: Boolean)
   case class UnsubFromTopic(topic: String, subscriber: ActorRef)
+  case class TopicPastStat(topic: String)
+  case class LookupTopic(topic: String)
 }

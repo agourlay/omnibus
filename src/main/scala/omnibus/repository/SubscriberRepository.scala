@@ -5,9 +5,9 @@ import akka.actor._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-import omnibus.http.HttpSubscriber
-import omnibus.domain.Subscriber
-import omnibus.domain.ReactiveCmd
+import omnibus.http.streaming.HttpSubscriber
+import omnibus.domain.subscriber.Subscriber
+import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.repository.SubscriberRepositoryProtocol._
 
 class SubscriberRepository extends Actor with ActorLogging {
@@ -19,13 +19,8 @@ class SubscriberRepository extends Actor with ActorLogging {
   }
 
   def createSub(topics: Set[ActorRef], responder: ActorRef, reactiveCmd: ReactiveCmd, http: Boolean) = {
-    if (http) {
-      log.debug("Creating http sub on topics " + topics)
-      context.actorOf(Props(classOf[HttpSubscriber], responder, topics, reactiveCmd))
-    } else {
-      log.debug("Creating sub on topics " + topics)
-      context.actorOf(Props(classOf[Subscriber], responder, topics, reactiveCmd))
-    }
+    log.debug("Creating sub on topics " + topics)
+    context.actorOf(Props(classOf[Subscriber], responder, topics, reactiveCmd, http))
   }
 }
 
