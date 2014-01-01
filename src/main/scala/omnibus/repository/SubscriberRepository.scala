@@ -5,7 +5,6 @@ import akka.actor._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-import omnibus.http.streaming.HttpSubscriber
 import omnibus.domain.subscriber.Subscriber
 import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.repository.SubscriberRepositoryProtocol._
