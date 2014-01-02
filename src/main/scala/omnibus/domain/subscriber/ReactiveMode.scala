@@ -20,7 +20,10 @@ object ReactiveMode extends Enumeration {
 import omnibus.domain.subscriber.ReactiveMode._
 
 case class ReactiveCmd(val mode: ReactiveMode, val since: Option[Long], val to: Option[Long])
-case class ReactiveInput(val mode: String, val since: Option[Long], val to: Option[Long])
+case class ReactiveInput(val mode: String, val since: Option[Long], val to: Option[Long]){
+  require(mode == null || mode == "" || (mode.length > 0 && ReactiveMode.values.find(mode == _.toString) != None), 
+    s"ReactiveMode isn't valid; please use one of ${ReactiveMode.values}")
+}
 
 object ReactiveCmd {
   def apply(mode: String, since: Option[Long], to: Option[Long]): ReactiveCmd = apply(ReactiveMode.withName(mode), since, to)
