@@ -30,7 +30,7 @@ class TopicRepository extends Actor with ActorLogging {
   }
 
   // cache of most looked up topicRef, conf values to be tuned
-  val mostAskedTopic: Cache[Option[ActorRef]] = LruCache(maxCapacity = 100, timeToLive = 1 minute)
+  val mostAskedTopic: Cache[Option[ActorRef]] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
 
   def receive = {
     case CreateTopicActor(topic)              => createTopic(topic)
@@ -65,10 +65,12 @@ class TopicRepository extends Actor with ActorLogging {
 
   def lookUpTopicWithCache(topic: String): Option[ActorRef] = {
     log.info(s"Lookup in cache for topic $topic")
-    // TODO can setup None in cache...
     val futureOpt: Future[Option[ActorRef]] = mostAskedTopic(topic) { lookUpTopic(topic) }
     // we block here to provide an API based on Option[]
-    Await.result(futureOpt, timeout.duration).asInstanceOf[Option[ActorRef]]
+    val optResult : Option[ActorRef] = Await.result(futureOpt, timeout.duration).asInstanceOf[Option[ActorRef]]
+    // do not let spray cache insert a none in the cache for the actor
+    if (optResult.isEmpty) mostAskedTopic.remove(topic)
+    optResult
   }
 
   def lookUpTopic(topic: String): Future[Option[ActorRef]] = {
