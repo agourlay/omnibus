@@ -44,20 +44,20 @@ libraryDependencies ++= {
   val sprayV      = "1.3-M2"
   val sprayJsonV  = "1.2.5"
   val logbackV    = "1.0.13"
-  val specs2V     = "2.2.3"
+  val specs2V     = "2.3.7"
   val scalaCheckV = "1.11.1"
   Seq(
        "io.spray"            %   "spray-can"                      % sprayV                  withSources() 
       ,"io.spray"            %   "spray-routing"                  % sprayV                  withSources()
-      ,"io.spray"            %   "spray-testkit"                  % sprayV       % "test"   withSources()
       ,"io.spray"            %   "spray-caching"                  % sprayV                  withSources()
       ,"io.spray"            %%  "spray-json"                     % sprayJsonV              withSources()
       ,"com.typesafe.akka"   %%  "akka-actor"                     % akkaV                   withSources()
       ,"com.typesafe.akka"   %%  "akka-persistence-experimental"  % akkaV                   withSources()
       ,"com.typesafe.akka"   %%  "akka-slf4j"                     % akkaV                   withSources()
-      ,"com.typesafe.akka"   %%  "akka-testkit"                   % akkaV        % "test"   withSources()
       ,"ch.qos.logback"      %   "logback-classic"                % logbackV                withSources()
-      ,"org.specs2"          %%  "specs2"                         % specs2V      % "test"   withSources()
+      ,"io.spray"            %   "spray-testkit"                  % sprayV       % "test"   withSources()
+      ,"com.typesafe.akka"   %%  "akka-testkit"                   % akkaV        % "test"   withSources()
+      ,"org.specs2"          %%  "specs2-core"                    % specs2V      % "test"   withSources()
       ,"org.scalacheck"      %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
   )
 }

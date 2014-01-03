@@ -38,7 +38,7 @@ class StatsRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
   val route =
     pathPrefix("stats") {
       parameters('mode.as[String] ? "simple"){ mode =>
-        path("http") {
+        path("system") {
           get { ctx =>
             log.info(s"Sending server stats with $mode")
             if (mode == "streaming") {
