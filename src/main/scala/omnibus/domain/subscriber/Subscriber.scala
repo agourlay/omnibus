@@ -90,8 +90,9 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
     context.watch(topicRef)
     log.debug(s"subscriber successfully subscribed to $topicRef")
     // we are successfully registered to the topic, let's use the reactive cm if not simple
-    if (reactiveCmd.mode != ReactiveMode.SIMPLE){
-      topicRef ! TopicProtocol.SetupReactiveMode(self, reactiveCmd)
+    reactiveCmd.mode match {
+      case ReactiveMode.SIMPLE => log.debug("no reactive mode for simple")
+      case _                   => topicRef ! TopicProtocol.SetupReactiveMode(self, reactiveCmd)
     }
   }
 

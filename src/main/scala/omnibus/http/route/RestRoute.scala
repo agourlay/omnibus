@@ -50,10 +50,8 @@ class RestRoute(omnibusService: ActorRef) (implicit context: ActorContext) exten
             }
           }
         } ~
-        parameters('mode.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveInput) { reactiveInput =>
+        parameters('mode.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveCmd) { reactiveCmd =>
           get { ctx =>
-            //TODO Use case class extraction on parameters directly on reactiveCmd with require validation 
-            val reactiveCmd = ReactiveCmd(reactiveInput)
             val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(topic, ctx.responder, reactiveCmd, true)).mapTo[Boolean]
             future.onComplete {
               case Success(result) => log.debug("Alles klar, let's stream")

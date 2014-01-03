@@ -68,7 +68,7 @@ The supported modes are:
   - e.g  http://localhost:8080/topics/logs?mode=between-ts&since=1388250283&to=1388250552
 
 Modes are specified by url parameter
-> curl -X GET http://localhost:8080/topics/results/basketball?mode=between-id&since=1&to=2
+> curl -X GET "http://localhost:8080/topics/results/basketball?mode=between-id&since=1&to=2"
 
 > ~~> Streaming subscription for topics /results/basketball with mode replay
 

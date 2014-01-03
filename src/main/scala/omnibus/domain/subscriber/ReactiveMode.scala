@@ -15,32 +15,26 @@ object ReactiveMode extends Enumeration {
   val BETWEEN_ID = Value("between-id") // all the events between two given event-id  
   val BETWEEN_TS = Value("between-ts") // all the events between two given timestamp  
 
+  implicit val string2ReactiveMode = new FromStringDeserializer[ReactiveMode] {
+    def apply(value: String) : Either[DeserializationError, ReactiveMode] = {
+      try Right(ReactiveMode.withName(value))
+      catch {
+        case e: Exception => Left(MalformedContent(s"The reactiveMode is not valid - please use one of ${ReactiveMode.values}"))
+      }  
+    }
+  } 
 }
 
 import omnibus.domain.subscriber.ReactiveMode._
 
-case class ReactiveCmd(val mode: ReactiveMode, val since: Option[Long], val to: Option[Long])
-case class ReactiveInput(val mode: String, val since: Option[Long], val to: Option[Long]){
-  require(mode == null || mode == "" || (mode.length > 0 && ReactiveMode.values.find(mode == _.toString) != None), 
-    s"ReactiveMode isn't valid; please use one of ${ReactiveMode.values}")
-}
-
-object ReactiveCmd {
-  def apply(mode: String, since: Option[Long], to: Option[Long]): ReactiveCmd = apply(ReactiveMode.withName(mode), since, to)
-
-  def apply(reactInput: ReactiveInput): ReactiveCmd = {
-    apply(reactInput.mode, reactInput.since, reactInput.to)
-  }
-
-  //TODO use in OmnibusRest
-  implicit val ReactiveCmdMarshaller =
-    Unmarshaller[ReactiveCmd](ContentTypeRange.`*`) {
-      case HttpEntity.NonEmpty(contentType, data) =>
-        val Array(_, mode, since, to) = data.asString.split(":,".toCharArray).map(_.trim)
-        val reactMode: ReactiveMode = if (mode.isEmpty) ReactiveMode.SIMPLE else ReactiveMode.withName(mode)
-        val sinceOpt: Option[Long] = if (since.isEmpty) None else Some(since.toLong)
-        val toOpt: Option[Long] = if (to.isEmpty) None else Some(to.toLong)
-        ReactiveCmd(reactMode, sinceOpt, toOpt)
-    }
-
+case class ReactiveCmd(val mode: ReactiveMode, val since: Option[Long], val to: Option[Long]){
+  require( mode match {
+    case SIMPLE     => true
+    case LAST       => true
+    case REPLAY     => true
+    case SINCE_ID   => since.nonEmpty
+    case SINCE_TS   => since.nonEmpty
+    case BETWEEN_ID => since.nonEmpty && to.nonEmpty
+    case BETWEEN_TS => since.nonEmpty && to.nonEmpty
+    }, s"reactiveMode argument(s) is missing ")
 }
