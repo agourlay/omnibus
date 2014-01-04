@@ -6,6 +6,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.collection.mutable.ListBuffer
 
+import omnibus.configuration._
 import omnibus.domain._
 import omnibus.domain.topic.TopicStatProtocol._
 
@@ -14,8 +15,7 @@ class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Ac
   implicit val system = context.system
   implicit def executionContext = context.dispatcher
 
-  // TODO setup through config
-  val intervalMeasure : FiniteDuration = 5 minute
+  val intervalMeasure : FiniteDuration = Settings(system).Statistics.StorageInterval
 
   var messageReceived : Long = 0
   var subscribersNumber: Long = 0

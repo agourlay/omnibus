@@ -53,11 +53,19 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     case BetweenID(refSub, startId, endID)   => forwardMessagesBetweenID(refSub, startId, endID)
     case BetweenTS(refSub, startTs, endTs)   => forwardMessagesBetweenTS(refSub, startTs, endTs)
     case SetupReactiveMode(refSub, reactCmd) => setupReactiveMode(refSub, reactCmd)
+    case Delete                              => deleteTopic()
 
     case Propagation(operation, direction)   => handlePropagation(operation, direction)
 
     case m @ TopicStatProtocol.PastStats     => statHolder forward m
     case m @ TopicStatProtocol.LiveStats     => statHolder forward m
+  }
+
+  def deleteTopic() {
+    val lastIdSeen = state.events.head.id
+    // erase all data from storage
+    deleteMessages(lastIdSeen, true)
+    self ! PoisonPill
   }
 
   def handlePropagation(operation: Operation, direction: PropagationDirection) = {
@@ -191,6 +199,7 @@ object TopicProtocol {
   case class Unsubscribe(subscriber: ActorRef) extends Operation
   case class CreateSubTopic(topics: List[String])
   case object SubscriberNumber
+  case object Delete
 
   // ReactiveCmd operations
   case class Replay(subscriber: ActorRef) extends Operation

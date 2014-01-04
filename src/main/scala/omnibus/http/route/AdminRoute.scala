@@ -9,6 +9,7 @@ import spray.httpx.encoding._
 import spray.routing._
 import spray.can.Http
 import spray.can.server.Stats
+import spray.routing.authentication._
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,6 +24,7 @@ import reflect.ClassTag
 
 import omnibus.http.JsonSupport._
 import omnibus.http.streaming._
+import omnibus.configuration._
 import omnibus.domain._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
@@ -30,13 +32,14 @@ import omnibus.service.OmnibusServiceProtocol._
 class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
+  implicit def system = context.system
   implicit val timeout = akka.util.Timeout(5 seconds)
 
   val log: Logger = LoggerFactory.getLogger("omnibus.route.stat")
 
-  // TODO setup admin authentication 
   val route =
     pathPrefix("admin") {
+      authenticate(BasicAuth(adminPassAuthenticator _, realm = "secure site")) { userName =>
         path("topics" / Rest) { topic =>
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
             delete {
@@ -47,4 +50,12 @@ class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
           }
         }
       }
+    }  
+
+  def adminPassAuthenticator(userPass: Option[UserPass]): Future[Option[String]] =
+  Future {
+    if (userPass.exists(up => up.user == Settings(system).Admin.Name && up.pass == Settings(system).Admin.Password))
+      Some(Settings(system).Admin.Name)
+    else None
+  }
 }

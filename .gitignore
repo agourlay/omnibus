@@ -143,3 +143,4 @@ node_modules
 src/main/resources/frontend/web/dist
 
 omnibus.sublime-project
+/data

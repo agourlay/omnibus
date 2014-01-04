@@ -26,7 +26,7 @@ import omnibus.domain.subscriber._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 
-class RestRoute(omnibusService: ActorRef) (implicit context: ActorContext) extends Directives {
+class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(5 seconds)

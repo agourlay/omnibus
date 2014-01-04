@@ -112,10 +112,10 @@ There are two ways of running Omnibus
 Get the latest omnibus-standalone.jar or build from source with sbt assembly and run it.
 
 ```sh
-java -jar omnibus-standalone.jar 8888 &
+java -jar omnibus-standalone.jar &
 ```
 
-This starts Omnibus on port 8888 (if not specified as args, the default one is 8080).
+This starts Omnibus on default port 8080.
 
 ### As an embedded library.
 
@@ -130,7 +130,7 @@ libraryDependencies += "com.agourlay" % "omnibus" % "0.1-SNAPSHOT"
 and then call :
 
 ```scala
-val receptionist : OmnibusReceptionist = omnibus.service.OmnibusBuilder.start(8080)
+val receptionist : OmnibusReceptionist = omnibus.service.OmnibusBuilder.start()
 ``` 
 
 This will start the Omnibus system on the given port and return an OmnibusReceptionist object that offers all the useful methods to interact with the system :

@@ -28,10 +28,10 @@ class HttpEndpoint(omnibusService: ActorRef) extends HttpServiceActor with Actor
   implicit val timeout = akka.util.Timeout(5 seconds)
 
   val routes =
-    new RestRoute(omnibusService).route ~  // '/topics'
+    new TopicRoute(omnibusService).route ~  // '/topics'
     new StatsRoute(omnibusService).route ~ // '/stats'
     new AdminRoute(omnibusService).route ~ // '/admin/topics'
-    new StaticFilesRoute().route           // '/ '
+    new AdminUIRoute().route           // '/ '
 
   def receive = runRoute(routes)
 

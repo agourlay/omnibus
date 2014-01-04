@@ -9,5 +9,5 @@ import omnibus.service.OmnibusBuilder
 object Boot extends App {
   val log: Logger = LoggerFactory.getLogger("omnibus.boot")
   log.info("Booting Omnibus in standalone mode...")
-  if (args.nonEmpty) OmnibusBuilder.start(args(0).toInt) else OmnibusBuilder.start()
+  OmnibusBuilder.start()
 }

@@ -17,14 +17,16 @@ import omnibus.service._
 import omnibus.repository._
 import omnibus.configuration._
 
-object OmnibusBuilder extends Configuration {
+object OmnibusBuilder {
 
-  def start(httpPort: Int = defaultHttpPort): OmnibusReceptionist = {
+  def start(): OmnibusReceptionist = {
 
-    implicit val system = ActorSystem(systemName)
+    implicit val system = ActorSystem("omnibus")
     implicit def executionContext = system.dispatcher
 
     val log: Logger = LoggerFactory.getLogger("omnibusBuilder")
+
+    val httpPort = Settings(system).Http.Port
 
     // parent of the topic tree 
     val topicRepository = system.actorOf(Props(classOf[TopicRepository]), "topic-repository")

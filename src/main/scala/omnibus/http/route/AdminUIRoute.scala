@@ -21,7 +21,7 @@ import scala.util._
 import DefaultJsonProtocol._
 import reflect.ClassTag
 
-class StaticFilesRoute(implicit context: ActorContext) extends Directives {
+class AdminUIRoute(implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(5 seconds)
