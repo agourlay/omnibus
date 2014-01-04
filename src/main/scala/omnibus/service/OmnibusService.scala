@@ -10,6 +10,7 @@ import scala.util._
 
 import omnibus.service.OmnibusServiceProtocol._
 import omnibus.repository._
+import omnibus.configuration._
 import omnibus.domain._
 import omnibus.domain.subscriber._
 
@@ -17,7 +18,7 @@ import reflect.ClassTag
 
 class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Actor with ActorLogging {
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(5 seconds)
+  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   def receive = {
     case CreateTopic(topic, message)                     => sender ! createTopic(topic, message)

@@ -12,13 +12,14 @@ import scala.util._
 import spray.caching.{ LruCache, Cache }
 
 import omnibus.domain._
+import omnibus.configuration._
 import omnibus.domain.topic._
 import omnibus.repository.TopicRepositoryProtocol._
 
 class TopicRepository extends Actor with ActorLogging {
 
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(2 seconds)
+  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   var rootTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
 

@@ -21,10 +21,12 @@ import scala.util._
 import DefaultJsonProtocol._
 import reflect.ClassTag
 
+import omnibus.configuration._
+
 class AdminUIRoute(implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(5 seconds)
+  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   val log: Logger = LoggerFactory.getLogger("omnibus.route.staticFiles")
 

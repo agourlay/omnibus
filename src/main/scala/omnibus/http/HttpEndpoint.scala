@@ -20,18 +20,19 @@ import reflect.ClassTag
 import omnibus.http.JsonSupport._
 import omnibus.http.route._
 import omnibus.domain._
+import omnibus.configuration._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 
 class HttpEndpoint(omnibusService: ActorRef) extends HttpServiceActor with ActorLogging {
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(5 seconds)
+  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   val routes =
-    new TopicRoute(omnibusService).route ~  // '/topics'
+    new TopicRoute(omnibusService).route ~ // '/topics'
     new StatsRoute(omnibusService).route ~ // '/stats'
     new AdminRoute(omnibusService).route ~ // '/admin/topics'
-    new AdminUIRoute().route           // '/ '
+    new AdminUIRoute().route               // '/ '
 
   def receive = runRoute(routes)
 

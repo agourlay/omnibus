@@ -12,6 +12,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 import omnibus.service._
+import omnibus.configuration._
 import omnibus.service.OmnibusServiceProtocol._
 import omnibus.repository._
 import omnibus.domain._
@@ -19,7 +20,7 @@ import omnibus.domain.subscriber._
 
 class OmnibusReceptionist(system: ActorSystem, omnibusService: ActorRef) {
   implicit def executionContext = system.dispatcher
-  implicit val timeout = akka.util.Timeout(2 seconds)
+  implicit val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
 
   val log: Logger = LoggerFactory.getLogger("OmnibusReceptionist")
 

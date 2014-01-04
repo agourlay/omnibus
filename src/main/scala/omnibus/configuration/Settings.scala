@@ -16,12 +16,18 @@ class Settings(config: Config, extendedSystem: ExtendedActorSystem) extends Exte
     val Password = config.getString("omnibus.admin.password")
   }
 
+  object Data {
+    val RetentionTime = FiniteDuration(config.getMilliseconds("omnibus.data.retentionTime"), TimeUnit.MILLISECONDS)
+  }
+
   object Timeout {
-  	val AskTimeout = FiniteDuration(config.getMilliseconds("omnibus.timeout.ask"), TimeUnit.MILLISECONDS)
+  	val Ask = FiniteDuration(config.getMilliseconds("omnibus.timeout.ask"), TimeUnit.MILLISECONDS)
   }
 
   object Statistics {
     val StorageInterval = FiniteDuration(config.getMilliseconds("omnibus.statistics.storageInterval"), TimeUnit.MILLISECONDS)
+    val PushInterval = FiniteDuration(config.getMilliseconds("omnibus.statistics.pushInterval"), TimeUnit.MILLISECONDS)
+    val RetentionTime = FiniteDuration(config.getMilliseconds("omnibus.statistics.retentionTime"), TimeUnit.MILLISECONDS)
   }
 }
 

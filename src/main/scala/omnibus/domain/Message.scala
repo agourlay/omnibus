@@ -8,12 +8,6 @@ case class Message(id: Long,
   payload: String,
   timestamp: Long = System.currentTimeMillis / 1000)
 
-case class TopicState(events: List[Message] = Nil) {
-  def update(msg: Message) = copy(msg :: events)
-  def size = events.length
-  override def toString: String = events.reverse.toString
-}
-
 object MessageObj {
   def toMessageChunk(message: Message): MessageChunk = {
     MessageChunk("id: " + message.id + "\n" +

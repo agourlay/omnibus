@@ -23,13 +23,14 @@ import reflect.ClassTag
 import omnibus.http.JsonSupport._
 import omnibus.domain._
 import omnibus.domain.subscriber._
+import omnibus.configuration._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 
 class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(5 seconds)
+  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   val log: Logger = LoggerFactory.getLogger("omnibus.route.rest")
 

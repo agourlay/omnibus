@@ -33,7 +33,7 @@ class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
 
   implicit def executionContext = context.dispatcher
   implicit def system = context.system
-  implicit val timeout = akka.util.Timeout(5 seconds)
+  implicit val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
 
   val log: Logger = LoggerFactory.getLogger("omnibus.route.stat")
 

@@ -15,24 +15,24 @@ class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Ac
   implicit val system = context.system
   implicit def executionContext = context.dispatcher
 
-  val intervalMeasure : FiniteDuration = Settings(system).Statistics.StorageInterval
+  val storageInterval = Settings(system).Statistics.StorageInterval
+  val retentionTime = Settings(system).Statistics.RetentionTime
 
   var messageReceived : Long = 0
   var subscribersNumber: Long = 0
   var subTopicsNumber : Long = 0
 
   var lastMeasureMillis = System.currentTimeMillis
-
-  // TODO will store this somewhere somehow
   var statHistory = ListBuffer.empty[TopicStatisticState]
 
   override def preStart() = {
-    system.scheduler.schedule(intervalMeasure, intervalMeasure, self, TopicStatProtocol.StoringTick)
+    system.scheduler.schedule(storageInterval, storageInterval, self, TopicStatProtocol.StoringTick)
+    system.scheduler.schedule(retentionTime, retentionTime, self, TopicStatProtocol.PurgeOldData)
     log.info(s"Creating new TopicStats for $topicName")
   }
 
   def receive = {
-    case message: Message    => messageReceived = messageReceived + 1
+    case Message             => messageReceived = messageReceived + 1
     case SubscriberAdded     => subscribersNumber = subscribersNumber + 1
     case SubscriberRemoved   => subscribersNumber = subscribersNumber - 1
     case SubTopicAdded       => subTopicsNumber = subTopicsNumber + 1
@@ -40,6 +40,7 @@ class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Ac
     case StoringTick         => storeStats()
     case PastStats           => sender ! statHistory.toList
     case LiveStats           => sender ! liveStats()
+    case PurgeOldData        => purgeOldData()
   }
 
    def liveStats() : TopicStatisticState = {
@@ -50,10 +51,14 @@ class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Ac
   }
 
   def storeStats() = {
-    val throughputPerSec = messageReceived / intervalMeasure.toSeconds
+    val throughputPerSec = messageReceived / storageInterval.toSeconds
     val currentStat = TopicStatisticState(topicName, throughputPerSec, subscribersNumber, subTopicsNumber)
     currentStat +=: statHistory
     messageReceived = 0
+  }
+
+  def purgeOldData() {
+    statHistory = statHistory.filter(stat => stat.timestamp > (System.currentTimeMillis - retentionTime.toMillis))
   }
 }
 
@@ -65,4 +70,5 @@ object TopicStatProtocol {
   case object SubTopicRemoved
   case object PastStats
   case object LiveStats
+  case object PurgeOldData
 }
