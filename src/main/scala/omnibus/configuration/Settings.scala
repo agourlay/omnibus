@@ -16,8 +16,8 @@ class Settings(config: Config, extendedSystem: ExtendedActorSystem) extends Exte
     val Password = config.getString("omnibus.admin.password")
   }
 
-  object Data {
-    val RetentionTime = FiniteDuration(config.getMilliseconds("omnibus.data.retentionTime"), TimeUnit.MILLISECONDS)
+  object Topic {
+    val RetentionTime = FiniteDuration(config.getMilliseconds("omnibus.topic.retentionTime"), TimeUnit.MILLISECONDS)
   }
 
   object Timeout {

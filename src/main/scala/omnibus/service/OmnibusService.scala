@@ -24,7 +24,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     case CreateTopic(topic, message)                     => sender ! createTopic(topic, message)
     case DeleteTopic(topic)                              => sender ! deleteTopic(topic)
     case CheckTopic(topic)                               => checkTopic(topic, sender)
-    case PublishToTopic(topic, message)                  => sender ! publishToTopic(topic, message)
+    case PublishToTopic(topic, message)                  => publishToTopic(topic, message) pipeTo sender
     case SubToTopic(topic, responder, reactiveCmd, http) => subToTopic(topic, responder, reactiveCmd, http) pipeTo sender
     case UnsubFromTopic(topic, subscriber)               => sender ! unsubscribeFromTopic(topic, subscriber)
     case TopicPastStat(topic)                            => topicRepo ! TopicRepositoryProtocol.TopicPastStatActor(topic, sender)
@@ -47,9 +47,22 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     bool.map(value => if (value) s"Topic $topic exists" else s"Topic $topic does not exist") pipeTo replyTo
   }
 
-  def publishToTopic(topic: String, message: String): String = {
-    topicRepo ! TopicRepositoryProtocol.PublishToTopicActor(topic, message)
-    s"Publishing message to topic $topic \n"
+  def publishToTopic(topic: String, message: String): Future[Boolean] = {
+    val p = promise[Boolean]
+    val f = p.future
+    val exist = (topicRepo ? TopicRepositoryProtocol.CheckTopicActor(topic)).mapTo[Boolean]
+    exist.onComplete {
+      case Failure(error) => p.failure { new Exception(s"an error occured while pushing to $topic \n") }
+      case Success(topicExists) => {
+        if (topicExists) {
+          topicRepo ! TopicRepositoryProtocol.PublishToTopicActor(topic, message)
+          p.success(true)
+        } else {
+          p.failure { new Exception(s"Error : Topic $topic does not exist\n")}
+        }
+      }
+    }  
+    f
   }
 
   def unsubscribeFromTopic(topic: String, subscriber: ActorRef) {
@@ -72,7 +85,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     Future.sequence(actorTopics).onComplete {
       case Failure(error) => {
         log.warning("an error occured while subscribing to topic " + error.getMessage())
-        promise.failure { new Exception("an error occured while subscribing to topic ") }
+        p.failure { new Exception("an error occured while subscribing to topic ") }
       }
       case Success(optTopicRefList) => {
         val topicRefList: List[ActorRef] = optTopicRefList.filter(_.nonEmpty).map(_.get)
