@@ -4,7 +4,7 @@ assemblySettings
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-jarName in assembly := "omnibus-standalone.jar"
+jarName in assembly := { s"omnibus-standalone-${version.value}" }
 
 test in assembly := {}
 

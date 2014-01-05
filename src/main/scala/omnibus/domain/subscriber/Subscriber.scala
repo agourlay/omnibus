@@ -51,7 +51,7 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
   }
 
   def stopSubscription() {
-    log.info(s"End of sub $self")
+    log.debug(s"End of subscriber $self")
     self ! PoisonPill
   }
 
@@ -77,10 +77,10 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
   }
 
   def refreshTopics() {
-    log.info(s"Refresh sub in $topicListened")
+    log.debug(s"Refresh sub in $topicListened")
     for (topic <- topicListened) { topic ! TopicProtocol.Subscribe(self) }
 
-    log.info(s"Retry pending sub in $pendingTopic")
+    log.debug(s"Retry pending sub in $pendingTopic")
     for (topic <- pendingTopic) { topic ! TopicProtocol.Subscribe(self) }
   }
 

@@ -6,7 +6,7 @@ addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.5.1")
 
 addSbtPlugin("com.orrsella" % "sbt-sublime" % "1.0.9") 
 
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.10.1")
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.10.2")
 
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.2")
 

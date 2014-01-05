@@ -71,7 +71,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     //List[Future[Option]] to Future[List[Option]]                 
     Future.sequence(actorTopics).onComplete {
       case Failure(error) => {
-        log.info("an error occured while subscribing to topic " + error.getMessage())
+        log.warning("an error occured while subscribing to topic " + error.getMessage())
         promise.failure { new Exception("an error occured while subscribing to topic ") }
       }
       case Success(optTopicRefList) => {

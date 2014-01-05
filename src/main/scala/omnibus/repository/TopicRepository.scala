@@ -50,7 +50,7 @@ class TopicRepository extends Actor with ActorLogging {
       log.debug(s"Root topic $topicRoot already exist, forward to sub topic")
       rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail)
     } else {
-      log.info(s"Creating new root topic $topicRoot")
+      log.debug(s"Creating new root topic $topicRoot")
       val newRootTopic = context.actorOf(Props(classOf[Topic], topicRoot), topicRoot)
       rootTopics += (topicRoot -> newRootTopic)
       newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail)
@@ -60,12 +60,12 @@ class TopicRepository extends Actor with ActorLogging {
   def publishToTopic(topicName: String, message: String) = {
     lookUpTopicWithCache(topicName) match {
       case Some(topicRef) => topicRef ! TopicProtocol.PublishMessage(Message(nextEventId, topicName, message))
-      case None => log.debug(s"trying to push to non existing topic $topicName")
+      case None => log.warning(s"trying to push to non existing topic $topicName")
     }
   }
 
   def lookUpTopicWithCache(topic: String): Option[ActorRef] = {
-    log.info(s"Lookup in cache for topic $topic")
+    log.debug(s"Lookup in cache for topic $topic")
     val futureOpt: Future[Option[ActorRef]] = mostAskedTopic(topic) { lookUpTopic(topic) }
     // we block here to provide an API based on Option[]
     val optResult : Option[ActorRef] = Await.result(futureOpt, timeout.duration).asInstanceOf[Option[ActorRef]]
@@ -75,7 +75,7 @@ class TopicRepository extends Actor with ActorLogging {
   }
 
   def lookUpTopic(topic: String): Future[Option[ActorRef]] = {
-    log.info(s"Lookup for topic $topic")
+    log.debug(s"Lookup for topic $topic")
     val future: Future[ActorRef] = context.actorSelection(topic).resolveOne
     future.map(actor => Some(actor)).recover { case e: ActorNotFound => None }
   }

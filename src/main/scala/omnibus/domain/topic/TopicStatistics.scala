@@ -28,7 +28,7 @@ class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Ac
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, TopicStatProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, TopicStatProtocol.PurgeOldData)
-    log.info(s"Creating new TopicStats for $topicName")
+    log.debug(s"Creating new TopicStats for $topicName")
   }
 
   def receive = {
