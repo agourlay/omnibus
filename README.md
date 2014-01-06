@@ -109,7 +109,7 @@ There are two ways of running Omnibus
 
 ### As a standalone process.
 
-Get the latest omnibus-standalone.jar or build from source with sbt assembly and run it.
+Get the latest omnibus-standalone.zip distribution, extract and run it.
 
 ```sh
 java -jar omnibus-standalone.jar &

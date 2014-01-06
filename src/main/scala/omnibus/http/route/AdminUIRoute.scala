@@ -28,7 +28,7 @@ class AdminUIRoute(implicit context: ActorContext) extends Directives {
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
-  val log: Logger = LoggerFactory.getLogger("omnibus.route.staticFiles")
+  val log: Logger = LoggerFactory.getLogger("omnibus.route.adminUI")
 
   val route = 
     path(""){

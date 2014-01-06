@@ -33,7 +33,7 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
-  val log: Logger = LoggerFactory.getLogger("omnibus.route.rest")
+  val log: Logger = LoggerFactory.getLogger("omnibus.route.topic")
 
   val route =
     path("topics" / Rest) { topic =>
