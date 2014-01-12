@@ -28,6 +28,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     case SubToTopic(topic, responder, reactiveCmd, http) => subToTopic(topic, responder, reactiveCmd, http) pipeTo sender
     case UnsubFromTopic(topic, subscriber)               => sender ! unsubscribeFromTopic(topic, subscriber)
     case TopicPastStat(topic)                            => topicRepo ! TopicRepositoryProtocol.TopicPastStatActor(topic, sender)
+    case TopicLiveStat(topic)                            => topicRepo ! TopicRepositoryProtocol.TopicLiveStatActor(topic, sender)
     case LookupTopic(topic)                              => lookupTopic(topic) pipeTo sender
   }
 
@@ -113,5 +114,6 @@ object OmnibusServiceProtocol {
   case class SubToTopic(topic: String, subscriber: ActorRef, reactiveCmd: ReactiveCmd, http: Boolean)
   case class UnsubFromTopic(topic: String, subscriber: ActorRef)
   case class TopicPastStat(topic: String)
+  case class TopicLiveStat(topic: String)
   case class LookupTopic(topic: String)
 }

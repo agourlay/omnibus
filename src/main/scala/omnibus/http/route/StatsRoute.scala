@@ -38,36 +38,35 @@ class StatsRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
 
   val route =
     pathPrefix("stats") {
-      parameters('mode.as[String] ? "simple"){ mode =>
+      parameters('mode.as[String] ? "live"){ mode =>
         path("system") {
           get { ctx =>
             log.info(s"Sending server stats with $mode")
-            if (mode == "streaming") {
-              context.actorOf(Props(new HttpStatStream(ctx.responder)))
-            } else {
-              ctx.complete ((context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats])
+            if (mode == "streaming") context.actorOf(Props(new HttpStatStream(ctx.responder)))
+            else ctx.complete ((context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats])
             }
-          }
-        } ~
-        path("topics" / Rest) { topic =>
-          validate(!topic.isEmpty, "topic name cannot be empty \n") {
-            get { ctx =>
-              log.info(s"Sending stats from topic $topic with $mode")
-              if (mode == "streaming") {
-                val f = (omnibusService ? OmnibusServiceProtocol.LookupTopic(topic)).mapTo[Option[ActorRef]]
-                f.onComplete {
-                  case Failure(result) => ctx.complete(s"Something wrong happened... \n")
-                  case Success(result) => result match {
-                    case Some(ref) => context.actorOf(Props(new HttpTopicStatStream(ctx.responder, ref)))
-                    case None      => ctx.complete(s"topic '$topic' not found \n")
+          } ~
+          path("topics" / Rest) { topic =>
+            validate(!topic.isEmpty, "topic name cannot be empty \n") {
+              get { ctx =>
+                log.info(s"Sending stats from topic $topic with $mode")
+                mode match {
+                  case "live"      => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicLiveStat(topic)).mapTo[TopicStatisticState])
+                  case "history"   => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicPastStat(topic)).mapTo[List[TopicStatisticState]])
+                  case "streaming" => {
+                    val f = (omnibusService ? OmnibusServiceProtocol.LookupTopic(topic)).mapTo[Option[ActorRef]]
+                    f.onComplete {
+                      case Failure(result) => ctx.complete(s"Something wrong happened... \n")
+                      case Success(result) => result match {
+                        case Some(ref) => context.actorOf(Props(new HttpTopicStatStream(ctx.responder, ref)))
+                        case None      => ctx.complete(s"topic '$topic' not found \n")
+                      }
+                    }
                   }
-                }
-              } else {
-                ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicPastStat(topic)).mapTo[List[TopicStatisticState]])
+                }    
               }
             }
-          }
+          }  
         }
-      }  
-    }
-}
+      }
+    }    

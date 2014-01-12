@@ -78,7 +78,7 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
 
   def refreshTopics() {
     log.debug(s"Refresh sub in $topicListened")
-    for (topic <- topicListened) { topic ! TopicProtocol.Subscribe(self) }
+    //for (topic <- topicListened) { topic ! TopicProtocol.Subscribe(self) }
 
     log.debug(s"Retry pending sub in $pendingTopic")
     for (topic <- pendingTopic) { topic ! TopicProtocol.Subscribe(self) }

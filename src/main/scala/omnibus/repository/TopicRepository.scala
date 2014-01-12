@@ -40,6 +40,7 @@ class TopicRepository extends Actor with ActorLogging {
     case LookupTopicActor(topic)              => sender ! lookUpTopicWithCache(topic)
     case PublishToTopicActor(topic, message)  => publishToTopic(topic, message)
     case TopicPastStatActor(topic, replyTo)   => topicPastStat(topic, replyTo)
+    case TopicLiveStatActor(topic, replyTo)   => topicLiveStat(topic, replyTo)
     case TopicProtocol.Propagation            => log.debug("message propoagation reached TopicRepository")
   }
 
@@ -104,6 +105,16 @@ class TopicRepository extends Actor with ActorLogging {
     }
     futurResult pipeTo replyTo
   }
+
+  def topicLiveStat(topicName: String, replyTo : ActorRef) {
+    val p = promise[TopicStatisticState]
+    val futurResult= p.future
+    lookUpTopicWithCache(topicName) match {
+      case None => p.failure { new Exception(s"Error : Topic $topicName does not exist\n")}
+      case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticState])
+    }
+    futurResult pipeTo replyTo
+  }
 }
 
 object TopicRepositoryProtocol {
@@ -113,4 +124,5 @@ object TopicRepositoryProtocol {
   case class LookupTopicActor(topicName: String)
   case class PublishToTopicActor(topicName: String, message: String)
   case class TopicPastStatActor(topic: String, replyTo : ActorRef)
+  case class TopicLiveStatActor(topic: String, replyTo : ActorRef)
 }
