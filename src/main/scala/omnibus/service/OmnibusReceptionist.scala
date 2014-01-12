@@ -24,8 +24,8 @@ class OmnibusReceptionist(system: ActorSystem, omnibusService: ActorRef) {
 
   val log: Logger = LoggerFactory.getLogger("OmnibusReceptionist")
 
-  def createTopic(topic: String, message: String) = {
-    omnibusService ! OmnibusServiceProtocol.CreateTopic(topic, message)
+  def createTopic(topic: String) = {
+    omnibusService ! OmnibusServiceProtocol.CreateTopic(topic)
   }
 
   def deleteTopic(topic: String) = omnibusService ! OmnibusServiceProtocol.DeleteTopic(topic)

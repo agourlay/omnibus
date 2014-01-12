@@ -21,7 +21,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   def receive = {
-    case CreateTopic(topic, message)                     => sender ! createTopic(topic, message)
+    case CreateTopic(topic)                              => sender ! createTopic(topic)
     case DeleteTopic(topic)                              => sender ! deleteTopic(topic)
     case CheckTopic(topic)                               => checkTopic(topic, sender)
     case PublishToTopic(topic, message)                  => publishToTopic(topic, message) pipeTo sender
@@ -31,11 +31,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     case LookupTopic(topic)                              => lookupTopic(topic) pipeTo sender
   }
 
-  def createTopic(topic: String, message: String): String = {
-    topicRepo ! TopicRepositoryProtocol.CreateTopicActor(topic)
-    if (message.nonEmpty) publishToTopic(topic, message)
-    s"Topic $topic created \n"
-  }
+  def createTopic(topic: String) = topicRepo ! TopicRepositoryProtocol.CreateTopicActor(topic)
 
   def deleteTopic(topic: String): String = {
     topicRepo ! TopicRepositoryProtocol.DeleteTopicActor(topic)
@@ -43,6 +39,11 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
   }
 
   def checkTopic(topic: String, replyTo: ActorRef) = {
+    val bool = (topicRepo ? TopicRepositoryProtocol.CheckTopicActor(topic)).mapTo[Boolean]
+    bool pipeTo replyTo
+  }
+
+  def checkTopicAsString(topic: String, replyTo: ActorRef) = {
     val bool = (topicRepo ? TopicRepositoryProtocol.CheckTopicActor(topic)).mapTo[Boolean]
     bool.map(value => if (value) s"Topic $topic exists" else s"Topic $topic does not exist") pipeTo replyTo
   }
@@ -105,7 +106,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
 }
 
 object OmnibusServiceProtocol {
-  case class CreateTopic(topic: String, message: String)
+  case class CreateTopic(topic: String)
   case class DeleteTopic(topic: String)
   case class CheckTopic(topic: String)
   case class PublishToTopic(topic: String, message: String)

@@ -20,7 +20,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   implicit def executionContext = context.dispatcher
 
   var state = TopicState()
-  def updateState(msg: Message): Unit = state = state.update(msg)
+  def updateState(msg: Message): Unit = {state = state.update(msg)}
   def numEvents = state.size
 
   var subscribers: Set[ActorRef] = Set.empty[ActorRef]

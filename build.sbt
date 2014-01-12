@@ -46,6 +46,7 @@ libraryDependencies ++= {
   val logbackV    = "1.0.13"
   val specs2V     = "2.3.7"
   val scalaCheckV = "1.11.1"
+  val scalaTestV  = "2.0"
   Seq(
        "io.spray"            %   "spray-can"                      % sprayV                  withSources() 
       ,"io.spray"            %   "spray-routing"                  % sprayV                  withSources()
@@ -59,6 +60,7 @@ libraryDependencies ++= {
       ,"com.typesafe.akka"   %%  "akka-testkit"                   % akkaV        % "test"   withSources()
       ,"org.specs2"          %%  "specs2-core"                    % specs2V      % "test"   withSources()
       ,"org.scalacheck"      %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
+      ,"org.scalatest"       %%  "scalatest"                      % scalaTestV   % "test"   withSources()
   )
 }
 

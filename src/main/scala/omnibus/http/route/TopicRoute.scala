@@ -37,12 +37,25 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
 
   val route =
     path("topics" / Rest) { topic =>
-      validate(!topic.isEmpty, "topic name cannot be empty \n") {
+      validate(!topic.isEmpty, "topic name cannot be empty \n") {        
+        post { ctx =>
+          val futureExist = (omnibusService ? OmnibusServiceProtocol.CheckTopic(topic)).mapTo[Boolean]
+          futureExist.onComplete {
+            case Success(b) => {
+              if(b) ctx.complete(StatusCodes.Accepted, s"Topic $topic already exist \n")
+              else {                      
+                omnibusService ! OmnibusServiceProtocol.CreateTopic(topic)
+                ctx.complete (StatusCodes.Created, s"Topic $topic created \n") 
+              }
+            }
+            case Failure(ex) => {
+              log.info("exception occured", ex)
+              ctx.complete(StatusCodes.InternalServerError, "An unexpected error occured \n")
+            }            
+          } 
+        } ~
         entity(as[String]) { message =>
-          post { 
-            complete (StatusCodes.Created, (omnibusService ? OmnibusServiceProtocol.CreateTopic(topic, message)).mapTo[String])
-          } ~
-          put { ctx => 
+          put { ctx =>
             val future = (omnibusService ? OmnibusServiceProtocol.PublishToTopic(topic, message)).mapTo[Boolean]
             future.onComplete {
               case Success(result) => ctx.complete(s"Message published to topic $topic \n")

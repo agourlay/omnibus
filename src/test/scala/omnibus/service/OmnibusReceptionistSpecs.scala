@@ -23,14 +23,14 @@ class OmnibusReceptionistSpecs extends Specification {
 
     def createNewTopic() = {
     	val receptionist : OmnibusReceptionist = OmnibusBuilder.start()
-    	receptionist.createTopic("test/topic", "bazinga")
+    	receptionist.createTopic("test/topic")
     	receptionist.shutDownOmnibus()
     	true 
     }
 
     def deleteTopic() = {
     	val receptionist : OmnibusReceptionist = OmnibusBuilder.start()
-    	receptionist.createTopic("test/topic", "bazinga")
+    	receptionist.createTopic("test/topic")
     	receptionist.deleteTopic("test/topic")
     	receptionist.shutDownOmnibus()
     	true 
@@ -38,7 +38,7 @@ class OmnibusReceptionistSpecs extends Specification {
 
     def publishToTopic() = {
     	val receptionist : OmnibusReceptionist = OmnibusBuilder.start()
-    	receptionist.createTopic("test/topic", "")
+    	receptionist.createTopic("test/topic")
     	receptionist.publishToTopic("test/topic","push it")
     	receptionist.shutDownOmnibus()
     	true 

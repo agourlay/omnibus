@@ -19,11 +19,9 @@ Topics are trees, you can create them simply with a POST request.
 
 The root url of every topic is "/topics", this keyword is reserved.
 
-To create the nested topic "/topics/animals/furry" and directly push data on the new topic.
+Use POST to create the nested topic "/topics/animals/furry".
 
-> curl -X POST http://localhost:8080/topics/animals/furry -d "cats are the best"
-
-POST can be used without message to create an empty topic.
+> curl -X POST http://localhost:8080/topics/animals/furry
 
 With PUT it is only possible to push data to an existing topic.
 
@@ -136,7 +134,7 @@ val receptionist : OmnibusReceptionist = omnibus.service.OmnibusBuilder.start()
 This will start the Omnibus system on the given port and return an OmnibusReceptionist object that offers all the useful methods to interact with the system :
 
 ```scala
-  def createTopic(topicName : String, message : String)
+  def createTopic(topicName : String)
   def deleteTopic(topicName : String)
   def checkTopic(topicName : String) : Future[Boolean]
   def publishToTopic(topicName : String, message : String) 
