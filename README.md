@@ -98,8 +98,8 @@ Omnibus exposes usage statistics concerning all topics and the system itself fol
   - e.g  http://localhost:8080/stats/topics/customer/order/
   - e.g  http://localhost:8080/stats/system
 - `history` : get all statistics history available.
-  - e.g  http://localhost:8080/stats/topics/customer/order/
-  - e.g  http://localhost:8080/stats/system
+  - e.g  http://localhost:8080/stats/topics/customer/order/?mode=history
+  - e.g  http://localhost:8080/stats/system?mode=history
 - `streaming` : continous data stream of statistics in realtime
   - e.g  http://localhost:8080/stats/topics/customer/order?mode="streaming"
   - e.g  http://localhost:8080/stats/topics/system?mode="streaming"
