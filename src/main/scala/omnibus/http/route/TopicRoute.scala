@@ -6,6 +6,7 @@ import akka.actor._
 import spray.json._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding._
+import spray.httpx.marshalling._
 import spray.routing._
 import spray.can.Http._
 import spray.http._
@@ -57,10 +58,11 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
         entity(as[String]) { message =>
           put { ctx =>
             val future = (omnibusService ? OmnibusServiceProtocol.PublishToTopic(topic, message)).mapTo[Boolean]
-            future.onComplete {
-              case Success(result) => ctx.complete(s"Message published to topic $topic \n")
-              case Failure(result) => ctx.complete(StatusCodes.NotFound, s"topic '$topic' not found \n")
+            implicit val booleanMarshaller = Marshaller.of[Boolean](MediaTypes.`text/plain`) { (value, contentType, ctx) =>
+                  val string = if(value) s"Message published to topic $topic\n" else s"Message did not publish to topic $topic\n"
+                  ctx.marshalTo(HttpEntity(contentType, string))
             }
+            ctx.complete (future)
           }
         } ~
         parameters('mode.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveCmd) { reactiveCmd =>

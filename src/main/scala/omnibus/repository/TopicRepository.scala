@@ -61,7 +61,10 @@ class TopicRepository extends Actor with ActorLogging {
   def publishToTopic(topicName: String, message: String) = {
     lookUpTopicWithCache(topicName) match {
       case Some(topicRef) => topicRef ! TopicProtocol.PublishMessage(Message(nextEventId, topicName, message))
-      case None => log.warning(s"trying to push to non existing topic $topicName")
+      case None => {
+        log.warning(s"trying to push to non existing topic $topicName")
+        throw new TopicNotFoundException(topicName)
+      }
     }
   }
 
