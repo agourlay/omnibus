@@ -52,7 +52,7 @@ class TopicRepository extends Actor with ActorLogging {
       rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail)
     } else {
       log.debug(s"Creating new root topic $topicRoot")
-      val newRootTopic = context.actorOf(Props(classOf[Topic], topicRoot), topicRoot)
+      val newRootTopic = context.actorOf(Topic.props(topicRoot), topicRoot)
       rootTopics += (topicRoot -> newRootTopic)
       newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail)
     }
@@ -125,4 +125,9 @@ object TopicRepositoryProtocol {
   case class PublishToTopicActor(topicName: String, message: String)
   case class TopicPastStatActor(topic: String, replyTo : ActorRef)
   case class TopicLiveStatActor(topic: String, replyTo : ActorRef)
+}
+
+
+object TopicRepository {
+  def props : Props = Props(classOf[TopicRepository])
 }

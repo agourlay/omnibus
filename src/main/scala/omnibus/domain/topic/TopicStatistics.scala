@@ -76,3 +76,7 @@ object TopicStatProtocol {
   case object LiveStats
   case object PurgeOldData
 }
+
+object TopicStatistics {
+  def props(ref : ActorRef) : Props = Props(classOf[TopicStatistics], ref)
+}

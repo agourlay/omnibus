@@ -29,16 +29,16 @@ object OmnibusBuilder {
     val httpPort = Settings(system).Http.Port
 
     // parent of the topic tree 
-    val topicRepository = system.actorOf(Props(classOf[TopicRepository]), "topic-repository")
+    val topicRepository = system.actorOf(TopicRepository.props, "topic-repository")
 
     // parent of the subscriber tree
-    val subRepository = system.actorOf(Props(classOf[SubscriberRepository]), "subscriber-repository")
+    val subRepository = system.actorOf(SubscriberRepository.props, "subscriber-repository")
 
     // awesome service layer
-    val omnibusService = system.actorOf(Props(classOf[OmnibusService], topicRepository, subRepository), "omnibus-service")
+    val omnibusService = system.actorOf(OmnibusService.props(topicRepository, subRepository), "omnibus-service")
 
     // HttpService actor exposing omnibus routes
-    val omnibusHttp = system.actorOf(Props(classOf[HttpEndpoint], omnibusService), "omnibus-http")
+    val omnibusHttp = system.actorOf(HttpEndpoint.props(omnibusService), "omnibus-http")
 
     log.info(s"Omnibus starting on port $httpPort ~~> ")
 

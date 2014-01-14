@@ -37,3 +37,7 @@ class HttpEndpoint(omnibusService: ActorRef) extends HttpServiceActor with Actor
   def receive = runRoute(routes)
 
 }
+
+object HttpEndpoint {
+	def props(omnibusService: ActorRef) : Props = Props(classOf[HttpEndpoint], omnibusService)
+}

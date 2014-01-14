@@ -26,7 +26,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   var subscribers: Set[ActorRef] = Set.empty[ActorRef]
   var subTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
 
-  val statHolder = context.actorOf(Props(classOf[TopicStatistics], self))
+  val statHolder = context.actorOf(TopicStatistics.props(self))
 
   override def preStart() = {
     val myPath = self.path
@@ -158,7 +158,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
       log.debug(s"sub topic $subTopic already exists, forward to its sub topics")
       subTopics(subTopic) ! TopicProtocol.CreateSubTopic(topics)
     } else {
-      val subTopicActor = context.actorOf(Props(classOf[Topic], subTopic), subTopic)
+      val subTopicActor = context.actorOf(Topic.props(subTopic), subTopic)
       subTopics += (subTopic -> subTopicActor)
       subTopicActor ! TopicProtocol.CreateSubTopic(topics)
       // report stats
@@ -217,4 +217,5 @@ object TopicProtocol {
 object Topic {
   def prettyPath(ref: ActorRef) = ref.path.toString.split("/topic-repository").toList(1)
   
+  def props(topic: String) : Props = Props(classOf[Topic], topic)
 }

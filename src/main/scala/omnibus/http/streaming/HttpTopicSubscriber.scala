@@ -36,3 +36,7 @@ class HttpTopicSubscriber(responder: ActorRef, mode : ReactiveMode, topicsPath :
     }  
   }: Receive) orElse super.receive
 }
+
+object HttpTopicSubscriber {
+  def props(responder: ActorRef, mode : ReactiveMode, topicsPath : String) : Props = Props(classOf[HttpTopicSubscriber], responder, mode, topicsPath)
+}

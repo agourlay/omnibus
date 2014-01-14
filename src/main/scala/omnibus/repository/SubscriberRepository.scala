@@ -19,10 +19,14 @@ class SubscriberRepository extends Actor with ActorLogging {
 
   def createSub(topics: Set[ActorRef], responder: ActorRef, reactiveCmd: ReactiveCmd, http: Boolean) = {
     log.debug("Creating sub on topics " + topics)
-    context.actorOf(Props(classOf[Subscriber], responder, topics, reactiveCmd, http))
+    context.actorOf(Subscriber.props(responder, topics, reactiveCmd, http))
   }
 }
 
 object SubscriberRepositoryProtocol {
   case class CreateSub(topics: Set[ActorRef], responder: ActorRef, reactiveCmd: ReactiveCmd, http: Boolean)
+}
+
+object SubscriberRepository {
+	def props : Props = Props(classOf[SubscriberRepository])
 }

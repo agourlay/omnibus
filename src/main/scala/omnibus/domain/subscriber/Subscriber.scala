@@ -29,7 +29,7 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
 
     if (http) {
       // HttpSubscriber will proxify the responder, cool huh?
-      responder = context.actorOf(Props(classOf[HttpTopicSubscriber], responder, mode, prettyTopics))
+      responder = context.actorOf(HttpTopicSubscriber.props(responder, mode, prettyTopics))
     }
 
     // subscribe to every topic
@@ -109,4 +109,8 @@ object SubscriberProtocol {
   case object PendingAckTopic
   case object AcknowledgedTopic
   case object RefreshTopics
+}
+
+object Subscriber {
+  def props(responder: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd, http : Boolean) : Props = Props(classOf[Subscriber], responder, topics, reactiveCmd, http)
 }

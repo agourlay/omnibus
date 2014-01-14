@@ -117,3 +117,8 @@ object OmnibusServiceProtocol {
   case class TopicLiveStat(topic: String)
   case class LookupTopic(topic: String)
 }
+
+
+object OmnibusService {
+  def props(topicRepository:ActorRef, subRepository:ActorRef) : Props = Props(classOf[OmnibusService], topicRepository, subRepository)
+}
