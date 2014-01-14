@@ -12,6 +12,7 @@ import omnibus.service.OmnibusServiceProtocol._
 import omnibus.repository._
 import omnibus.configuration._
 import omnibus.domain._
+import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 
 import reflect.ClassTag
@@ -60,7 +61,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
           topicRepo ! TopicRepositoryProtocol.PublishToTopicActor(topic, message)
           p.success(true)
         } else {
-          p.failure { new Exception(s"Error : Topic $topic does not exist\n")}
+          p.failure { new TopicNotFoundException(topic)}
         }
       }
     }  

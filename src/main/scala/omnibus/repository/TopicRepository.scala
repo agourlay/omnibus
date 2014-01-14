@@ -110,7 +110,7 @@ class TopicRepository extends Actor with ActorLogging {
     val p = promise[TopicStatisticState]
     val futurResult= p.future
     lookUpTopicWithCache(topicName) match {
-      case None => p.failure { new Exception(s"Error : Topic $topicName does not exist\n")}
+      case None => p.failure { new TopicNotFoundException(topicName)}
       case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticState])
     }
     futurResult pipeTo replyTo
