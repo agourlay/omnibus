@@ -10,10 +10,12 @@ import omnibus.configuration._
 import omnibus.domain._
 import omnibus.domain.topic.TopicStatProtocol._
 
-class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Actor with ActorLogging {
+class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging {
 
   implicit val system = context.system
   implicit def executionContext = context.dispatcher
+
+  lazy val prettyPath = Topic.prettyPath(topicRef)
 
   val storageInterval = Settings(system).Statistics.StorageInterval
   val retentionTime = Settings(system).Statistics.RetentionTime
@@ -28,7 +30,7 @@ class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Ac
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, TopicStatProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, TopicStatProtocol.PurgeOldData)
-    log.debug(s"Creating new TopicStats for $topicName")
+    log.debug(s"Creating new TopicStats for $prettyPath")
   }
 
   def receive = {
@@ -46,15 +48,16 @@ class TopicStatistics(val topicName: String, val topicRef : ActorRef) extends Ac
    def liveStats() : TopicStatisticState = {
     val intervalInSec = (System.currentTimeMillis - lastMeasureMillis)  / 1000
     val throughputPerSec = messageReceived / intervalInSec
-    val currentStat = TopicStatisticState(topicName, throughputPerSec, subscribersNumber, subTopicsNumber)
+    val currentStat = TopicStatisticState(prettyPath, throughputPerSec, subscribersNumber, subTopicsNumber)
     currentStat
   }
 
   def storeStats() = {
     val throughputPerSec = messageReceived / storageInterval.toSeconds
-    val currentStat = TopicStatisticState(topicName, throughputPerSec, subscribersNumber, subTopicsNumber)
+    val currentStat = TopicStatisticState(prettyPath, throughputPerSec, subscribersNumber, subTopicsNumber)
     currentStat +=: statHistory
     messageReceived = 0
+    lastMeasureMillis = System.currentTimeMillis
   }
 
   def purgeOldData() {

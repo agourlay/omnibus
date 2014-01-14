@@ -2,7 +2,7 @@ package omnibus.domain.topic
 
 import omnibus.domain._
 
-case class TopicStatisticState(topicName: String, throughputPerSec : Long, subscribersNumber: Long, subTopicsNumber : Long,
+case class TopicStatisticState(topic:String, throughputPerSec : Long, subscribersNumber: Long, subTopicsNumber : Long,
                                timestamp: Long = System.currentTimeMillis / 1000)
 
 case class TopicState(events: List[Message] = Nil) {

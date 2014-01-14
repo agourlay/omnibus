@@ -97,9 +97,7 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
   }
 
   def prettySubscription(topicToDisplay: Set[ActorRef]): String = {
-    val setOfTopic = topicToDisplay.map(_.path)
-      .map(_.toString)
-      .map(_.split("/topic-repository").toList(1))
+    val setOfTopic = topicToDisplay.map(Topic.prettyPath(_))
     setOfTopic.mkString(" + ")
   }
 }

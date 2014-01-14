@@ -26,7 +26,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   var subscribers: Set[ActorRef] = Set.empty[ActorRef]
   var subTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
 
-  val statHolder = context.actorOf(Props(classOf[TopicStatistics], topic, self))
+  val statHolder = context.actorOf(Props(classOf[TopicStatistics], self))
 
   override def preStart() = {
     val myPath = self.path
@@ -212,4 +212,9 @@ object TopicProtocol {
   // container used to propagate operation in topic tree
   case class Propagation(message: TopicProtocol.Operation, direction: PropagationDirection)
   trait Operation{}
+}
+
+object Topic {
+  def prettyPath(ref: ActorRef) = ref.path.toString.split("/topic-repository").toList(1)
+  
 }
