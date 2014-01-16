@@ -94,15 +94,15 @@ Of course you are free to use reactive modes on composed subscriptions. Just be 
 
 Omnibus exposes usage statistics concerning all topics and the system itself following two modes.
 
-- `live` : get the current statistics.
+- `live` : get the current statistics. (default mode)
   - e.g  http://localhost:8080/stats/topics/customer/order/
   - e.g  http://localhost:8080/stats/system
 - `history` : get all statistics history available.
   - e.g  http://localhost:8080/stats/topics/customer/order/?mode=history
   - e.g  http://localhost:8080/stats/system?mode=history
 - `streaming` : continous data stream of statistics in realtime
-  - e.g  http://localhost:8080/stats/topics/customer/order?mode="streaming"
-  - e.g  http://localhost:8080/stats/topics/system?mode="streaming"
+  - e.g  http://localhost:8080/stats/topics/customer/order?mode=streaming
+  - e.g  http://localhost:8080/stats/topics/system?mode=streaming
 
 ## Usage and installation
 

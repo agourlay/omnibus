@@ -24,6 +24,7 @@ import reflect.ClassTag
 import omnibus.http.JsonSupport._
 import omnibus.http.streaming._
 import omnibus.domain.topic._
+import omnibus.domain.topic.StatisticsMode._
 import omnibus.repository._
 import omnibus.configuration._
 import omnibus.service._
@@ -38,7 +39,7 @@ class StatsRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
 
   val route =
     pathPrefix("stats") {
-      parameters('mode.as[String] ? "live"){ mode =>
+      parameters('mode.as[StatisticsMode] ? StatisticsMode.LIVE){ mode =>
         path("system") {
           get { ctx =>
             log.info(s"Sending server stats with $mode")
@@ -51,9 +52,9 @@ class StatsRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
               get { ctx =>
                 log.info(s"Sending stats from topic $topic with $mode")
                 mode match {
-                  case "live"      => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicLiveStat(topic)).mapTo[TopicStatisticState])
-                  case "history"   => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicPastStat(topic)).mapTo[List[TopicStatisticState]])
-                  case "streaming" => {
+                  case StatisticsMode.LIVE      => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicLiveStat(topic)).mapTo[TopicStatisticState])
+                  case StatisticsMode.HISTORY   => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicPastStat(topic)).mapTo[List[TopicStatisticState]])
+                  case StatisticsMode.STREAMING => {
                     val f = (omnibusService ? OmnibusServiceProtocol.LookupTopic(topic)).mapTo[Option[ActorRef]]
                     f.onComplete {
                       case Failure(result) => ctx.complete(s"Something wrong happened... \n")
