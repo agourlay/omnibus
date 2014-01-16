@@ -8,7 +8,6 @@ import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding._
 import spray.routing._
 import spray.can.Http
-import spray.can.server.Stats
 import spray.routing.authentication._
 
 import org.slf4j.Logger
@@ -39,7 +38,7 @@ class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
 
   val route =
     pathPrefix("admin") {
-      authenticate(BasicAuth(adminPassAuthenticator _, realm = "secure site")) { userName =>
+      authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
         path("topics" / Rest) { topic =>
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
             delete {
@@ -51,11 +50,4 @@ class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
         }
       }
     }  
-
-  def adminPassAuthenticator(userPass: Option[UserPass]): Future[Option[String]] =
-  Future {
-    if (userPass.exists(up => up.user == Settings(system).Admin.Name && up.pass == Settings(system).Admin.Password))
-      Some(Settings(system).Admin.Name)
-    else None
-  }
 }

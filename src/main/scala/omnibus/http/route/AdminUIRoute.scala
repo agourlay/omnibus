@@ -8,7 +8,8 @@ import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding._
 import spray.routing._
 import spray.can.Http
-import spray.can.server.Stats
+import spray.routing.authentication._
+import spray.routing.directives.CachingDirectives._
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,13 +31,21 @@ class AdminUIRoute(implicit context: ActorContext) extends Directives {
 
   val log: Logger = LoggerFactory.getLogger("omnibus.route.adminUI")
 
+  val simpleCache = routeCache(maxCapacity = 500)
+
   val route = 
-    path(""){
+    authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
+      path(""){
+         cache(simpleCache) {
+            encodeResponse(Gzip){
+              getFromResource("frontend/web/index.html")   
+          }
+        }
+      } ~
+      cache(simpleCache) {
         encodeResponse(Gzip){
-          getFromResource("frontend/web/index.html")   
-      }
-    } ~
-	  encodeResponse(Gzip){
-	    getFromResourceDirectory("frontend/web")
+          getFromResourceDirectory("frontend/web")
+        }
+      }  
     }    
 }

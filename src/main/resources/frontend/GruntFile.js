@@ -19,18 +19,22 @@ module.exports = function(grunt) {
           "web/bower_components/jquery/jquery.min.js",
           "web/bower_components/handlebars/handlebars.runtime.min.js",
           "web/bower_components/ember/ember.min.js",
+          "web/bower_components/bootstrap/dist/js/bootstrap.min.js",
           "web/bower_components/momentjs/min/moment.min.js",
           "web/bower_components/store.js/store.min.js",
           "web/bower_components/typeahead.js/dist/typeahead.min.js",
           "web/bower_components/nprogress/nprogress.js",
           "web/bower_components/jquery-ui/ui/minified/jquery-ui.min.js",
           "web/bower_components/bacon/dist/Bacon.min.js",
+          "web/bower_components/rickshaw/rickshaw.min.js"
         ],
         dest: 'web/dist/libs.min.js'
       },
       libcss : {
         src : [
+          "web/bower_components/bootstrap/dist/css/bootstrap.min.css",
           "web/bower_components/nprogress/nprogress.css",
+          "web/bower_components/rickshaw/rickshaw.min.css"
         ],
         dest : 'web/dist/libs.min.css'
       }
@@ -39,7 +43,10 @@ module.exports = function(grunt) {
       js: {
         files: {
           'web/dist/omnibus.min.js': [
-            "web/dist/templates.js"
+            "web/dist/templates.js",
+            "web/js/app.js",
+            "web/js/dao.js",
+            "web/js/router.js"
           ]
         }
       }
