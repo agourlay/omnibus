@@ -36,17 +36,17 @@ class HttpEndpoint(omnibusService: ActorRef) extends HttpServiceActor with Actor
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   implicit def myExceptionHandler(implicit log: LoggingContext) = ExceptionHandler {
-	case e : TopicNotFoundException  =>
-	requestUri { uri =>
-        log.warning("Request to {} could not be handled normally; topic does not exist", uri)
-	    complete(StatusCodes.NotFound, s"No topic ${e.topicName} found; please retry later or check topic name correctness !!!\n")
-	}
-	case e : Exception  =>
-	requestUri { uri =>
-        log.warning("Request to {} could not be handled normally; unknown exception", uri)
-        log.error("unknown exception : ", e)
-	    complete(StatusCodes.InternalServerError, "An unexpected error occured \n")
-	}
+  	case e : TopicNotFoundException  =>
+  	requestUri { uri =>
+      log.warning("Request to {} could not be handled normally; topic does not exist", uri)
+  	  complete(StatusCodes.NotFound, s"No topic ${e.topicName} found; please retry later or check topic name correctness !!!\n")
+  	}
+  	case e : Exception  =>
+  	requestUri { uri =>
+      log.warning("Request to {} could not be handled normally; unknown exception", uri)
+      log.error("unknown exception : ", e)
+  	  complete(StatusCodes.InternalServerError, "An unexpected error occured \n")
+  	}
   }
 
   val routes =

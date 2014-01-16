@@ -130,13 +130,13 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   def subscribe(subscriber: ActorRef) = {
-    context.watch(subscriber)
-    subscribers += subscriber
-    subscriber ! SubscriberProtocol.AcknowledgeSub(self)
-    // subscribe to all subtopics by default
-    subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.Subscribe(subscriber) }
-    // report stats
-    statHolder ! TopicStatProtocol.SubscriberAdded
+    if (!subscribers.contains(subscriber)){
+      context.watch(subscriber)
+      subscribers += subscriber
+      subscriber ! SubscriberProtocol.AcknowledgeSub(self)
+      // report stats
+      statHolder ! TopicStatProtocol.SubscriberAdded
+    }
   }
 
   def unsubscribe(subscriber: ActorRef) = {
