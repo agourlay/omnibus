@@ -10,7 +10,7 @@ import spray.httpx.marshalling._
 import spray.routing._
 import spray.can.Http._
 import spray.http._
-import spray.can.server.Stats
+import HttpHeaders._
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -42,11 +42,11 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
         post { ctx =>
           val futureExist = (omnibusService ? OmnibusServiceProtocol.CheckTopic(topic)).mapTo[Boolean]
           futureExist.onComplete {
-            case Success(b) => {
-              if(b) ctx.complete(StatusCodes.Accepted, s"Topic $topic already exist \n")
+            case Success(exists) => {
+              if(exists) complete(StatusCodes.Accepted, Location(ctx.request.uri):: Nil, s"Topic $topic already exist \n")
               else {                      
                 omnibusService ! OmnibusServiceProtocol.CreateTopic(topic)
-                ctx.complete (StatusCodes.Created, s"Topic $topic created \n") 
+                ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $topic created \n") 
               }
             }
             case Failure(ex) => {
@@ -58,6 +58,7 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
         entity(as[String]) { message =>
           put { ctx =>
             val future = (omnibusService ? OmnibusServiceProtocol.PublishToTopic(topic, message)).mapTo[Boolean]
+            //TODO clean this, it is ugly here
             implicit val booleanMarshaller = Marshaller.of[Boolean](MediaTypes.`text/plain`) { (value, contentType, ctx) =>
                   val string = if(value) s"Message published to topic $topic\n" else s"Message did not publish to topic $topic\n"
                   ctx.marshalTo(HttpEntity(contentType, string))
