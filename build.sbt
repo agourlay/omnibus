@@ -47,14 +47,20 @@ libraryDependencies ++= {
   val specs2V     = "2.3.7"
   val scalaCheckV = "1.11.1"
   val scalaTestV  = "2.0.1-SNAP4"
+  val akkaHbaseV  = "0.2"
+  val akkaMongoV  = "0.1-SNAPSHOT"
+  val akkaCassanV = "0.1-SNAPSHOT"
   Seq(
        "io.spray"            %   "spray-can"                      % sprayV                  withSources() 
       ,"io.spray"            %   "spray-routing"                  % sprayV                  withSources()
       ,"io.spray"            %   "spray-caching"                  % sprayV                  withSources()
       ,"io.spray"            %%  "spray-json"                     % sprayJsonV              withSources()
       ,"com.typesafe.akka"   %%  "akka-actor"                     % akkaV                   withSources()
-      ,"com.typesafe.akka"   %%  "akka-persistence-experimental"  % akkaV                   withSources()
       ,"com.typesafe.akka"   %%  "akka-slf4j"                     % akkaV                   withSources()
+      ,"com.typesafe.akka"   %%  "akka-persistence-experimental"  % akkaV                   withSources()
+      ,"pl.project13.scala"  %%  "akka-persistence-hbase"         % akkaHbaseV              withSources()   exclude("org.slf4j", "slf4j-log4j12")
+    //,"com.github.krasserm" %%  "akka-persistence-cassandra"     % akkaCassanV             withSources()
+    //,"com.github.ddevore"  %%  "akka-persistence-mongo"         % akkaMongoV              withSources()
       ,"ch.qos.logback"      %   "logback-classic"                % logbackV                withSources()
       ,"io.spray"            %   "spray-testkit"                  % sprayV       % "test"   withSources()
       ,"com.typesafe.akka"   %%  "akka-testkit"                   % akkaV        % "test"   withSources()
