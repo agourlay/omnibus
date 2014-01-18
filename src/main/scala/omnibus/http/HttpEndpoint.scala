@@ -31,7 +31,6 @@ import omnibus.service.OmnibusServiceProtocol._
 
 class HttpEndpoint(omnibusService: ActorRef) extends HttpServiceActor with ActorLogging {
 
-
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 

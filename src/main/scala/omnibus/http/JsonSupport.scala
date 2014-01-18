@@ -21,11 +21,11 @@ object JsonSupport {
 
   implicit val formatTopicView = new RootJsonFormat[TopicView] {
     def write(obj: TopicView): JsValue = JsObject(
-      "topic"              -> JsString(obj.topic),
+      "topic"              -> JsArray(obj.topic.split("/").tail.map(JsString(_)).toList),
       "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
       "viewDate"           -> JsNumber(obj.viewDate),  
       "_embedded"          -> JsObject("children" -> JsArray(
-        obj.children.map( child => JsObject( child ->  JsObject("href" -> JsString("/topics"+child)))).toList
+        obj.children.map( child => JsObject( child.split("/").last ->  JsObject("href" -> JsString("/topics"+child)))).toList
         )
       ),
       "_links"             -> JsArray(
