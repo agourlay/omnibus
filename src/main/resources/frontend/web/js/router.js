@@ -5,13 +5,13 @@ App.Router.map(function() {
     this.resource('system');
 });
 
-App.FridgeRoute = Ember.Route.extend({
+App.TopicRoute = Ember.Route.extend({
 	model: function(params) {
 		return App.Dao.topic(params.topic_id);
   	}
 });
 
-App.FridgesRoute = Ember.Route.extend({
+App.TopicsRoute = Ember.Route.extend({
 	model: function() {
 		return App.Dao.topics();
   	}
