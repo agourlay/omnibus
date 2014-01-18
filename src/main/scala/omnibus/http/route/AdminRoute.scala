@@ -51,6 +51,7 @@ class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
         path("leaves") {
           get { ctx =>
             omnibusService ! OmnibusServiceProtocol.AllLeaves(ctx.responder)
+            context.system.scheduler.scheduleOnce(10.seconds){ctx.complete("Connection closes")}
           }
         }
       }
