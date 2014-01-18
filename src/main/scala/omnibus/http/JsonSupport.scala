@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration._
 
 import spray.json._
+import spray.http.Uri
 import spray.can.server.Stats
 import DefaultJsonProtocol._
 
@@ -16,9 +17,24 @@ import omnibus.domain.topic._
 
 object JsonSupport {
   implicit val formatMessage = jsonFormat4(Message)
-  // TODO create RootJsonFormat[TopicView] to return the stream url
-  implicit val formatTopicView = jsonFormat4(TopicView)
   implicit val formatTopicStats = jsonFormat5(TopicStatisticState)
+
+  implicit val formatTopicView = new RootJsonFormat[TopicView] {
+    def write(obj: TopicView): JsValue = JsObject(
+      "topic"              -> JsString(obj.topic),
+      "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
+      "children"           -> JsArray(obj.children.map(JsString(_)).toList),
+      "_links"             -> JsArray(
+        JsObject("subscribe" -> JsObject("href" -> JsString("/stream/topics"+obj.topic))),
+        JsObject("stats"     -> JsObject("href" -> JsString("/stats/topics"+obj.topic)))
+      ),
+      "viewDate"           -> JsNumber(obj.viewDate)  
+    )
+
+    // we don't need to deserialize the view
+    def read(json: JsValue): TopicView = ???
+  }  
+
   implicit val formatHttpServerStats = new RootJsonFormat[Stats] {
     def write(obj: Stats): JsValue = JsObject(
       "uptimeInMilli"      -> JsNumber(obj.uptime.toMillis),
