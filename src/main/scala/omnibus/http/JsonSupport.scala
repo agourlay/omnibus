@@ -23,12 +23,13 @@ object JsonSupport {
     def write(obj: TopicView): JsValue = JsObject(
       "topic"              -> JsString(obj.topic),
       "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
-      "children"           -> JsArray(obj.children.map(JsString(_)).toList),
+      "viewDate"           -> JsNumber(obj.viewDate),  
+      "_embedded"          -> JsObject("children" -> JsArray(obj.children.map(JsString(_)).toList)),
       "_links"             -> JsArray(
+        JsObject("self"      -> JsObject("href" -> JsString("/topics"+obj.topic))),
         JsObject("subscribe" -> JsObject("href" -> JsString("/stream/topics"+obj.topic))),
         JsObject("stats"     -> JsObject("href" -> JsString("/stats/topics"+obj.topic)))
-      ),
-      "viewDate"           -> JsNumber(obj.viewDate)  
+      )
     )
 
     // we don't need to deserialize the view
