@@ -11,6 +11,7 @@ import spray.routing._
 import spray.can.Http._
 import spray.http._
 import HttpHeaders._
+import MediaTypes._
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,12 +38,22 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
 
   val log: Logger = LoggerFactory.getLogger("omnibus.route.topic")
 
+  lazy val HALType = register(
+    MediaType.custom(
+      mainType = "application",
+      subType = "hal+json",
+      compressible = false,
+      binary = false
+     ))
+
   val route =
     path("topics" / Rest) { topic =>  
       get {
-        complete {
-          if (topic.isEmpty) (omnibusService ? OmnibusServiceProtocol.AllRoots).mapTo[List[TopicView]]
-          else (omnibusService ? OmnibusServiceProtocol.ViewTopic(topic)).mapTo[TopicView]
+        respondWithMediaType(HALType) {
+          complete {
+            if (topic.isEmpty) (omnibusService ? OmnibusServiceProtocol.AllRoots).mapTo[List[TopicView]]
+            else (omnibusService ? OmnibusServiceProtocol.ViewTopic(topic)).mapTo[TopicView]
+          }
         }
       } ~
       post { ctx =>

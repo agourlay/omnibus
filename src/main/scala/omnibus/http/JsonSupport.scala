@@ -24,7 +24,10 @@ object JsonSupport {
       "topic"              -> JsString(obj.topic),
       "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
       "viewDate"           -> JsNumber(obj.viewDate),  
-      "_embedded"          -> JsObject("children" -> JsArray(obj.children.map(JsString(_)).toList)),
+      "_embedded"          -> JsObject("children" -> JsArray(
+        obj.children.map( child => JsObject( child ->  JsObject("href" -> JsString("/topics"+child)))).toList
+        )
+      ),
       "_links"             -> JsArray(
         JsObject("self"      -> JsObject("href" -> JsString("/topics"+obj.topic))),
         JsObject("subscribe" -> JsObject("href" -> JsString("/stream/topics"+obj.topic))),
