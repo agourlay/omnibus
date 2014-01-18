@@ -47,6 +47,11 @@ class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
               }
             }
           }
+        } ~ 
+        path("leaves") {
+          get { ctx =>
+            omnibusService ! OmnibusServiceProtocol.AllLeaves(ctx.responder)
+          }
         }
       }
     }  

@@ -41,7 +41,7 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
     path("topics" / Rest) { topic =>  
       get {
         complete {
-          if (topic.isEmpty) (omnibusService ? OmnibusServiceProtocol.AllLeaves).mapTo[List[TopicView]]
+          if (topic.isEmpty) (omnibusService ? OmnibusServiceProtocol.AllRoots).mapTo[List[TopicView]]
           else (omnibusService ? OmnibusServiceProtocol.ViewTopic(topic)).mapTo[TopicView]
         }
       } ~

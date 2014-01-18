@@ -54,6 +54,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     case BetweenTS(refSub, startTs, endTs)   => forwardMessagesBetweenTS(refSub, startTs, endTs)
     case SetupReactiveMode(refSub, reactCmd) => setupReactiveMode(refSub, reactCmd)
     case Delete                              => deleteTopic()
+    case Leaves(replyTo)                     => leaves(replyTo)
     case View                                => sender ! view()
 
     case Propagation(operation, direction)   => handlePropagation(operation, direction)
@@ -68,6 +69,11 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     val prettyChildren = subTopics.values.map(Topic.prettyPath(_)).toSeq
     TopicView(prettyPath, subTopicNumber, prettyChildren)
   }
+
+  def leaves(replyTo : ActorRef) {
+    if (subTopics.isEmpty) replyTo ! view()
+    else for(sub <- subTopics.values) sub ! TopicProtocol.Leaves(replyTo)
+  }  
 
   def deleteTopic() {
     val lastIdSeen = state.events.head.id
@@ -206,6 +212,7 @@ object TopicProtocol {
   case class Subscribe(subscriber: ActorRef) extends Operation
   case class Unsubscribe(subscriber: ActorRef) extends Operation
   case class CreateSubTopic(topics: List[String])
+  case class Leaves(replyTo : ActorRef)
   case object SubscriberNumber
   case object Delete
   case object View

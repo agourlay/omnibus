@@ -32,7 +32,8 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     case TopicLiveStat(topic)                            => topicRepo ! TopicRepositoryProtocol.TopicLiveStatActor(topic, sender)
     case LookupTopic(topic)                              => lookupTopic(topic) pipeTo sender
     case ViewTopic(topic)                                => topicRepo ! TopicRepositoryProtocol.TopicViewActor(topic, sender)
-    case AllLeaves                                       => ??? //aggregate all topic views
+    case AllLeaves(replyTo)                              => topicRepo ! TopicRepositoryProtocol.AllLeavesActor(replyTo)
+    case AllRoots                                        => topicRepo ! TopicRepositoryProtocol.AllRootsActor(sender)
   }
 
   def createTopic(topic: String) = topicRepo ! TopicRepositoryProtocol.CreateTopicActor(topic)
@@ -120,7 +121,8 @@ object OmnibusServiceProtocol {
   case class TopicLiveStat(topic: String)
   case class LookupTopic(topic: String)
   case class ViewTopic(topic: String)
-  case object AllLeaves
+  case class AllLeaves(replyTo : ActorRef)
+  case object AllRoots
 }
 
 

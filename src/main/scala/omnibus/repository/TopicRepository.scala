@@ -14,6 +14,7 @@ import spray.caching.{ LruCache, Cache }
 import omnibus.domain._
 import omnibus.configuration._
 import omnibus.domain.topic._
+import omnibus.http.streaming.HttpTopicViewStream
 import omnibus.repository.TopicRepositoryProtocol._
 
 class TopicRepository extends Actor with ActorLogging {
@@ -42,6 +43,8 @@ class TopicRepository extends Actor with ActorLogging {
     case TopicPastStatActor(topic, replyTo)   => topicPastStat(topic, replyTo)
     case TopicLiveStatActor(topic, replyTo)   => topicLiveStat(topic, replyTo)
     case TopicViewActor(topic, replyTo)       => topicView(topic, replyTo)
+    case AllLeavesActor(replyTo)              => allLeaves(replyTo)
+    case AllRootsActor(replyTo)               => allRoots(replyTo)
     case TopicProtocol.Propagation            => log.debug("message propagation reached TopicRepository")
   }
 
@@ -129,6 +132,16 @@ class TopicRepository extends Actor with ActorLogging {
     }
     futurResult pipeTo replyTo
   }  
+
+  def allLeaves(replyTo : ActorRef) {
+    context.actorOf(HttpTopicViewStream.props(replyTo, rootTopics.values.toList))
+  }
+
+  def allRoots(replyTo : ActorRef) {
+    val actorTopics = rootTopics.values
+    val results = for (topic <- rootTopics.values) yield (topic ? TopicProtocol.View).mapTo[TopicView]
+    Future.sequence(results) pipeTo replyTo
+  }
 }
 
 object TopicRepositoryProtocol {
@@ -140,6 +153,8 @@ object TopicRepositoryProtocol {
   case class TopicPastStatActor(topic: String, replyTo : ActorRef)
   case class TopicLiveStatActor(topic: String, replyTo : ActorRef)
   case class TopicViewActor(topic: String, replyTo : ActorRef)
+  case class AllLeavesActor(replyTo : ActorRef)
+  case class AllRootsActor(replyTo : ActorRef)
 }
 
 
