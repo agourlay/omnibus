@@ -1,4 +1,3 @@
-//TopicNotFoundException
 package omnibus.domain.topic
 
 

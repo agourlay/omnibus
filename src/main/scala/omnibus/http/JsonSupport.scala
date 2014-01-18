@@ -12,10 +12,12 @@ import spray.can.server.Stats
 import DefaultJsonProtocol._
 
 import omnibus.domain._
-import omnibus.domain.topic.TopicStatisticState
+import omnibus.domain.topic._
 
 object JsonSupport {
   implicit val formatMessage = jsonFormat4(Message)
+  // TODO create RootJsonFormat[TopicView] to return the stream url
+  implicit val formatTopicView = jsonFormat4(TopicView)
   implicit val formatTopicStats = jsonFormat5(TopicStatisticState)
   implicit val formatHttpServerStats = new RootJsonFormat[Stats] {
     def write(obj: Stats): JsValue = JsObject(

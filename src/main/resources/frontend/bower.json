@@ -26,8 +26,8 @@
     "nprogress" : "0.1.2",
     "rickshaw" : "1.4.6",
     "font-awesome": "4.0.3",
-    "d3" : "3.4",
-    "bacon" : "0.7.0"
+    "d3" : "3.4.1",
+    "bacon" : "0.7.1"
   },
   "resolutions": {
     "jquery": "2.0.3"

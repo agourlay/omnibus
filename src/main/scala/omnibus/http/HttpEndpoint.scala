@@ -39,7 +39,7 @@ class HttpEndpoint(omnibusService: ActorRef) extends HttpServiceActor with Actor
   	case e : TopicNotFoundException  =>
   	requestUri { uri =>
       log.warning("Request to {} could not be handled normally; topic does not exist", uri)
-  	  complete(StatusCodes.NotFound, s"No topic ${e.topicName} found; please retry later or check topic name correctness !!!\n")
+  	  complete(StatusCodes.NotFound, s"Topic ${e.topicName} not found; please retry later or check topic name correctness\n")
   	}
   	case e : Exception  =>
   	requestUri { uri =>

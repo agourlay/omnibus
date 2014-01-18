@@ -41,7 +41,8 @@ class TopicRepository extends Actor with ActorLogging {
     case PublishToTopicActor(topic, message)  => publishToTopic(topic, message)
     case TopicPastStatActor(topic, replyTo)   => topicPastStat(topic, replyTo)
     case TopicLiveStatActor(topic, replyTo)   => topicLiveStat(topic, replyTo)
-    case TopicProtocol.Propagation            => log.debug("message propoagation reached TopicRepository")
+    case TopicViewActor(topic, replyTo)       => topicView(topic, replyTo)
+    case TopicProtocol.Propagation            => log.debug("message propagation reached TopicRepository")
   }
 
   def createTopic(topicName: String) = {
@@ -118,6 +119,16 @@ class TopicRepository extends Actor with ActorLogging {
     }
     futurResult pipeTo replyTo
   }
+
+  def topicView(topicName: String, replyTo : ActorRef) {
+    val p = promise[TopicView]
+    val futurResult= p.future
+    lookUpTopicWithCache(topicName) match {
+      case None => p.failure { new TopicNotFoundException(topicName)}
+      case Some(topicRef) => p.completeWith((topicRef ? TopicProtocol.View).mapTo[TopicView])
+    }
+    futurResult pipeTo replyTo
+  }  
 }
 
 object TopicRepositoryProtocol {
@@ -128,6 +139,7 @@ object TopicRepositoryProtocol {
   case class PublishToTopicActor(topicName: String, message: String)
   case class TopicPastStatActor(topic: String, replyTo : ActorRef)
   case class TopicLiveStatActor(topic: String, replyTo : ActorRef)
+  case class TopicViewActor(topic: String, replyTo : ActorRef)
 }
 
 
