@@ -42,15 +42,18 @@ class StatsRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
       parameters('mode.as[StatisticsMode] ? StatisticsMode.LIVE){ mode =>
         path("system") {
           get { ctx =>
-            log.info(s"Sending server stats with $mode")
-            if (mode == "streaming") context.actorOf(Props(new HttpStatStream(ctx.responder)))
-            else ctx.complete ((context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats])
+            log.debug(s"Sending system stats with $mode")
+              mode match {
+                case StatisticsMode.LIVE      => ctx.complete ((context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats])
+                case StatisticsMode.HISTORY   => ctx.complete("implementation missing \n") // TODO aggregate system stats
+                case StatisticsMode.STREAMING => context.actorOf(Props(new HttpStatStream(ctx.responder)))
+              }
             }
           } ~
           path("topics" / Rest) { topic =>
             validate(!topic.isEmpty, "topic name cannot be empty \n") {
               get { ctx =>
-                log.info(s"Sending stats from topic $topic with $mode")
+                log.debug(s"Sending stats from topic $topic with $mode")
                 mode match {
                   case StatisticsMode.LIVE      => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicLiveStat(topic)).mapTo[TopicStatisticState])
                   case StatisticsMode.HISTORY   => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicPastStat(topic)).mapTo[List[TopicStatisticState]])

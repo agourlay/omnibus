@@ -154,8 +154,6 @@ omnibus.domain.Message(id : Long, topicName : String, payload : String, timestam
 
 ### Optimistic roadmap
 
-- [ ] provide minimal administration interface with statistics per topics 
-
 - [ ] support properly Server-Sent-Event specification (Last-Event-Id header...)
 
 - [ ] deploy bus in cluster (akka-cluster)
