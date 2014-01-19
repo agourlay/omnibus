@@ -67,7 +67,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     val prettyPath = Topic.prettyPath(self)
     val subTopicNumber = subTopics.size
     val prettyChildren = subTopics.values.map(Topic.prettyPath(_)).toSeq
-    TopicView(prettyPath, subTopicNumber, prettyChildren)
+    TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents)
   }
 
   def leaves(replyTo : ActorRef) {

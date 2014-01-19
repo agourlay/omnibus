@@ -6,4 +6,6 @@ import omnibus.domain._
 case class TopicView(topic:String
 	               , subTopicsNumber : Long
 	               , children : Seq[String]
+	               , subscribersNumber : Long
+	               , numEvents : Long
 	               , viewDate: Long = System.currentTimeMillis / 1000)

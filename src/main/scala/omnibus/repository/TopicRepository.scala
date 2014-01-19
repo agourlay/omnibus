@@ -24,7 +24,7 @@ class TopicRepository extends Actor with ActorLogging {
 
   var rootTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
 
-  var _seqEventId = 0L
+  var _seqEventId = 1L
   def nextEventId = {
     val ret = _seqEventId
     _seqEventId += 1

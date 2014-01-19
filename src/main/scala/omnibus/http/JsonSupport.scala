@@ -23,6 +23,8 @@ object JsonSupport {
     def write(obj: TopicView): JsValue = JsObject(
       "topic"              -> JsArray(obj.topic.split("/").tail.map(JsString(_)).toList),
       "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
+      "subscribersNumber"  -> JsNumber(obj.subscribersNumber),
+      "eventsNumber"       -> JsNumber(obj.numEvents),
       "viewDate"           -> JsNumber(obj.viewDate),  
       "_embedded"          -> JsObject("children" -> JsArray(
         obj.children.map( child => JsObject( child.split("/").last ->  JsObject("href" -> JsString("/topics"+child)))).toList
