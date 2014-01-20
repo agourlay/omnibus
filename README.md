@@ -23,11 +23,17 @@ Topics are trees, you can create them simply with a POST request.
 
 The root url of every topic is "/topics", this keyword is reserved.
 
+> curl -X GET http://localhost:8080/topics/
+```json
+[]
+```
+We received the empty collection of roots.
+
 Use POST to create the nested topic "/topics/animals/furry".
 
 > curl -X POST http://localhost:8080/topics/animals/furry
 
-If you want to retrieve information about a topic use GET
+We can now retrieve informations about the topic we just created using GET
 
 > curl -X GET http://localhost:8080/topics/animals
 ```json
@@ -60,15 +66,15 @@ If you want to retrieve information about a topic use GET
 }
 ``` 
 
-You get there all the informations you need about the topic and its subtopics.
+You get there almost all the informations you need to interact with a topic in a REST fashion way.
 
-You can then interact with the topic in a REST fashion way.
-
-With PUT it is only possible to push data to an existing topic.
+With PUT you can push data to an existing topic.
 
 > curl -X PUT http://localhost:8080/topics/animals -d "dolphins are the best"
 
 If you publish a message at the "/animals" level, all subtopics will receive it as well.
+
+It is possible to DELETE a topic and all its subtopics via a password protected administration API. 
 
 And finally you can subscribe to the notifications on a topic.
 
@@ -78,7 +84,6 @@ And finally you can subscribe to the notifications on a topic.
 
 When you subscribe to a topic, you will of course receive all the notifications targetting its sub topics.
 
-It is possible to DELETE a topic and all its subtopic through a password protected administration API. 
 
 ## Reactive modes
 
@@ -140,7 +145,7 @@ Omnibus exposes usage statistics concerning all topics and the system itself fol
   - e.g  http://localhost:8080/stats/system
 - `history` : get all statistics history available. (you can configure retention time)
   - e.g  http://localhost:8080/stats/topics/customer/order/?mode=history
-  - e.g  http://localhost:8080/stats/system?mode=history
+  - e.g  http://localhost:8080/stats/system?mode=history (not yet available on system)
 - `streaming` : continous data stream of statistics in realtime
   - e.g  http://localhost:8080/stats/topics/customer/order?mode=streaming
   - e.g  http://localhost:8080/stats/topics/system?mode=streaming
@@ -159,9 +164,9 @@ java -jar omnibus-standalone.jar &
 
 This starts Omnibus on default port 8080.
 
-### As an embedded library.
+### As an embedded library (experimental)
 
-It is possible to integrate Omnibus in an existing Akka application. (This API is still experimental)
+It is possible to integrate Omnibus in an existing Akka application.
 
 Add the latest omnibus.jar to your application by building from source with sbt `publishLocal`
 

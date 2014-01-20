@@ -58,7 +58,7 @@ libraryDependencies ++= {
       ,"com.typesafe.akka"   %%  "akka-actor"                     % akkaV                   withSources()
       ,"com.typesafe.akka"   %%  "akka-slf4j"                     % akkaV                   withSources()
       ,"com.typesafe.akka"   %%  "akka-persistence-experimental"  % akkaV                   withSources()
-      ,"pl.project13.scala"  %%  "akka-persistence-hbase"         % akkaHbaseV              withSources()   exclude("org.slf4j", "slf4j-log4j12")
+    //,"pl.project13.scala"  %%  "akka-persistence-hbase"         % akkaHbaseV              withSources()   exclude("org.slf4j", "slf4j-log4j12")
     //,"com.github.krasserm" %%  "akka-persistence-cassandra"     % akkaCassanV             withSources()
     //,"com.github.ddevore"  %%  "akka-persistence-mongo"         % akkaMongoV              withSources()
       ,"ch.qos.logback"      %   "logback-classic"                % logbackV                withSources()
