@@ -11,9 +11,13 @@ Omnibus is an HTTP-friendly reactive message bus which means :
 
 **This is still a work in progress, any API is likely to change** 
  
-## Classic bus features
+## REST & Hypertext Application Language
 
-Let's demonstrate some basic commands using Curl.
+Omnibus follows the [HAL JSON](http://stateless.co/hal_specification.html) to exposes its resources. 
+
+It simply means that the REST API is easily discoverable.
+
+Let's demonstrate what it means with some basic commands using CURL.
 
 Topics are trees, you can create them simply with a POST request.
 
@@ -23,6 +27,43 @@ Use POST to create the nested topic "/topics/animals/furry".
 
 > curl -X POST http://localhost:8080/topics/animals/furry
 
+If you want to retrieve information about a topic use GET
+
+> curl -X GET http://localhost:8080/topics/animals
+```json
+{
+  "topic": ["animals"],
+  "subTopicsNumber": 1,
+  "subscribersNumber": 0,
+  "eventsNumber": 0,
+  "viewDate": 1390212364,
+  "_embedded": {
+    "children": [{
+      "furry": {
+        "href": "/topics/animals/furry"
+      }
+    }]
+  },
+  "_links": [{
+    "self": {
+      "href": "/topics/animals"
+    }
+  }, {
+    "subscribe": {
+      "href": "/stream/topics/animals"
+    }
+  }, {
+    "stats": {
+      "href": "/stats/topics/animals"
+    }
+  }]
+}
+``` 
+
+You get there all the informations you need to about the topic and its subtopics.
+
+You can then interact with the topic in a REST fashion way.
+
 With PUT it is only possible to push data to an existing topic.
 
 > curl -X PUT http://localhost:8080/topics/animals -d "dolphins are the best"
@@ -31,13 +72,13 @@ If you publish a message at the "/animals" level, all subtopics will receive it 
 
 And finally you can subscribe to the notifications on a topic.
 
-> curl -X GET http://localhost:8080/topics/animals
+> curl -X GET http://localhost:8080/stream/topics/animals
 
 > ~~> Streaming subscription for topics /animals
 
 When you subscribe to a topic, you will of course receive all the notifications targetting its sub topics.
 
-It will be soon possible to DELETE a topic and all its subtopic through the protected administration API. 
+It is possible to DELETE a topic and all its subtopic through a password protected administration API. 
 
 ## Reactive modes
 
@@ -92,12 +133,12 @@ Of course you are free to use reactive modes on composed subscriptions. Just be 
 
 ## Administration and statistics
 
-Omnibus exposes usage statistics concerning all topics and the system itself following two modes.
+Omnibus exposes usage statistics concerning all topics and the system itself following three modes.
 
 - `live` : get the current statistics. (default mode)
   - e.g  http://localhost:8080/stats/topics/customer/order/
   - e.g  http://localhost:8080/stats/system
-- `history` : get all statistics history available.
+- `history` : get all statistics history available. (you can configure retention time)
   - e.g  http://localhost:8080/stats/topics/customer/order/?mode=history
   - e.g  http://localhost:8080/stats/system?mode=history
 - `streaming` : continous data stream of statistics in realtime
@@ -120,7 +161,7 @@ This starts Omnibus on default port 8080.
 
 ### As an embedded library.
 
-It is possible to integrate Omnibus in an existing Akka application.
+It is possible to integrate Omnibus in an existing Akka application. (This API is still experimental)
 
 Add the latest omnibus.jar to your application by building from source with sbt `publishLocal`
 
