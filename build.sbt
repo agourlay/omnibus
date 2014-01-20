@@ -1,12 +1,10 @@
-import AssemblyKeys._
+import com.typesafe.sbt.SbtNativePackager.Universal
 
-assemblySettings
+import com.typesafe.sbt.packager.Keys._
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-jarName in assembly := { s"omnibus-standalone-${version.value}.jar" }
-
-test in assembly := {}
+packageArchetype.java_application
 
 organization := "com.agourlay"
 
@@ -25,6 +23,12 @@ scalacOptions := Seq(
   "-language:_",
   "-target:jvm-1.7",
   "-feature")
+
+mappings in Universal += {
+  file("src/main/resources/application.conf") -> "conf/application.conf"
+}
+
+scriptClasspath += "../conf/application.conf"
 
 resolvers ++= Seq(
    "sonatype releases"  at "https://oss.sonatype.org/content/repositories/releases/"
