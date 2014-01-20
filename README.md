@@ -11,7 +11,7 @@ Omnibus is an HTTP-friendly reactive message bus which means :
 
 **This is still a work in progress, any API is likely to change** 
  
-## REST & Hypertext Application Language
+## REST & hal+json
 
 Omnibus follows the specification [hal+json](http://stateless.co/hal_specification.html) to expose its resources. 
 
@@ -24,10 +24,12 @@ Topics are trees, you can create them simply with a POST request.
 The root url of every topic is "/topics", this keyword is reserved.
 
 > curl -X GET http://localhost:8080/topics/
+
 ```json
 []
 ```
-We received the empty collection of roots.
+
+We receive the empty collection of roots.
 
 Use POST to create the nested topic "/topics/animals/furry".
 
@@ -36,6 +38,7 @@ Use POST to create the nested topic "/topics/animals/furry".
 We can now retrieve informations about the topic we just created using GET
 
 > curl -X GET http://localhost:8080/topics/animals
+
 ```json
 {
   "topic": ["animals"],
@@ -197,11 +200,3 @@ The subscriber's actorRef will receive this kind of updates
 ```scala
 omnibus.domain.Message(id : Long, topicName : String, payload : String, timestamp : Long)
 ```
-
-### Optimistic roadmap
-
-- [ ] support properly Server-Sent-Event specification (Last-Event-Id header...)
-
-- [ ] deploy bus in cluster (akka-cluster)
-
-- [ ] support websockets
