@@ -13,11 +13,11 @@ Omnibus is an HTTP-friendly reactive message bus which means :
  
 ## REST & Hypertext Application Language
 
-Omnibus follows the [HAL JSON](http://stateless.co/hal_specification.html) to exposes its resources. 
+Omnibus follows the specification [hal+json](http://stateless.co/hal_specification.html) to expose its resources. 
 
 It simply means that the REST API is easily discoverable.
 
-Let's demonstrate what it means with some basic commands using CURL.
+Let's demonstrate how it works with some basic commands using CURL.
 
 Topics are trees, you can create them simply with a POST request.
 
@@ -60,7 +60,7 @@ If you want to retrieve information about a topic use GET
 }
 ``` 
 
-You get there all the informations you need to about the topic and its subtopics.
+You get there all the informations you need about the topic and its subtopics.
 
 You can then interact with the topic in a REST fashion way.
 
