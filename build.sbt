@@ -40,7 +40,6 @@ resolvers ++= Seq(
   ,"akka repo"          at "http://repo.akka.io/"
   ,"akka snapshots"     at "http://repo.akka.io/snapshots"
   ,"spray repo"         at "http://repo.spray.io/"
-  ,"spray nightly"      at "http://nightlies.spray.io/"
 )
 
 libraryDependencies ++= {
@@ -50,7 +49,7 @@ libraryDependencies ++= {
   val logbackV    = "1.0.13"
   val specs2V     = "2.3.7"
   val scalaCheckV = "1.11.2"
-  val scalaTestV  = "2.0.1-SNAP6"
+  val scalaTestV  = "2.1.RC1"
   val akkaHbaseV  = "0.2"
   val akkaMongoV  = "0.1-SNAPSHOT"
   val akkaCassanV = "0.1-SNAPSHOT"

@@ -7,7 +7,7 @@ Omnibus is an HTTP-friendly reactive message bus which means :
  - Updates are streamed by [Server-Sent-Event](http://www.html5rocks.com/en/tutorials/eventsource/basics/) which can be easily consumed by javascript frontends. 
  - With reactive modes it is possible to replay specific parts of the events.
  - Subscriptions can be composed via the url keyword `+`.
- - It can be easily integrated in an existing [Akka](http://akka.io/) application.
+ - It can be integrated in an existing [Akka](http://akka.io/) application. (experimental)
 
 **This is still a work in progress, any API is likely to change** 
  
@@ -141,16 +141,18 @@ Of course you are free to use reactive modes on composed subscriptions. Just be 
 
 ## Administration and statistics
 
-Omnibus exposes usage statistics concerning all topics and the system itself following three modes.
+You can access the administration interface running on http://localhost:8080/ with the default authentication admin/omnibus.(still a work in progress)
+
+If you just want to get the raw data, omnibus exposes statistics concerning all topics and the system itself following three modes.
 
 - `live` : get the current statistics. (default mode)
-  - e.g  http://localhost:8080/stats/topics/customer/order/
+  - e.g  http://localhost:8080/stats/topics/animals/furry/
   - e.g  http://localhost:8080/stats/system
 - `history` : get all statistics history available. (you can configure retention time)
-  - e.g  http://localhost:8080/stats/topics/customer/order/?mode=history
-  - e.g  http://localhost:8080/stats/system?mode=history (not yet available on system)
+  - e.g  http://localhost:8080/stats/topics/animals/furry/?mode=history
+  - e.g  http://localhost:8080/stats/system?mode=history (not yet available)
 - `streaming` : continous data stream of statistics in realtime
-  - e.g  http://localhost:8080/stats/topics/customer/order?mode=streaming
+  - e.g  http://localhost:8080/stats/topics/animals/furry?mode=streaming
   - e.g  http://localhost:8080/stats/topics/system?mode=streaming
 
 ## Usage and installation
@@ -159,13 +161,11 @@ There are two ways of running Omnibus
 
 ### As a standalone process.
 
-Get the latest omnibus-standalone.zip distribution, extract and run it.
-
-```sh
-java -jar omnibus-standalone.jar &
-```
+Get the latest omnibus.tar distribution, extract and run the starting script in `/bin`.
 
 This starts Omnibus on default port 8080.
+
+You can configure the system by changing the properties in `/conf/application.conf`.
 
 ### As an embedded library (experimental)
 
