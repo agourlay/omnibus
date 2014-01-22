@@ -34,7 +34,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     super.preStart()
   }
 
-  val receiveReplay: Receive = {
+  val receiveRecover: Receive = {
     case PublishMessage(message)                => updateState(message)
     case SnapshotOffer(_, snapshot: TopicState) => state = snapshot
   }
