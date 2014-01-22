@@ -25,10 +25,10 @@ scalacOptions := Seq(
   "-feature")
 
 mappings in Universal += {
-  file("src/main/resources/application.conf") -> "conf/application.conf"
+  file("src/main/resources/application.conf") -> "conf/omnibus.conf"
 }
 
-scriptClasspath += "../conf/application.conf"
+scriptClasspath += "../conf/omnibus.conf"
 
 resolvers ++= Seq(
    "sonatype releases"  at "https://oss.sonatype.org/content/repositories/releases/"
@@ -48,7 +48,7 @@ libraryDependencies ++= {
   val sprayJsonV  = "1.2.5"
   val logbackV    = "1.0.13"
   val specs2V     = "2.3.7"
-  val scalaCheckV = "1.11.2"
+  val scalaCheckV = "1.11.3"
   val scalaTestV  = "2.1.RC1"
   val akkaHbaseV  = "0.2"
   val akkaMongoV  = "0.1-SNAPSHOT"
