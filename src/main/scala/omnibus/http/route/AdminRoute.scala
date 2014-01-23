@@ -7,8 +7,12 @@ import spray.json._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.encoding._
 import spray.routing._
-import spray.can.Http
 import spray.routing.authentication._
+import spray.json._
+import spray.httpx.marshalling._
+import spray.http._
+import HttpHeaders._
+import MediaTypes._
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,9 +45,11 @@ class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
       authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
         path("topics" / Rest) { topic =>
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
-            delete {
-              complete {
-                (omnibusService ? OmnibusServiceProtocol.DeleteTopic(topic)).mapTo[String]
+            delete { ctx =>
+              val futureDel = (omnibusService ? OmnibusServiceProtocol.DeleteTopic(topic)).mapTo[Boolean]
+              futureDel.onComplete {
+                case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Topic $topic deleted\n")
+                case Failure(ex) => ctx.complete(ex)
               }
             }
           }

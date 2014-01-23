@@ -76,9 +76,11 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }  
 
   def deleteTopic() {
-    val lastIdSeen = state.events.head.id
-    // erase all data from storage
-    deleteMessages(lastIdSeen, true)
+    if (!state.events.isEmpty){
+      val lastIdSeen = state.events.head.id
+      // erase all data from storage
+      deleteMessages(lastIdSeen, true)
+    }
     self ! PoisonPill
   }
 
