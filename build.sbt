@@ -40,6 +40,7 @@ resolvers ++= Seq(
   ,"akka repo"          at "http://repo.akka.io/"
   ,"akka snapshots"     at "http://repo.akka.io/snapshots"
   ,"spray repo"         at "http://repo.spray.io/"
+  ,"akka cassandra"     at "http://dl.bintray.com/krasserm/maven"
 )
 
 libraryDependencies ++= {
@@ -50,9 +51,9 @@ libraryDependencies ++= {
   val specs2V     = "2.3.7"
   val scalaCheckV = "1.11.3"
   val scalaTestV  = "2.1.RC1"
+  val akkaCassanV = "0.1"
   val akkaHbaseV  = "0.2"
   val akkaMongoV  = "0.1-SNAPSHOT"
-  val akkaCassanV = "0.1-SNAPSHOT"
   Seq(
        "io.spray"            %   "spray-can"                      % sprayV                  withSources() 
       ,"io.spray"            %   "spray-routing"                  % sprayV                  withSources()
@@ -61,9 +62,7 @@ libraryDependencies ++= {
       ,"com.typesafe.akka"   %%  "akka-actor"                     % akkaV                   withSources()
       ,"com.typesafe.akka"   %%  "akka-slf4j"                     % akkaV                   withSources()
       ,"com.typesafe.akka"   %%  "akka-persistence-experimental"  % akkaV                   withSources()
-    //,"pl.project13.scala"  %%  "akka-persistence-hbase"         % akkaHbaseV              withSources()   exclude("org.slf4j", "slf4j-log4j12")
-    //,"com.github.krasserm" %%  "akka-persistence-cassandra"     % akkaCassanV             withSources()
-    //,"com.github.ddevore"  %%  "akka-persistence-mongo"         % akkaMongoV              withSources()
+      ,"com.github.krasserm" %%  "akka-persistence-cassandra"     % akkaCassanV             withSources()
       ,"ch.qos.logback"      %   "logback-classic"                % logbackV                withSources()
       ,"io.spray"            %   "spray-testkit"                  % sprayV       % "test"   withSources()
       ,"com.typesafe.akka"   %%  "akka-testkit"                   % akkaV        % "test"   withSources()
