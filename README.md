@@ -21,7 +21,7 @@ Let's demonstrate how it works with some basic commands using CURL.
 
 Topics are trees, you can create them simply with a POST request.
 
-The root url of every topic is "/topics", this keyword is reserved.
+The root url of every topic is `/topics`, this keyword is reserved.
 
 > curl -X GET http://localhost:8080/topics/
 
@@ -75,7 +75,7 @@ With PUT you can push data to an existing topic.
 
 > curl -X PUT http://localhost:8080/topics/animals -d "dolphins are the best"
 
-If you publish a message at the "/animals" level, all subtopics will receive it as well.
+If you publish a message at the `/animals` level, all subtopics will receive it as well.
 
 It is possible to DELETE a topic and all its subtopics via the [administration](https://github.com/agourlay/omnibus#administration) API. 
 
@@ -131,7 +131,7 @@ Modes are specified by url parameter
 
 ## Composable subscriptions
 
-You can compose subscriptions with the char '+' in order to merge notifications from multiple topics.
+You can compose subscriptions with the char `+` in order to merge notifications from multiple topics.
 
 > curl -X GET http://localhost:8080/topics/customer/order/+/logistic/export
 
@@ -141,15 +141,16 @@ Of course you are free to use reactive modes on composed subscriptions. Just be 
 
 ## Administration
 
-All administration features are protected by http basic authentication. (better than nothing)
-By defaukt the admin credential is `admin/omnibus`, this can be changed it the configuration file.
+All administration features are protected by http basic authentication. (better than nothing for now)
+
+By default the admin credentials are `admin/omnibus`, this can be changed it the configuration file.
 
 The administration module exposes two APIs
 
 - `DELETE /admin/topics/{topic-name}` to delete a topic and its subtopics
 - `GET /admin/leaves` to retrieve all the topic leaves
 
-You can also access the administration web interface running on http://localhost:8080/.(still a work in progress)
+You can also access the administration web interface running on http://localhost:8080/. (still a work in progress)
 
 ## Monitoring
 
