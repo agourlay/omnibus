@@ -52,8 +52,6 @@ libraryDependencies ++= {
   val scalaCheckV = "1.11.3"
   val scalaTestV  = "2.1.RC1"
   val akkaCassanV = "0.1"
-  val akkaHbaseV  = "0.2"
-  val akkaMongoV  = "0.1-SNAPSHOT"
   val gatlingV    = "2.0.0-SNAPSHOT"
   Seq(
        "io.spray"              %   "spray-can"                      % sprayV                  withSources() 
