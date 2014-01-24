@@ -87,7 +87,7 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
               val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(topic, ctx.responder, reactiveCmd, true)).mapTo[Boolean]
               future.onComplete {
                 case Success(result) => log.debug("Alles klar, let's stream")
-                case Failure(result) => ctx.complete(StatusCodes.NotFound, s"topic '$topic' not found \n")
+                case Failure(ex) => ctx.complete(ex)
               }
             }
           }

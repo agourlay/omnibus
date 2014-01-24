@@ -137,7 +137,9 @@ You can compose subscriptions with the char `+` in order to merge notifications 
 
 > ~~> Streaming subscription for topics /customer/order + /logistic/export with mode simple
 
-Of course you are free to use reactive modes on composed subscriptions. Just be ready to handle the flow of data if you target a root topic with the replay mode :D
+All the topics must exist at the moment of the subscription or the whole request will be rejected.
+
+Of course you are can use reactive modes on composed subscriptions but be ready to handle the flow of data if you target a root topic with the replay mode :D
 
 ## Administration
 

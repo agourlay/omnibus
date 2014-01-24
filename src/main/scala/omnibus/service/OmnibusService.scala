@@ -108,13 +108,14 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
         p.failure { new Exception("an error occured while subscribing to topic ") }
       }
       case Success(optTopicRefList) => {
-        val topicRefList: List[ActorRef] = optTopicRefList.filter(_.nonEmpty).map(_.get)
-        if (topicRefList.nonEmpty) {
+        // All topics must exist in case of a composed subscriptions
+        if (optTopicRefList.forall(_.nonEmpty)) {
+          val topicRefList: List[ActorRef] = optTopicRefList.filter(_.nonEmpty).map(_.get)
           subscriberRepo ! SubscriberRepositoryProtocol.CreateSub(topicRefList.toSet, responder, reactiveCmd, httpMode)
           p.success(true)
         } else {
-          log.info("Cannot create sub on empty topic list")
-          p.failure { new IllegalArgumentException("Cannot create sub on empty topic list") }
+          log.info("None of the topics exist")
+          p.failure { new TopicNotFoundException(topicName) }
         }
       }
     }
