@@ -77,7 +77,7 @@ With PUT you can push data to an existing topic.
 
 If you publish a message at the "/animals" level, all subtopics will receive it as well.
 
-It is possible to DELETE a topic and all its subtopics via a password protected administration API. 
+It is possible to DELETE a topic and all its subtopics via the [administration](https://github.com/agourlay/omnibus#administration) API. 
 
 And finally you can subscribe to the notifications on a topic.
 
@@ -139,11 +139,21 @@ You can compose subscriptions with the char '+' in order to merge notifications 
 
 Of course you are free to use reactive modes on composed subscriptions. Just be ready to handle the flow of data if you target a root topic with the replay mode :D
 
-## Administration and statistics
+## Administration
 
-You can access the administration interface running on http://localhost:8080/ with the default authentication admin/omnibus.(still a work in progress)
+All administration features are protected by http basic authentication. (better than nothing)
+By defaukt the admin credential is `admin/omnibus`, this can be changed it the configuration file.
 
-If you just want to get the raw data, omnibus exposes statistics concerning all topics and the system itself following three modes.
+The administration module exposes two APIs
+
+- `DELETE /admin/topics/{topic-name}` to delete a topic and its subtopics
+- `GET /admin/leaves` to retrieve all the topic leaves
+
+You can also access the administration web interface running on http://localhost:8080/.(still a work in progress)
+
+## Monitoring
+
+If you just want to get raw data about usage, omnibus exposes statistics concerning all topics and the system itself following three modes.
 
 - `live` : get the current statistics. (default mode)
   - e.g  http://localhost:8080/stats/topics/animals/furry/
@@ -154,6 +164,16 @@ If you just want to get the raw data, omnibus exposes statistics concerning all 
 - `streaming` : continous data stream of statistics in realtime
   - e.g  http://localhost:8080/stats/topics/animals/furry?mode=streaming
   - e.g  http://localhost:8080/stats/topics/system?mode=streaming
+
+## Persistence
+
+Omnibus persists events in order to be able to replay them later.
+
+By default those are persisted to disk but it is possible to store events using an external database.
+
+So far only Cassandra is supported through the akka-persistence-plugin, see [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for configuration.
+
+The retention time is configurable aswell for persistence solution.
 
 ## Usage and installation
 
