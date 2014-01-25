@@ -1,9 +1,21 @@
-<div class="pure-menu pure-menu-open pure-menu-horizontal">
-    <a href="#" class="pure-menu-heading">Omnibus</a>
-    <ul>
-        <li><a href="#">Topics</a></li>
-        <li><a href="#">Stats</a></li>
-        <li><a href="#">Setting</a></li>
-    </ul>
+ <div class="pure-g">
+    <div class="pure-u-1">
+		<div class="pure-menu pure-menu-open pure-menu-horizontal">
+		    <a href="#" class="pure-menu-heading"><i class="fa fa-cogs"></i> Omnibus admin</a>
+		    <ul>
+		        <li>{{#link-to 'topics'}} <i class="fa fa-info"></i> Topics {{/link-to}}</li>
+		        <li>{{#link-to 'system'}} <i class="fa fa-dashboard"></i> System{{/link-to}}</li>
+		        <li>{{#link-to 'settings'}} <i class="fa fa-gear"></i> Settings {{/link-to}}</li>
+		        <li>
+		            <a href="https://github.com/agourlay/omnibus" target="blank">
+		              <i class="fa fa-bug"></i> Report an issue
+		            </a>
+		        </li>
+		    </ul>
+		</div>
+	</div>
+	<div class="pure-u-1">	
+        {{outlet}}
+    </div>
 </div>
-{{outlet}}
+            

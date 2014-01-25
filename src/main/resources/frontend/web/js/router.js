@@ -1,5 +1,6 @@
 App.Router.map(function() {
     this.resource('index', { path:'/'}); 
+    this.resource('settings');
     this.resource('topics');
     this.resource('topic', { path:'/topic/:topic_id' });
     this.resource('system');

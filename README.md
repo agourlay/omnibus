@@ -190,7 +190,7 @@ If you just want to get raw data about usage, omnibus exposes statistics concern
   - e.g  http://localhost:8080/stats/system?mode=history (not yet available)
 - `streaming` : continous data stream of statistics in realtime
   - e.g  http://localhost:8080/stats/topics/animals/furry?mode=streaming
-  - e.g  http://localhost:8080/stats/topics/system?mode=streaming
+  - e.g  http://localhost:8080/stats/system?mode=streaming
 
 ## Persistence
 

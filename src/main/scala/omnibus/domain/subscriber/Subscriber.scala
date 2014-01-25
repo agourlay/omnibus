@@ -73,7 +73,6 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
 
   def sendMessage(msg: Message) = {
     // An event can only be played once by subscription
-    log.info("filtering "+ msg.toString + "against "+ topicsName)
     if (notYetPlayed(msg) && filterAccordingReactMode(msg) && filterAccordingSubMode(msg)) {
       responder ! msg
       idsSeen += msg.id

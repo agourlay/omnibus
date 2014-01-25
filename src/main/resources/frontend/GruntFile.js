@@ -23,12 +23,14 @@ module.exports = function(grunt) {
           "web/bower_components/typeahead.js/dist/typeahead.min.js",
           "web/bower_components/jquery-ui/ui/minified/jquery-ui.min.js",
           "web/bower_components/bacon/dist/Bacon.min.js",
+          "web/bower_components/d3/d3.min.js",
           "web/bower_components/rickshaw/rickshaw.min.js"
         ],
         dest: 'web/dist/libs.min.js'
       },
       libcss : {
         src : [
+          "web/bower_components/jquery-ui/themes/base/minified/jquery-ui.min.css",
           "web/bower_components/pure/pure-min.css",
           "web/bower_components/rickshaw/rickshaw.min.css"
         ],
@@ -42,7 +44,8 @@ module.exports = function(grunt) {
             "web/dist/templates.js",
             "web/js/app.js",
             "web/js/dao.js",
-            "web/js/router.js"
+            "web/js/router.js",
+            "web/js/views/systemView.js"
           ]
         }
       }
