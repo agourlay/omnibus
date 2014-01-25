@@ -45,6 +45,8 @@ module.exports = function(grunt) {
             "web/js/app.js",
             "web/js/dao.js",
             "web/js/router.js",
+            "web/js/model/topic.js",
+            "web/js/views/topicView.js",
             "web/js/views/systemView.js"
           ]
         }

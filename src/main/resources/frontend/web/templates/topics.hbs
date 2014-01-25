@@ -1,1 +1,23 @@
-topics
+
+<table class="pure-table">
+	<thead>
+	    <tr>
+	        <th>Topic</th>
+	        <th>Subscriber number</th>
+	        <th>Events number</th>
+	        <th>Subtopic number</th>
+	        <th>Subtopics</th>
+	    </tr>
+	</thead>
+	<tbody>
+		{{#each controller}}
+			<tr>
+			    <td><b>{{#link-to 'topic' name}}{{name}}{{/link-to}}</b></td>
+			    <td>{{subscribersNumber}}</td>
+			    <td>{{eventsNumber}}</td>
+			    <td>{{subTopicsNumber}}</td>
+			    <td>{{subTopics}}</td>
+			</tr>
+		{{/each}}
+	</tbody>
+</table>

@@ -21,7 +21,7 @@ Let's demonstrate how it works with some basic commands using CURL.
 
 Topics are trees, you can create them simply with a POST request.
 
-The root url of every topic is `/topics`, this keyword is reserved.
+The root url of every topic is `/topics`.
 
 > curl -X GET http://localhost:8080/topics/
 
@@ -31,7 +31,7 @@ The root url of every topic is `/topics`, this keyword is reserved.
 
 We receive the empty collection of roots.
 
-Use POST to create the nested topic "/topics/animals/furry".
+Use POST to create the nested topic `/topics/animals/furry`.
 
 > curl -X POST http://localhost:8080/topics/animals/furry
 
@@ -79,7 +79,13 @@ If you publish a message at the `/animals` level, all subtopics will receive it 
 
 It is possible to DELETE a topic and all its subtopics via the [administration](https://github.com/agourlay/omnibus#administration) API. 
 
-And finally you can subscribe to the notifications on a topic.
+You can also request the collection of leaves topic using `GET /admin/leaves`. It is a streamed API, so you will receive topics as the topic trees are traversed. 
+
+> curl -X GET http://localhost:8080/leaves
+
+> ~~> Streaming topic view 
+
+And finally you can of course subscribe to the notifications on a topic.
 
 > curl -X GET http://localhost:8080/stream/topics/animals
 
@@ -114,7 +120,7 @@ To enable this behaviour, use the http param `?sub=wide` when subscribing
 
 ## Reactive modes
 
-Omnibus supports reactive modes in order to replay specific sequence of events from topics.
+Omnibus supports reactive modes via url parameters in order to replay specific sequence of events from topics.
 
 The supported modes are: 
 
@@ -138,7 +144,6 @@ The supported modes are:
 - `between-ts` : all the events between two given unix timestamp
   - e.g  http://localhost:8080/stream/topics/logs?react=between-ts&since=1388250283&to=1388250552
 
-Modes are specified by url parameter
 > curl -X GET "http://localhost:8080/stream/topics/results/basketball?react=between-id&since=1&to=2"
 
 > ~~> Streaming subscription for topics /results/basketball with mode replay
@@ -171,10 +176,9 @@ All administration features are protected by http basic authentication. (better 
 
 By default the admin credentials are `admin/omnibus`, this can be changed in the configuration file.
 
-The administration module exposes two APIs
+The administration module exposes only one API for now.
 
 - `DELETE /admin/topics/{topic-name}` to delete a topic and its subtopics
-- `GET /admin/leaves` to retrieve all the topic leaves
 
 You can also access the administration web interface running on http://localhost:8080/. (still a work in progress)
 
@@ -185,9 +189,11 @@ If you just want to get raw data about usage, omnibus exposes statistics concern
 - `live` : get the current statistics. (default mode)
   - e.g  http://localhost:8080/stats/topics/animals/furry/
   - e.g  http://localhost:8080/stats/system
+
 - `history` : get all statistics history available. (you can configure retention time)
   - e.g  http://localhost:8080/stats/topics/animals/furry/?mode=history
   - e.g  http://localhost:8080/stats/system?mode=history (not yet available)
+
 - `streaming` : continous data stream of statistics in realtime
   - e.g  http://localhost:8080/stats/topics/animals/furry?mode=streaming
   - e.g  http://localhost:8080/stats/system?mode=streaming

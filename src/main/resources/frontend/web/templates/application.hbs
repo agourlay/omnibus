@@ -1,6 +1,6 @@
  <div class="pure-g">
     <div class="pure-u-1">
-		<div class="pure-menu pure-menu-open pure-menu-horizontal">
+		<div id="main-header" class="pure-menu pure-menu-open pure-menu-horizontal">
 		    <a href="#" class="pure-menu-heading"><i class="fa fa-cogs"></i> Omnibus admin</a>
 		    <ul>
 		        <li>{{#link-to 'topics'}} <i class="fa fa-info"></i> Topics {{/link-to}}</li>
@@ -14,7 +14,7 @@
 		    </ul>
 		</div>
 	</div>
-	<div class="pure-u-1">	
+	<div id="main-content" class="pure-u-1">	
         {{outlet}}
     </div>
 </div>
