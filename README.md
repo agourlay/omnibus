@@ -85,8 +85,29 @@ And finally you can subscribe to the notifications on a topic.
 
 > ~~> Streaming subscription for topics /animals
 
-When you subscribe to a topic, you will of course receive all the notifications targetting its sub topics.
+## Subscription models
 
+By default Omnibus follow the common subscription model found in other systems :
+
+- when subscribing to a `parent` topic one will see all updates occuring in the subtopics aswell.
+- when subscribing to a `leaf` topic one will only see the updates targetting directly this topic.
+
+Although this model is enough for most of the use cases, Omnibus goes further by proposing another model.
+
+It is possible to listen to all activities occuring in the higher part of the topic path. 
+
+For example, subscribing to "/topics/animals/furry/cats" the client could receive
+
+>id: 11345 
+>event: /animals/furry
+>data: A message for all furry animals!
+>timestamp: 1388250283
+
+Then the client can decide dynamically according his use case to do something with this event or not.
+
+To enable this behaviour, use the http param `?sub=wide` when subscribing
+
+- e.g http://localhost:8080/topics/animals/furry/cats?sub=wide
 
 ## Reactive modes
 
@@ -97,35 +118,35 @@ The supported modes are:
 - `simple`   : classic subscription (default one if not specified)
 
 - `last`     : get last message on a topic and the following events
-  - e.g http://localhost:8080/topics/stock/nasdaq?mode=last
+  - e.g http://localhost:8080/topics/stock/nasdaq?react=last
 
 - `replay`   : get all past messages on topic and the following events
-  - e.g http://localhost:8080/topics/customer/order?mode=replay
+  - e.g http://localhost:8080/topics/customer/order?react=replay
 
 - `since-id` : all the past events since a given event-id and the following events
-  - e.g http://localhost:8080/topics/worldcup?mode=since-id&since=120
+  - e.g http://localhost:8080/topics/worldcup?react=since-id&since=120
 
 - `since-ts` : all the past events since a given unix timestamp and the following events
-  - e.g  http://localhost:8080/topics/logs?mode=since-ts&since=1388250283
+  - e.g  http://localhost:8080/topics/logs?react=since-ts&since=1388250283
 
 - `between-id` : all the events between two given event-id 
-  - e.g http://localhost:8080/topics/worldcup?mode=between-id&since=12&to=200
+  - e.g http://localhost:8080/topics/worldcup?react=between-id&since=12&to=200
 
 - `between-ts` : all the events between two given unix timestamp
-  - e.g  http://localhost:8080/topics/logs?mode=between-ts&since=1388250283&to=1388250552
+  - e.g  http://localhost:8080/topics/logs?react=between-ts&since=1388250283&to=1388250552
 
 Modes are specified by url parameter
-> curl -X GET "http://localhost:8080/topics/results/basketball?mode=between-id&since=1&to=2"
+> curl -X GET "http://localhost:8080/topics/results/basketball?react=between-id&since=1&to=2"
 
 > ~~> Streaming subscription for topics /results/basketball with mode replay
 
 > id: 1
-> event: result/basketball
+> event: /result/basketball
 > data: A basket ball game result
 > timestamp: 1388250283
 
 > id: 2
-> event: result/basketball
+> event: /result/basketball
 > data: Another basket ball game result
 > timestamp: 1388250552
 
@@ -213,7 +234,7 @@ This will start the Omnibus system on the given port and return an OmnibusRecept
   def deleteTopic(topicName : String)
   def checkTopic(topicName : String) : Future[Boolean]
   def publishToTopic(topicName : String, message : String) 
-  def subToTopic(topicName : String, subscriber : ActorRef, mode : ReactiveCmd) : Future[Boolean]
+  def subToTopic(topicName : String, subscriber : ActorRef, reactCmd : ReactiveCmd) : Future[Boolean]
   def unsubFromTopic(topicName : String, subscriber : ActorRef)
   def shutDownOmnibus()
 ```  

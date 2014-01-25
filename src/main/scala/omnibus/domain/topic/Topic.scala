@@ -90,7 +90,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   def applyReactiveCmd(refSub: ActorRef, cmd : ReactiveCmd) = {
-    cmd.mode match {
+    cmd.react match {
       case ReactiveMode.REPLAY     => forwardMessagesReplay(refSub)
       case ReactiveMode.LAST       => forwardLastMessage(refSub)
       case ReactiveMode.SINCE_ID   => forwardMessagesSinceID(refSub, cmd.since.get)
@@ -116,7 +116,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   def setupReactiveMode(refSub: ActorRef, cmd : ReactiveCmd) = {
     applyReactiveCmd(refSub, cmd)
-    val reactiveMessageToFW = cmd.mode match {
+    val reactiveMessageToFW = cmd.react match {
       case ReactiveMode.REPLAY     => TopicProtocol.Replay(refSub)
       case ReactiveMode.LAST       => TopicProtocol.Last(refSub)
       case ReactiveMode.SINCE_ID   => TopicProtocol.SinceID(refSub, cmd.since.get)

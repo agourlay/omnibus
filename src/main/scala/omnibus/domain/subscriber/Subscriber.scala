@@ -22,14 +22,17 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
   // set of all event ids seen by this subscriber 
   var idsSeen: Set[Long] = Set.empty[Long]
 
+  val topicsName = topics.map(Topic.prettyPath(_))
+
   override def preStart() = {
     val prettyTopics = prettySubscription(topics)
-    val mode = reactiveCmd.mode
-    log.info(s"Creating sub on topics $prettyTopics with mode $mode")
+    val react = reactiveCmd.react
+    val sub = reactiveCmd.sub
+    log.debug(s"Creating sub on topics $prettyTopics with react $react and sub $sub")
 
     if (http) {
       // HttpSubscriber will proxify the responder, cool huh?
-      responder = context.actorOf(HttpTopicSubscriber.props(responder, mode, prettyTopics))
+      responder = context.actorOf(HttpTopicSubscriber.props(responder, reactiveCmd, prettyTopics))
     }
 
     // subscribe to every topic
@@ -57,15 +60,21 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
 
   def notYetPlayed(msg: Message): Boolean = !idsSeen.contains(msg.id)
 
-  def filterAccordingMode(msg: Message) = reactiveCmd.mode match {
+  def filterAccordingReactMode(msg: Message) = reactiveCmd.react match {
     case ReactiveMode.BETWEEN_ID => msg.id >= reactiveCmd.since.get && msg.id <= reactiveCmd.to.get
     case ReactiveMode.BETWEEN_TS => msg.timestamp >= reactiveCmd.since.get && msg.timestamp <= reactiveCmd.to.get
     case _ => true
   }
 
+  def filterAccordingSubMode(msg: Message) = reactiveCmd.sub match {
+    case SubscriptionMode.WIDE => true
+    case SubscriptionMode.CLASSIC => topicsName.contains(msg.topicName)
+  }
+
   def sendMessage(msg: Message) = {
     // An event can only be played once by subscription
-    if (notYetPlayed(msg) && filterAccordingMode(msg)) {
+    log.info("filtering "+ msg.toString + "against "+ topicsName)
+    if (notYetPlayed(msg) && filterAccordingReactMode(msg) && filterAccordingSubMode(msg)) {
       responder ! msg
       idsSeen += msg.id
     }
@@ -90,7 +99,7 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
     context.watch(topicRef)
     log.debug(s"subscriber successfully subscribed to $topicRef")
     // we are successfully registered to the topic, let's use the reactive cm if not simple
-    reactiveCmd.mode match {
+    reactiveCmd.react match {
       case ReactiveMode.SIMPLE => log.debug("no reactive mode for simple")
       case _                   => topicRef ! TopicProtocol.SetupReactiveMode(self, reactiveCmd)
     }

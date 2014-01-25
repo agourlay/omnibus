@@ -82,12 +82,12 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
     pathPrefix("stream") {
       path("topics" / Rest) { topic =>
         validate(!topic.isEmpty, "topic name cannot be empty \n") {    
-          parameters('mode.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveCmd) { reactiveCmd =>
+          parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?, 'sub.as[String] ? "classic").as(ReactiveCmd) { reactiveCmd =>
             get { ctx =>
               val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(topic, ctx.responder, reactiveCmd, true)).mapTo[Boolean]
               future.onComplete {
                 case Success(result) => log.debug("Alles klar, let's stream")
-                case Failure(ex) => ctx.complete(ex)
+                case Failure(ex)     => ctx.complete(ex)
               }
             }
           }
