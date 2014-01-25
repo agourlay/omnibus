@@ -87,23 +87,26 @@ And finally you can subscribe to the notifications on a topic.
 
 ## Subscription models
 
-By default Omnibus follow the common subscription model found in other systems :
+By default Omnibus follows the common subscription model used in similar systems :
 
-- when subscribing to a `parent` topic one will see all updates occuring in the subtopics aswell.
-- when subscribing to a `leaf` topic one will only see the updates targetting directly this topic.
+- when subscribing to a `parent` topic, one will see all updates occuring in the subtopics as well.
+- when subscribing to a `leaf` topic, one will only see the updates targeting this topic directly.
 
-Although this model is enough for most of the use cases, Omnibus goes further by proposing another model.
+Although this model is enough for most use cases, Omnibus goes further by proposing another model.
 
 It is possible to listen to all activities occuring in the higher part of the topic path. 
 
 For example, subscribing to "/topics/animals/furry/cats" the client could receive
 
 >id: 11345 
+
 >event: /animals/furry
+
 >data: A message for all furry animals!
+
 >timestamp: 1388250283
 
-Then the client can decide dynamically according his use case to do something with this event or not.
+Then the client can decide dynamically according to his use case to do something with this event or not.
 
 To enable this behaviour, use the http param `?sub=wide` when subscribing
 
@@ -166,7 +169,7 @@ Of course you are can use reactive modes on composed subscriptions but be ready 
 
 All administration features are protected by http basic authentication. (better than nothing for now)
 
-By default the admin credentials are `admin/omnibus`, this can be changed it the configuration file.
+By default the admin credentials are `admin/omnibus`, this can be changed in the configuration file.
 
 The administration module exposes two APIs
 
@@ -195,9 +198,9 @@ Omnibus persists events in order to be able to replay them later.
 
 By default those are persisted to disk but it is possible to store events using an external database.
 
-So far only Cassandra is supported through the akka-persistence-plugin, see [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for configuration.
+So far only [Cassandra](http://cassandra.apache.org/) is supported through the akka-persistence-plugin, see [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for complete configuration.
 
-The retention time is configurable aswell for persistence solution.
+The retention time is configurable as well for both persistence solutions.
 
 ## Usage and installation
 
