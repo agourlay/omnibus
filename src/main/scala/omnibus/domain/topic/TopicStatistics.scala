@@ -34,7 +34,7 @@ class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging {
   }
 
   def receive = {
-    case Message             => messageReceived = messageReceived + 1
+    case MessageReceived     => messageReceived = messageReceived + 1
     case SubscriberAdded     => subscribersNumber = subscribersNumber + 1
     case SubscriberRemoved   => subscribersNumber = subscribersNumber - 1
     case SubTopicAdded       => subTopicsNumber = subTopicsNumber + 1
@@ -46,8 +46,8 @@ class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging {
   }
 
    def liveStats() : TopicStatisticState = {
-    val intervalInSec = (System.currentTimeMillis - lastMeasureMillis)  / 1000
-    val throughputPerSec = messageReceived / intervalInSec
+    val intervalInSec : Double = (System.currentTimeMillis - lastMeasureMillis)  / 1000d
+    val throughputPerSec : Double = messageReceived / intervalInSec
     val currentStat = TopicStatisticState(prettyPath, throughputPerSec, subscribersNumber, subTopicsNumber)
     currentStat
   }
@@ -67,6 +67,7 @@ class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging {
 
 object TopicStatProtocol {
   case object StoringTick
+  case object MessageReceived
   case object SubscriberAdded
   case object SubscriberRemoved
   case object SubTopicAdded

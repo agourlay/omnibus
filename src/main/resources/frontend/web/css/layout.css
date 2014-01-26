@@ -12,9 +12,21 @@ a{
     z-index: 500;
     opacity: 0.9;
     border-bottom: 1px solid #e0e0e0;
-    margin-bottom: 10px;
 }
 
 #main-content {
     margin: 10px;
 }
+
+#system-table {
+    margin-right: auto;
+    margin-left:auto;
+}
+
+#requestTimeouts{
+    color:red;
+}
+
+#uptime{
+    color : #63E263;
+}          

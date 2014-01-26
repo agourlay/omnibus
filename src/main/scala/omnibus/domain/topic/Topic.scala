@@ -138,7 +138,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     propagateToDirection(ForwardToSubscribers(message), PropagationDirection.UP)
     propagateToDirection(ForwardToSubscribers(message), PropagationDirection.DOWN)
     // report stats
-    statHolder ! message
+    statHolder ! TopicStatProtocol.MessageReceived
   }
 
   def forwardToSubscribers(message: Message) = {
