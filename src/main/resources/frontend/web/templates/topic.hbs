@@ -1,6 +1,17 @@
 <h4>Topic {{content}} stats</h4>
 
-<div id="legend"></div>
+<table id="center-table" class="pure-table">
+    <tr>
+        <td>SubTopic number : {{view.subTopicsNumber}}</td>
+        <td rowspan="3"><span id="legend"></span></td>
+    </tr>  
+    <tr> 
+        <td>Subscriber number : {{view.subscribersNumber}}</td>
+    </tr>
+    <tr> 
+        <td><i class="fa fa-dashboard"> Throughput : {{view.throughputPerSec}} msg / sec</td>
+    </tr>
+</table>
 
 <div id="chart_container">
     <div id="chart"></div>

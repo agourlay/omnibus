@@ -16,6 +16,7 @@ import scala.concurrent.Future
 
 import omnibus.http.JsonSupport._
 import omnibus.configuration._
+import omnibus.http.streaming.HttpStatStreamProtocol._
 
 
 class HttpStatStream(responder: ActorRef) extends StreamingResponse(responder) {
@@ -30,16 +31,18 @@ class HttpStatStream(responder: ActorRef) extends StreamingResponse(responder) {
 
   override def preStart() = {
     super.preStart
-    context.system.scheduler.schedule(pushInterval, pushInterval){
-      val stats = (context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats]
-      stats pipeTo self
-    }
+    context.system.scheduler.schedule(pushInterval, pushInterval, self, HttpStatStreamProtocol.RequestHttpStats)
   }
 
   override def receive = ({
-    case stat : Stats => {
-        val nextChunk = MessageChunk("data: "+ formatHttpServerStats.write(stat) +"\n\n")
-        responder ! nextChunk 
+    case RequestHttpStats => (context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats] pipeTo self
+    case stat : Stats     => {
+      val nextChunk = MessageChunk("data: "+ formatHttpServerStats.write(stat) +"\n\n")
+      responder ! nextChunk 
     }
   }: Receive) orElse super.receive
+}
+
+object HttpStatStreamProtocol {
+  object RequestHttpStats
 }

@@ -7,7 +7,7 @@ a{
 	text-decoration:none !important;
 }
 
-#main-header {
+#main-menu {
     background-color: #f8f8f8;
     z-index: 500;
     opacity: 0.9;
@@ -18,7 +18,7 @@ a{
     margin: 10px;
 }
 
-#system-table {
+#center-table {
     margin-right: auto;
     margin-left:auto;
 }

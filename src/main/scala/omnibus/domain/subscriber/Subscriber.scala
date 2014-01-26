@@ -11,7 +11,8 @@ import omnibus.domain.subscriber.SubscriberProtocol._
 import omnibus.domain.subscriber.ReactiveMode._
 import omnibus.http.streaming.HttpTopicSubscriber
 
-class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val http : Boolean)
+class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd
+               , val http : Boolean, val timestamp: Long)
     extends Actor with ActorLogging {
 
   implicit val system = context.system
@@ -23,6 +24,7 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
   var idsSeen: Set[Long] = Set.empty[Long]
 
   val topicsName = topics.map(Topic.prettyPath(_))
+
 
   override def preStart() = {
     val prettyTopics = prettySubscription(topics)
@@ -120,5 +122,6 @@ object SubscriberProtocol {
 }
 
 object Subscriber {
-  def props(responder: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd, http : Boolean) : Props = Props(classOf[Subscriber], responder, topics, reactiveCmd, http)
+  def props(responder: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd, http : Boolean) : Props 
+    = Props(classOf[Subscriber], responder, topics, reactiveCmd, http, System.currentTimeMillis / 1000)
 }

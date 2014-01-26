@@ -3,6 +3,10 @@ App.TopicView = Em.View.extend({
     elementId: 'topic',
     contentBinding: 'controller.content',
 
+    throughputPerSec : 0,
+    subscribersNumber : 0,
+    subTopicsNumber : 0,
+
      listenStats : function(series, graph) {   
      	var view = this;
     	var source = new EventSource("stats/topics/"+view.content+"?mode=streaming");
@@ -12,6 +16,10 @@ App.TopicView = Em.View.extend({
             var throughputPerSec = stats.throughputPerSec;
             var subscribersNumber = stats.subscribersNumber;
             var subTopicsNumber = stats.subTopicsNumber;
+
+            view.set('throughputPerSec',throughputPerSec);
+            view.set('subscribersNumber',subscribersNumber);
+            view.set('subTopicsNumber',subTopicsNumber);
            
             var xNow = moment().unix();
             series[0].push({x: xNow, y:throughputPerSec});

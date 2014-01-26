@@ -137,12 +137,11 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     // forward message down and up the topic tree
     propagateToDirection(ForwardToSubscribers(message), PropagationDirection.UP)
     propagateToDirection(ForwardToSubscribers(message), PropagationDirection.DOWN)
-    // report stats
-    statHolder ! TopicStatProtocol.MessageReceived
   }
 
   def forwardToSubscribers(message: Message) = {
     subscribers.foreach { actorRef => actorRef ! message }  // push to subscribers
+    statHolder ! TopicStatProtocol.MessageReceived  // report stats
   }
 
   def subscribe(subscriber: ActorRef) = {

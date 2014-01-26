@@ -19,6 +19,7 @@ class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging {
 
   val storageInterval = Settings(system).Statistics.StorageInterval
   val retentionTime = Settings(system).Statistics.RetentionTime
+  val resolution = Settings(system).Statistics.Resolution
 
   var messageReceived : Long = 0
   var subscribersNumber: Long = 0
@@ -30,6 +31,7 @@ class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging {
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, TopicStatProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, TopicStatProtocol.PurgeOldData)
+    system.scheduler.schedule(resolution, resolution, self, TopicStatProtocol.ResetCounter)
     log.debug(s"Creating new TopicStats for $prettyPath")
   }
 
@@ -43,30 +45,38 @@ class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging {
     case PastStats           => sender ! statHistory.toList
     case LiveStats           => sender ! liveStats()
     case PurgeOldData        => purgeOldData()
+    case ResetCounter        => resetCounter()
   }
 
    def liveStats() : TopicStatisticState = {
     val intervalInSec : Double = (System.currentTimeMillis - lastMeasureMillis)  / 1000d
-    val throughputPerSec : Double = messageReceived / intervalInSec
+    val throughputPerSec = calculateThroughput(intervalInSec, messageReceived)
     val currentStat = TopicStatisticState(prettyPath, throughputPerSec, subscribersNumber, subTopicsNumber)
     currentStat
   }
 
   def storeStats() = {
-    val throughputPerSec = messageReceived / storageInterval.toSeconds
-    val currentStat = TopicStatisticState(prettyPath, throughputPerSec, subscribersNumber, subTopicsNumber)
-    currentStat +=: statHistory
-    messageReceived = 0
-    lastMeasureMillis = System.currentTimeMillis
+    liveStats() +=: statHistory
   }
 
   def purgeOldData() {
     statHistory = statHistory.filter(stat => stat.timestamp > (System.currentTimeMillis - retentionTime.toMillis))
   }
+
+  def resetCounter() {
+    messageReceived = 0
+    lastMeasureMillis = System.currentTimeMillis
+  }
+
+  def calculateThroughput(intervalInSec : Double, messageReceived : Long) = {
+    val throughputPerSec : Double = messageReceived / intervalInSec
+    Math.round(throughputPerSec*100.0)/100.0
+  }
 }
 
 object TopicStatProtocol {
   case object StoringTick
+  case object ResetCounter
   case object MessageReceived
   case object SubscriberAdded
   case object SubscriberRemoved

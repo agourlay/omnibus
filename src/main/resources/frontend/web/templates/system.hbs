@@ -1,6 +1,6 @@
 <h4>System HTTP stats</h4>
 
- <table id="system-table" class="pure-table">
+ <table id="center-table" class="pure-table">
     <tr>
         <td>Total requests : {{view.totalRequests}}</td>
         <td>Max opened requests : {{view.maxOpenRequests}}</td>
@@ -9,13 +9,15 @@
            <i class="fa fa-exclamation-triangle"></i> Requests timed out : 
            <span id="requestTimeouts">{{view.requestTimeouts}}</span>
         </td>
-        <td rowspan="2"><span id="legend"></td>
+        <td rowspan="2"><span id="legend"></span></td>
     </tr>
     <tr>
         <td>Total connections : {{view.totalConnections}}</td>
         <td>Max opened connections : {{view.maxOpenConnections}}</td>
         <td>Opened connections : {{view.openConnections}}</td>
-        <td>Uptime : <span id="uptime">{{view.uptime}}</span></td>
+        <td><i class="fa fa-clock-o"></i> System uptime : 
+            <span id="uptime">{{view.uptime}}</span>
+        </td>
     </tr>
 </table>
 
