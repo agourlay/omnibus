@@ -35,7 +35,7 @@ class AdminUIRoute(implicit context: ActorContext) extends Directives {
 
   val route = 
     authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
-      path(""){
+      pathSingleSlash{
          cache(simpleCache) {
             encodeResponse(Gzip){
               getFromResource("frontend/web/index.html")   
