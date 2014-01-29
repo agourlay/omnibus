@@ -29,4 +29,8 @@ a{
 
 #uptime{
     color : #63E263;
+}   
+
+.summary-box{
+    border: 1px solid #e0e0e0;
 }          

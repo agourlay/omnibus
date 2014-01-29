@@ -222,12 +222,12 @@ You can configure the system by changing the properties in `/conf/application.co
 
 ### As an embedded library (experimental)
 
-It is possible to integrate Omnibus in an existing Akka application.
+It is possible to integrate Omnibus in an existing Akka application. This is still an experimental feature, any feedback on the API is welcome.
 
 Add the latest omnibus.jar to your application by building from source with sbt `publishLocal`
 
 ```
-libraryDependencies += "com.agourlay" % "omnibus" % "0.1-SNAPSHOT"
+libraryDependencies += "com.agourlay" % "omnibus" % "0.2-SNAPSHOT"
 ```
 
 and then call :
