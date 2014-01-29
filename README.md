@@ -162,7 +162,7 @@ The supported modes are:
 
 You can compose subscriptions with the char `+` in order to merge notifications from multiple topics.
 
-> curl -X GET http://localhost:8080/topics/customer/order/+/logistic/export
+> curl -X GET http://localhost:8080/streams/topics/customer/order/+/logistic/export
 
 > ~~> Streaming subscription for topics /customer/order + /logistic/export with mode simple
 
