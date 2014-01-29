@@ -33,4 +33,12 @@ a{
 
 .summary-box{
     border: 1px solid #e0e0e0;
+}  
+
+.delete-button{
+    font-size: 70%;
+    background: rgb(202, 60, 60);
+    color: white;
+    border-radius: 4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }          
