@@ -12,7 +12,9 @@ App.Dao = Em.Object.create({
 	                    name: topic.topic.toString(),
 	                    eventsNumber : topic.eventsNumber,
 	                    subscribersNumber : topic.subscribersNumber,
-	                    subTopics : topic._embedded.children.map(function(obj){ return " " + Object.keys(obj) ; })
+	                    subTopics : topic._embedded.children.map(function(obj){ 
+                            return topic.topic.toString() + "/" +Object.keys(obj); 
+                        })
                     });
                     console.dir(model)
                     topicsModel.pushObject(model);        

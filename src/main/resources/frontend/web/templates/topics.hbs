@@ -17,7 +17,13 @@
 			    <td>{{subscribersNumber}}</td>
 			    <td>{{eventsNumber}}</td>
 			    <td>{{subTopicsNumber}}</td>
-			    <td>{{subTopics}}</td>
+			    <td>
+			    	<ul>
+				        {{#each subTopics}} 
+				          <li>{{#link-to 'topic' this}} {{this}} {{/link-to}}</li> 
+				        {{/each}}
+			        </ul>
+			    </td>
 			</tr>
 		{{/each}}
 	</tbody>
