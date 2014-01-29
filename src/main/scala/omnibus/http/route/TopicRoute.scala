@@ -60,7 +60,7 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
         val futureExist = (omnibusService ? OmnibusServiceProtocol.CheckTopic(topic)).mapTo[Boolean]
         futureExist.onComplete {
           case Success(exists) => {
-            if(exists) complete(StatusCodes.Accepted, Location(ctx.request.uri):: Nil, s"Topic $topic already exist \n")
+            if(exists) ctx.complete(StatusCodes.Accepted, Location(ctx.request.uri):: Nil, s"Topic $topic already exist \n")
             else {                      
               omnibusService ! OmnibusServiceProtocol.CreateTopic(topic)
               ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $topic created \n") 
