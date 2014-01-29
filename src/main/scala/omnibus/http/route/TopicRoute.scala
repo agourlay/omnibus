@@ -79,7 +79,7 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
         }
       }
     } ~ 
-    pathPrefix("stream") {
+    pathPrefix("streams") {
       path("topics" / Rest) { topic =>
         validate(!topic.isEmpty, "topic name cannot be empty \n") {    
           parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?, 'sub.as[String] ? "classic").as(ReactiveCmd) { reactiveCmd =>

@@ -59,7 +59,7 @@ We can now retrieve informations about the topic we just created using GET
     }
   }, {
     "subscribe": {
-      "href": "/stream/topics/animals"
+      "href": "/streams/topics/animals"
     }
   }, {
     "stats": {
@@ -87,7 +87,7 @@ You can also request the collection of leaves topic using `GET /admin/leaves`. I
 
 And finally you can of course subscribe to the notifications on a topic.
 
-> curl -X GET http://localhost:8080/stream/topics/animals
+> curl -X GET http://localhost:8080/streams/topics/animals
 
 > ~~> Streaming subscription for topics /animals
 
@@ -116,7 +116,7 @@ Then the client can decide dynamically according to his use case to do something
 
 To enable this behaviour, use the http param `?sub=wide` when subscribing
 
-- e.g http://localhost:8080/stream/topics/animals/furry/cats?sub=wide
+- e.g http://localhost:8080/streams/topics/animals/furry/cats?sub=wide
 
 ## Reactive modes
 
@@ -127,24 +127,24 @@ The supported modes are:
 - `simple`   : classic subscription (default one if not specified)
 
 - `last`     : get last message on a topic and the following events
-  - e.g http://localhost:8080/stream/topics/stock/nasdaq?react=last
+  - e.g http://localhost:8080/streams/topics/stock/nasdaq?react=last
 
 - `replay`   : get all past messages on topic and the following events
-  - e.g http://localhost:8080/stream/topics/customer/order?react=replay
+  - e.g http://localhost:8080/streams/topics/customer/order?react=replay
 
 - `since-id` : all the past events since a given event-id and the following events
-  - e.g http://localhost:8080/stream/topics/worldcup?react=since-id&since=120
+  - e.g http://localhost:8080/streams/topics/worldcup?react=since-id&since=120
 
 - `since-ts` : all the past events since a given unix timestamp and the following events
-  - e.g  http://localhost:8080/stream/topics/logs?react=since-ts&since=1388250283
+  - e.g  http://localhost:8080/streams/topics/logs?react=since-ts&since=1388250283
 
 - `between-id` : all the events between two given event-id 
-  - e.g http://localhost:8080/stream/topics/worldcup?react=between-id&since=12&to=200
+  - e.g http://localhost:8080/streams/topics/worldcup?react=between-id&since=12&to=200
 
 - `between-ts` : all the events between two given unix timestamp
-  - e.g  http://localhost:8080/stream/topics/logs?react=between-ts&since=1388250283&to=1388250552
+  - e.g  http://localhost:8080/streams/topics/logs?react=between-ts&since=1388250283&to=1388250552
 
-> curl -X GET "http://localhost:8080/stream/topics/results/basketball?react=between-id&since=1&to=2"
+> curl -X GET "http://localhost:8080/streams/topics/results/basketball?react=between-id&since=1&to=2"
 
 > ~~> Streaming subscription for topics /results/basketball with mode replay
 

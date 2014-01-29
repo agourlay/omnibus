@@ -32,7 +32,7 @@ object JsonSupport {
       ),
       "_links"             -> JsArray(
         JsObject("self"      -> JsObject("href" -> JsString("/topics"+obj.topic))),
-        JsObject("subscribe" -> JsObject("href" -> JsString("/stream/topics"+obj.topic))),
+        JsObject("subscribe" -> JsObject("href" -> JsString("/streams/topics"+obj.topic))),
         JsObject("stats"     -> JsObject("href" -> JsString("/stats/topics"+obj.topic)))
       )
     )
