@@ -9,7 +9,8 @@ App.TopicView = Em.View.extend({
 
      listenStats : function(series, graph) {   
      	var view = this;
-    	var source = new EventSource("stats/topics/"+view.content+"?mode=streaming");
+        console.dir(view.get('content'));
+    	var source = new EventSource("stats/topics/"+view.get('content').get('name')+"?mode=streaming");
         source.addEventListener('message', function(e) {
             var stats = $.parseJSON(e.data);
 
