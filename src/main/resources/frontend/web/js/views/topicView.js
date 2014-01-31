@@ -82,11 +82,6 @@ App.TopicView = Em.View.extend({
         view.listenStats(seriesData, graph);
         graph.render();
 
-        var slider = new Rickshaw.Graph.RangeSlider( {
-            graph: graph,
-            element: document.getElementById('slider')
-        } );
-
         var hoverDetail = new Rickshaw.Graph.HoverDetail( {
             graph: graph
         } );

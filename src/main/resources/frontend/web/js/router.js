@@ -10,11 +10,11 @@ App.Router.map(function() {
 App.TopicRoute = Ember.Route.extend({
 	model: function(params) {
 		return App.Dao.topic(params.topic_id);
-  	}
+  }
 });
 
 App.TopicsRoute = Ember.Route.extend({
 	model: function() {
 		return App.Dao.topics();
-  	}
+  }
 });

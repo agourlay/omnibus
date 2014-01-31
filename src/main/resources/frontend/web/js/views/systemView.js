@@ -84,23 +84,18 @@ App.SystemView = Em.View.extend({
         view.listenStats(seriesData, graph);
         graph.render();
 
-        var slider = new Rickshaw.Graph.RangeSlider( {
-            graph: graph,
-            element: document.getElementById('slider')
-        } );
-
         var hoverDetail = new Rickshaw.Graph.HoverDetail( {
             graph: graph
         } );
 
         var annotator = new Rickshaw.Graph.Annotate( {
-                graph: graph,
-                element: document.getElementById('timeline')
+            graph: graph,
+            element: document.getElementById('timeline')
         } );
 
         var legend = new Rickshaw.Graph.Legend( {
-                graph: graph,
-                element: document.getElementById('legend')
+            graph: graph,
+            element: document.getElementById('legend')
 
         } );
 

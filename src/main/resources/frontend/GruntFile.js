@@ -29,7 +29,6 @@ module.exports = function(grunt) {
       },
       libcss : {
         src : [
-          "web/bower_components/jquery-ui/themes/base/minified/jquery-ui.min.css",
           "web/bower_components/pure/pure-min.css",
           "web/bower_components/rickshaw/rickshaw.min.css"
         ],
