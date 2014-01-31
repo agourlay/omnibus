@@ -1,10 +1,12 @@
-html, body {
-height: 100%;
-margin: 0;
-}
 
 a{
 	text-decoration:none !important;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 
 #main-menu {
@@ -16,6 +18,7 @@ a{
 
 #main-content {
     margin: 10px;
+    text-align: center;
 }
 
 #center-table {

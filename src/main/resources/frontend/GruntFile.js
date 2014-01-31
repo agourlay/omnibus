@@ -20,7 +20,6 @@ module.exports = function(grunt) {
           "web/bower_components/handlebars/handlebars.runtime.min.js",
           "web/bower_components/ember/ember.min.js",
           "web/bower_components/momentjs/min/moment.min.js",
-          "web/bower_components/typeahead.js/dist/typeahead.min.js",
           "web/bower_components/jquery-ui/ui/minified/jquery-ui.min.js",
           "web/bower_components/bacon/dist/Bacon.min.js",
           "web/bower_components/d3/d3.min.js",
@@ -56,7 +55,6 @@ module.exports = function(grunt) {
       combine: {
         files: {
           "web/dist/omnibus.min.css" : [
-            "web/css/typeahead-custom.css",
             "web/css/layout.css"
             ]
         } 

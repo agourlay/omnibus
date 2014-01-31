@@ -1,22 +1,23 @@
- <div class="pure-g">
-    <div class="pure-u-1">
-		<div id="main-menu" class="pure-menu pure-menu-open pure-menu-horizontal">
-		    <a href="#" class="pure-menu-heading"><i class="fa fa-cogs fa-lg"></i> Omnibus admin</a>
-		    <ul>
-		        <li>{{#link-to 'topics'}} <i class="fa fa-sitemap"></i> Topics {{/link-to}}</li>
-		        <li>{{#link-to 'system'}} <i class="fa fa-exchange"></i> Network{{/link-to}}</li>
-		        <li>{{#link-to 'subscriptions'}} <i class="fa fa-users"></i> Subscriptions{{/link-to}}</li>
-		        <li>{{#link-to 'settings'}} <i class="fa fa-gear"></i> Settings {{/link-to}}</li>
-		        <li>
-		            <a href="https://github.com/agourlay/omnibus" target="blank">
-		              <i class="fa fa-bug"></i> Report an issue
-		            </a>
-		        </li>
-		    </ul>
-		</div>
-	</div>
+<div class="pure-g-r">
+	<nav id="main-menu" class="pure-menu pure-menu-open pure-menu-horizontal">
+	    <div class="pure-u-1-5">
+	        <a href="#" class="pure-menu-heading">
+	       		<i class="fa fa-cogs fa-lg"></i> Omnibus admin center
+	        </a>
+	    </div>
+	    <ul class="pure-u-4-5">
+	        <li>{{#link-to 'topics'}} <i class="fa fa-sitemap"></i> Topics {{/link-to}}</li>
+	        <li>{{#link-to 'system'}} <i class="fa fa-exchange"></i> Network{{/link-to}}</li>
+	        <li>{{#link-to 'subscriptions'}} <i class="fa fa-users"></i> Subscriptions{{/link-to}}</li>
+	        <li>{{#link-to 'settings'}} <i class="fa fa-gear"></i> Settings {{/link-to}}</li>
+	        <li>
+	            <a href="https://github.com/agourlay/omnibus" target="blank">
+	              <i class="fa fa-bug"></i> Report an issue
+	            </a>
+	        </li>
+	    </ul>
+	</nav>
 	<div id="main-content" class="pure-u-1">	
         {{outlet}}
     </div>
-</div>
-            
+</div>           
