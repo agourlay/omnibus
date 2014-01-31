@@ -25,6 +25,7 @@ object JsonSupport {
       "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
       "subscribersNumber"  -> JsNumber(obj.subscribersNumber),
       "eventsNumber"       -> JsNumber(obj.numEvents),
+      "creationDate"       -> JsNumber(obj.creationDate),
       "viewDate"           -> JsNumber(obj.viewDate),  
       "_embedded"          -> JsObject("children" -> JsArray(
         obj.children.map( child => JsObject( child.split("/").last ->  JsObject("href" -> JsString("/topics"+child)))).toList

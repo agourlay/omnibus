@@ -32,11 +32,12 @@ App.Dao = Em.Object.create({
     },
 
     createTopicModel : function(topic, model) {
-        model.set("name", topic.topic.toString());
+        model.set("name", topic.topic.join().replace(",","/"));
         model.set("eventsNumber", topic.eventsNumber);
         model.set("subscribersNumber", topic.subscribersNumber);
+        model.set("creationDate", topic.creationDate);
         model.set("subTopics", topic._embedded.children.map(function(obj){ 
-            return topic.topic.toString() + "/" +Object.keys(obj); 
+            return model.get("name") + "/" +Object.keys(obj); 
         }))
         return model;
     }

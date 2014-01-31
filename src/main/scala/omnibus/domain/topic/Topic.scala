@@ -27,6 +27,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   var subTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
 
   val statHolder = context.actorOf(TopicStatistics.props(self))
+  val creationDate = System.currentTimeMillis / 1000L
 
   override def preStart() = {
     val myPath = self.path
@@ -67,7 +68,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     val prettyPath = Topic.prettyPath(self)
     val subTopicNumber = subTopics.size
     val prettyChildren = subTopics.values.map(Topic.prettyPath(_)).toSeq
-    TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents)
+    TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents, creationDate)
   }
 
   def leaves(replyTo : ActorRef) {

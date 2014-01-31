@@ -8,4 +8,5 @@ case class TopicView(topic:String
 	               , children : Seq[String]
 	               , subscribersNumber : Long
 	               , numEvents : Long
+	               , creationDate : Long
 	               , viewDate: Long = System.currentTimeMillis / 1000)

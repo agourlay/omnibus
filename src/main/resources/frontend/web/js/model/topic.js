@@ -3,9 +3,13 @@ App.Topic = Em.Object.extend({
         subTopics: [],
         subscribersNumber : null,
         eventsNumber : null,
-        loaded: false,
+        creationDate: null,
         
         subTopicsNumber: function(){
             return this.subTopics.length ;
-        }.property("loaded")
+        }.property("loaded"),
+
+        prettyCreationDate : function(){
+        	return moment.unix(this.creationDate).fromNow();
+        }.property("creationDate")
 });
