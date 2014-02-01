@@ -7,6 +7,13 @@ App.Router.map(function() {
     this.resource('system');
 });
 
+App.IndexRoute = Ember.Route.extend({
+  model: function() {
+    return App.Dao.summary();
+  }
+});
+
+
 App.TopicRoute = Ember.Route.extend({
 	model: function(params) {
 		return App.Dao.topic(params.topic_id);

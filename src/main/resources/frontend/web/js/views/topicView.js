@@ -7,7 +7,7 @@ App.TopicView = Em.View.extend({
     subscribersNumber : 0,
     subTopicsNumber : 0,
 
-     listenStats : function(series, graph) {   
+    listenStats : function(series, graph) {   
      	var view = this;
         console.dir(view.get('content'));
     	var source = new EventSource("stats/topics/"+view.get('content').get('name')+"?mode=streaming");
