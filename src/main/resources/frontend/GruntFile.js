@@ -44,6 +44,7 @@ module.exports = function(grunt) {
             "web/js/dao.js",
             "web/js/router.js",
             "web/js/model/topic.js",
+            "web/js/model/topicStat.js",
             "web/js/model/system.js",
             "web/js/model/summary.js",
             "web/js/views/topicView.js",

@@ -16,7 +16,7 @@ App.IndexRoute = Ember.Route.extend({
 
 App.TopicRoute = Ember.Route.extend({
 	model: function(params) {
-		return App.Dao.topic(params.topic_id);
+		return App.Dao.topicStats(params.topic_id);
   }
 });
 

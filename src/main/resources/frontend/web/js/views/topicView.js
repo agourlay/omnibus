@@ -9,8 +9,7 @@ App.TopicView = Em.View.extend({
 
     listenStats : function(series, graph) {   
      	var view = this;
-        console.dir(view.get('content'));
-    	var source = new EventSource("stats/topics/"+view.get('content').get('name')+"?mode=streaming");
+    	var source = new EventSource("stats/topics/"+view.get('content').get('topic')+"?mode=streaming");
         source.addEventListener('message', function(e) {
             var stats = $.parseJSON(e.data);
 
@@ -42,9 +41,19 @@ App.TopicView = Em.View.extend({
     didInsertElement: function() {
         var view = this;
         var seriesData = [ [], [], [] ];
-        seriesData.forEach(function(series) {
-            series.push( {x: moment().unix(), y: NaN} );
-        });
+        if (view.get('content').get('stats').length > 0 ){
+            $.each( view.get('content').get('stats').reverse(), function(i, topicStat){
+                var xTime = topicStat.timestamp;
+                seriesData[0].push({x: xTime, y: topicStat.throughputPerSec});
+                seriesData[1].push({x: xTime, y: topicStat.subscribersNumber});
+                seriesData[2].push({x: xTime, y: topicStat.subTopicsNumber});       
+            });
+        } else {
+            seriesData.forEach(function(series) {
+                series.push( {x: moment().unix(), y: NaN} );
+            });
+        }
+    
         
         var palette = new Rickshaw.Color.Palette( { scheme: 'colorwheel' } );
         var graph = new Rickshaw.Graph( {

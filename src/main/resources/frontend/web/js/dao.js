@@ -8,7 +8,6 @@ App.Dao = Em.Object.create({
             var model = App.Summary.create();
             model.set('system', system);
             model.set('rootTopics', topics);
-            console.dir(model);
             return model;
         });
     },
@@ -23,7 +22,38 @@ App.Dao = Em.Object.create({
             }
         }).then(function (data) {return dao.createSystemModel(data)});
     },     
-      
+
+    topicStats : function(topicName)  {
+        var dao = this;
+        return $.ajax({
+            url: "stats/topics/"+topicName+"?mode=history",
+            type: 'GET',
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.log("Error during topics retrieval");                                        
+            }
+        }).then(function (topicStats) {
+            var container = App.TopicStatContainer.create();
+            var topicStatsModel = Ember.A([]);
+            $.each( topicStats, function(i, topicStat){
+                var model = dao.createTopicStatModel(topicStat);
+                topicStatsModel.pushObject(model);        
+            });
+            container.set("topic", topicName);
+            container.set("stats", topicStatsModel); 
+            return container
+        });
+    },
+   
+    createTopicStatModel : function(topicStat) {
+        var model = App.TopicStat.create();
+        model.set('topic', topicStat.topic);
+        model.set('throughputPerSec', topicStat.throughputPerSec);
+        model.set('subscribersNumber', topicStat.subscribersNumber);
+        model.set('subTopicsNumber', topicStat.subTopicsNumber);
+        model.set('timestamp', topicStat.timestamp);
+        return model;
+    },
+
     createSystemModel : function(system) {
         var model = App.System.create();
         model.set('totalRequests', system.totalRequests);
