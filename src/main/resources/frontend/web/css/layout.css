@@ -9,11 +9,24 @@ ul {
   padding: 0;
 }
 
+#issue{
+    float: right;
+}
+
 #main-menu {
-    background-color: #f8f8f8;
+    background-color: rgb(61, 79, 93);
     z-index: 500;
     opacity: 0.9;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 3px solid #e0e0e0;
+}
+
+.pure-menu-heading {
+    color: white !important;
+    font-weight: bold;
+}
+
+.pure-menu a {
+    color: rgb(176, 202, 219);
 }
 
 #main-content {
@@ -32,11 +45,35 @@ ul {
 
 #uptime{
     color : #63E263;
+}
+
+#chart_container{
+   border: 1px solid #e0e0e0; 
+   margin: 5px;
+   border-radius: 4px;
 }   
 
 .summary-box{
     border: 1px solid #e0e0e0;
+    border-radius: 4px;
 }  
+
+.summary-box-title{
+    background-color: rgb(176, 202, 219);
+    border-bottom: 1px solid #eee;
+    padding: 0.4em 0;
+    font-size: 80%;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+} 
+
+.summary-box-content{
+    
+} 
+
+.pure-table-horizontal th{
+    background-color: rgb(176, 202, 219); 
+}
 
 .delete-button{
     font-size: 70%;
