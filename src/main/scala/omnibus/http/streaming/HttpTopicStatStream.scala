@@ -36,8 +36,8 @@ class HttpTopicStatStream(responder: ActorRef, topic : ActorRef) extends Streami
   }
 
   override def receive = ({
-    case RequestTopicStats          => (topic ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticState] pipeTo self
-    case stat : TopicStatisticState => {
+    case RequestTopicStats          => (topic ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticValue] pipeTo self
+    case stat : TopicStatisticValue => {
         val nextChunk = MessageChunk("data: "+ formatTopicStats.write(stat) +"\n\n")
         responder ! nextChunk 
     }

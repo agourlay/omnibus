@@ -87,7 +87,10 @@ class TopicRepository extends Actor with ActorLogging {
   def lookUpTopic(topic: String): Future[Option[ActorRef]] = {
     log.debug(s"Lookup for topic $topic")
     val future: Future[ActorRef] = context.actorSelection(topic).resolveOne
-    future.map(actor => Some(actor)).recover { case e: ActorNotFound => None }
+    future.map(actor => Some(actor)).recover { 
+      case e: ActorNotFound => log.debug("ActorNotFound $topic during lookup"); None
+      case e: Exception => log.error("Error during topic $topic lookup"); None
+    }
   }
 
   def deleteTopic(topicName: String) = {
@@ -106,21 +109,21 @@ class TopicRepository extends Actor with ActorLogging {
   }
 
   def topicPastStat(topicName: String, replyTo : ActorRef) {
-    val p = promise[List[TopicStatisticState]]
+    val p = promise[List[TopicStatisticValue]]
     val futurResult= p.future
     lookUpTopicWithCache(topicName) match {
-      case None => p.success(List.empty[TopicStatisticState])
-      case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.PastStats).mapTo[List[TopicStatisticState]])
+      case None => p.success(List.empty[TopicStatisticValue])
+      case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.PastStats).mapTo[List[TopicStatisticValue]])
     }
     futurResult pipeTo replyTo
   }
 
   def topicLiveStat(topicName: String, replyTo : ActorRef) {
-    val p = promise[TopicStatisticState]
+    val p = promise[TopicStatisticValue]
     val futurResult= p.future
     lookUpTopicWithCache(topicName) match {
       case None => p.failure { new TopicNotFoundException(topicName)}
-      case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticState])
+      case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticValue])
     }
     futurResult pipeTo replyTo
   }

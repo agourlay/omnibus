@@ -55,8 +55,8 @@ class StatsRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
               get { ctx =>
                 log.debug(s"Sending stats from topic $topic with $mode")
                 mode match {
-                  case StatisticsMode.LIVE      => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicLiveStat(topic)).mapTo[TopicStatisticState])
-                  case StatisticsMode.HISTORY   => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicPastStat(topic)).mapTo[List[TopicStatisticState]])
+                  case StatisticsMode.LIVE      => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicLiveStat(topic)).mapTo[TopicStatisticValue])
+                  case StatisticsMode.HISTORY   => ctx.complete ((omnibusService ? OmnibusServiceProtocol.TopicPastStat(topic)).mapTo[List[TopicStatisticValue]])
                   case StatisticsMode.STREAMING => {
                     val f = (omnibusService ? OmnibusServiceProtocol.LookupTopic(topic)).mapTo[Option[ActorRef]]
                     f.onComplete {

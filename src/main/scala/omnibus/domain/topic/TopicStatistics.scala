@@ -1,6 +1,7 @@
 package omnibus.domain.topic
 
 import akka.actor._
+import akka.persistence._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -10,7 +11,7 @@ import omnibus.configuration._
 import omnibus.domain._
 import omnibus.domain.topic.TopicStatProtocol._
 
-class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging {
+class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor with ActorLogging {
 
   implicit val system = context.system
   implicit def executionContext = context.dispatcher
@@ -21,46 +22,61 @@ class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging {
   val retentionTime = Settings(system).Statistics.RetentionTime
   val resolution = Settings(system).Statistics.Resolution
 
+  var state = TopicStatisticState()
+  def updateState(msg: TopicStatisticValue): Unit = {state = state.update(msg)}
+  def numEvents = state.size
+
   var messageReceived : Long = 0
   var subscribersNumber: Long = 0
   var subTopicsNumber : Long = 0
 
   var lastMeasureMillis = System.currentTimeMillis
-  var statHistory = ListBuffer.empty[TopicStatisticState]
 
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, TopicStatProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, TopicStatProtocol.PurgeOldData)
     system.scheduler.schedule(resolution, resolution, self, TopicStatProtocol.ResetCounter)
     log.debug(s"Creating new TopicStats for $prettyPath")
+    super.preStart()
   }
 
-  def receive = {
+  val receiveRecover: Receive = {
+    case SnapshotOffer(_, snapshot: TopicStatisticState) => state = snapshot
+  }
+
+  val receiveCommand : Receive = {
     case MessageReceived     => messageReceived = messageReceived + 1
     case SubscriberAdded     => subscribersNumber = subscribersNumber + 1
     case SubscriberRemoved   => subscribersNumber = subscribersNumber - 1
     case SubTopicAdded       => subTopicsNumber = subTopicsNumber + 1
     case SubTopicRemoved     => subTopicsNumber = subTopicsNumber - 1
     case StoringTick         => storeStats()
-    case PastStats           => sender ! statHistory.toList
+    case PastStats           => sender ! state.events.reverse
     case LiveStats           => sender ! liveStats()
     case PurgeOldData        => purgeOldData()
     case ResetCounter        => resetCounter()
   }
 
-   def liveStats() : TopicStatisticState = {
+   def liveStats() : TopicStatisticValue = {
+    val seqNumber = lastSequenceNr + 1
     val intervalInSec : Double = (System.currentTimeMillis - lastMeasureMillis)  / 1000d
     val throughputPerSec = calculateThroughput(intervalInSec, messageReceived)
-    val currentStat = TopicStatisticState(prettyPath, throughputPerSec, subscribersNumber, subTopicsNumber)
+    val currentStat = TopicStatisticValue(seqNumber, prettyPath, throughputPerSec, subscribersNumber, subTopicsNumber)
     currentStat
   }
 
   def storeStats() = {
-    liveStats() +=: statHistory
+    persist(liveStats()) { s => updateState(s) }
   }
 
   def purgeOldData() {
-    statHistory = statHistory.filter(stat => stat.timestamp > (System.currentTimeMillis - retentionTime.toMillis))
+    val limitStat = state.events
+                         .find(_.timestamp < (System.currentTimeMillis - retentionTime.toMillis))
+
+    limitStat match {
+      case Some(stat) => deleteMessages(stat.seqNumber)
+      case None      =>  log.debug(s"Nothing to purge yet in topicStatistic")
+    }                   
   }
 
   def resetCounter() {

@@ -7,6 +7,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.collection.mutable.ListBuffer
 
+import omnibus.configuration._
 import omnibus.domain._
 import omnibus.domain.PropagationDirection._
 import omnibus.domain.topic.TopicProtocol._
@@ -17,11 +18,14 @@ import omnibus.domain.subscriber.ReactiveMode
 
 class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
+  implicit val system = context.system
   implicit def executionContext = context.dispatcher
 
   var state = TopicState()
-  def updateState(msg: Message): Unit = {state = state.update(msg)}
+  def updateState(msg: MessageTopic): Unit = {state = state.update(msg)}
   def numEvents = state.size
+
+  val retentionTime = Settings(system).Topic.RetentionTime
 
   var subscribers: Set[ActorRef] = Set.empty[ActorRef]
   var subTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
@@ -32,11 +36,12 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   override def preStart() = {
     val myPath = self.path
     log.info(s"Creating new topic $myPath")
+    system.scheduler.schedule(retentionTime, retentionTime, self, TopicProtocol.PurgeTopicData)
     super.preStart()
   }
 
   val receiveRecover: Receive = {
-    case PublishMessage(message)                => updateState(message)
+    case m @ MessageTopic(_, msg)               => updateState(m)
     case SnapshotOffer(_, snapshot: TopicState) => state = snapshot
   }
 
@@ -57,6 +62,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     case Delete                              => deleteTopic()
     case Leaves(replyTo)                     => leaves(replyTo)
     case View                                => sender ! view()
+    case PurgeTopicData                      => purgeOldData()
 
     case Propagation(operation, direction)   => handlePropagation(operation, direction)
 
@@ -71,6 +77,15 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents, creationDate)
   }
 
+  def purgeOldData() {
+    val limitEvt = state.events
+                        .find(_.msg.timestamp < (System.currentTimeMillis - retentionTime.toMillis))
+    limitEvt match {
+      case Some(evt) =>  deleteMessages(evt.seqNumber)
+      case None      =>  log.debug(s"Nothing to purge yet in topic")
+    }                   
+  }
+
   def leaves(replyTo : ActorRef) {
     if (subTopics.isEmpty) replyTo ! view()
     else for(sub <- subTopics.values) sub ! TopicProtocol.Leaves(replyTo)
@@ -78,7 +93,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   def deleteTopic() {
     if (!state.events.isEmpty){
-      val lastIdSeen = state.events.head.id
+      val lastIdSeen = state.events.head.seqNumber
       // erase all data from storage
       deleteMessages(lastIdSeen, true)
     }
@@ -132,12 +147,15 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   def publishMessage(message: Message) = {
     // persist in topic state
-    persist(message) { m => updateState(m) }
-    // push to subscribers
-    forwardToSubscribers(message)
-    // forward message down and up the topic tree
-    propagateToDirection(ForwardToSubscribers(message), PropagationDirection.UP)
-    propagateToDirection(ForwardToSubscribers(message), PropagationDirection.DOWN)
+    val seqNumber = lastSequenceNr + 1
+    persist(MessageTopic(seqNumber, message)) { evt => 
+      updateState(evt) 
+      // push to subscribers
+      forwardToSubscribers(evt.msg)
+      // forward message down and up the topic tree
+      propagateToDirection(ForwardToSubscribers(evt.msg), PropagationDirection.UP)
+      propagateToDirection(ForwardToSubscribers(evt.msg), PropagationDirection.DOWN)
+    }
   }
 
   def forwardToSubscribers(message: Message) = {
@@ -183,31 +201,31 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   def forwardMessagesReplay(refSub: ActorRef) = {
-    if (state.events.nonEmpty) state.events.reverse.foreach { message => refSub ! message }
+    if (state.events.nonEmpty) state.events.reverse.foreach { evt => refSub ! evt.msg }
   }  
 
   def forwardLastMessage(refSub: ActorRef) = {
-    if (state.events.nonEmpty) refSub ! state.events.head
+    if (state.events.nonEmpty) refSub ! state.events.head.msg
   }  
 
   def forwardMessagesSinceID(refSub: ActorRef, eventID: Long) = {
-    state.events.reverse.filter(_.id > eventID)
-                        .foreach { message => refSub ! message }
+    state.events.reverse.filter(_.msg.id > eventID)
+                        .foreach { evt => refSub ! evt.msg }
   }
 
   def forwardMessagesSinceTS(refSub: ActorRef, timestamp: Long) = {
-    state.events.reverse.filter(_.timestamp > timestamp)
-                        .foreach { message => refSub ! message }
+    state.events.reverse.filter(_.msg.timestamp > timestamp)
+                        .foreach { evt => refSub ! evt.msg }
   }
 
   def forwardMessagesBetweenID(refSub: ActorRef, startId: Long, endId: Long) = {
-    state.events.reverse.filter(message => message.id >= startId && message.id <= endId)
-                        .foreach { message => refSub ! message }
+    state.events.reverse.filter(evt => evt.msg.id >= startId && evt.msg.id <= endId)
+                        .foreach { evt => refSub ! evt.msg }
   }
 
   def forwardMessagesBetweenTS(refSub: ActorRef, startTs: Long, endTs: Long) = {
-    state.events.reverse.filter(message => message.timestamp >= startTs && message.timestamp <= endTs)
-                        .foreach { message => refSub ! message }
+    state.events.reverse.filter(evt => evt.msg.timestamp >= startTs && evt.msg.timestamp <= endTs)
+                        .foreach { evt => refSub ! evt.msg }
   }
 }
 
@@ -222,6 +240,7 @@ object TopicProtocol {
   case object SubscriberNumber
   case object Delete
   case object View
+  case object PurgeTopicData
 
   // ReactiveCmd operations
   case class Replay(subscriber: ActorRef) extends Operation

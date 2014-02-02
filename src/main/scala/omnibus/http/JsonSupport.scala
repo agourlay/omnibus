@@ -17,7 +17,19 @@ import omnibus.domain.topic._
 
 object JsonSupport {
   implicit val formatMessage = jsonFormat4(Message)
-  implicit val formatTopicStats = jsonFormat5(TopicStatisticState)
+
+  implicit val formatTopicStats = new RootJsonFormat[TopicStatisticValue] {
+    def write(obj: TopicStatisticValue): JsValue = JsObject(
+      "topic"              -> JsString(obj.topic),
+      "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
+      "subscribersNumber"  -> JsNumber(obj.subscribersNumber),
+      "throughputPerSec"   -> JsNumber(obj.throughputPerSec),
+      "timestamp"          -> JsNumber(obj.timestamp)
+    )
+
+    // we don't need to deserialize the TopicStatisticValue
+    def read(json: JsValue): TopicStatisticValue = ???
+  }  
 
   implicit val formatTopicView = new RootJsonFormat[TopicView] {
     def write(obj: TopicView): JsValue = JsObject(
