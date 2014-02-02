@@ -62,9 +62,10 @@ class TopicRepository extends Actor with ActorLogging {
     }
   }
 
-  def publishToTopic(topicName: String, message: String) = {
+  def publishToTopic(topicNameIn: String, message: String) = {
+    //TODO fix ugly concat and cleaning to build topicName
+    val topicName = cleanUpTopicName(topicNameIn)
     lookUpTopicWithCache(topicName) match {
-      //TODO fix ugly concat to build topicName
       case Some(topicRef) => topicRef ! TopicProtocol.PublishMessage(Message(nextEventId, "/"+topicName, message))
       case None => {
         log.warning(s"trying to push to non existing topic $topicName")
@@ -142,6 +143,10 @@ class TopicRepository extends Actor with ActorLogging {
     val actorTopics = rootTopics.values
     val results = for (topic <- rootTopics.values) yield (topic ? TopicProtocol.View).mapTo[TopicView]
     Future.sequence(results) pipeTo replyTo
+  }
+
+  def cleanUpTopicName(topicName : String) : String = {
+    topicName.reverse.dropWhile(_.equals('/')).reverse
   }
 }
 

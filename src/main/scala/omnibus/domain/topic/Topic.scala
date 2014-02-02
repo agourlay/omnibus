@@ -182,28 +182,32 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     }
   }
 
-  def forwardMessagesReplay(refSub: ActorRef) = if (state.events.nonEmpty) state.events foreach { message => refSub ! message }
+  def forwardMessagesReplay(refSub: ActorRef) = {
+    if (state.events.nonEmpty) state.events.reverse.foreach { message => refSub ! message }
+  }  
 
-  def forwardLastMessage(refSub: ActorRef) = if (state.events.nonEmpty) refSub ! state.events.head
+  def forwardLastMessage(refSub: ActorRef) = {
+    if (state.events.nonEmpty) refSub ! state.events.head
+  }  
 
   def forwardMessagesSinceID(refSub: ActorRef, eventID: Long) = {
-    state.events.filter(_.id > eventID)
-      .foreach { message => refSub ! message }
+    state.events.reverse.filter(_.id > eventID)
+                        .foreach { message => refSub ! message }
   }
 
   def forwardMessagesSinceTS(refSub: ActorRef, timestamp: Long) = {
-    state.events.filter(_.timestamp > timestamp)
-      .foreach { message => refSub ! message }
+    state.events.reverse.filter(_.timestamp > timestamp)
+                        .foreach { message => refSub ! message }
   }
 
   def forwardMessagesBetweenID(refSub: ActorRef, startId: Long, endId: Long) = {
-    state.events.filter(message => message.id >= startId && message.id <= endId)
-      .foreach { message => refSub ! message }
+    state.events.reverse.filter(message => message.id >= startId && message.id <= endId)
+                        .foreach { message => refSub ! message }
   }
 
   def forwardMessagesBetweenTS(refSub: ActorRef, startTs: Long, endTs: Long) = {
-    state.events.filter(message => message.timestamp >= startTs && message.timestamp <= endTs)
-      .foreach { message => refSub ! message }
+    state.events.reverse.filter(message => message.timestamp >= startTs && message.timestamp <= endTs)
+                        .foreach { message => refSub ! message }
   }
 }
 
