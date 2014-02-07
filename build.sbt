@@ -21,7 +21,6 @@ scalacOptions := Seq(
   "-encoding","utf8",
   "-Ywarn-dead-code",
   "-language:_",
-  "-target:jvm-1.7",
   "-feature")
 
 mappings in Universal += {
