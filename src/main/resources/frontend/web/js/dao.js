@@ -98,7 +98,7 @@ App.Dao = Em.Object.create({
 
     createTopicModel : function(topic) {
         var model = App.Topic.create();
-        model.set("name", topic.topic.join().replace(",","/"));
+        model.set("name", topic.topic.join().replace(/,/g,"/"));
         model.set("eventsNumber", topic.eventsNumber);
         model.set("subscribersNumber", topic.subscribersNumber);
         model.set("creationDate", topic.creationDate);

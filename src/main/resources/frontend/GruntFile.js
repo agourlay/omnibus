@@ -18,7 +18,7 @@ module.exports = function(grunt) {
         src : [
           "web/bower_components/jquery/jquery.min.js",
           "web/bower_components/handlebars/handlebars.runtime.min.js",
-          "web/bower_components/ember/ember.js",
+          "web/bower_components/ember/ember.min.js",
           "web/bower_components/momentjs/min/moment.min.js",
           "web/bower_components/jquery-ui/ui/minified/jquery-ui.min.js",
           "web/bower_components/bacon/dist/Bacon.min.js",
