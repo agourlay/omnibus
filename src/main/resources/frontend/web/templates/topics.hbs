@@ -3,11 +3,11 @@
 <table id="center-table" class="pure-table pure-table-horizontal pure-table-striped">
 	<thead>
 	    <tr>
+	    	<th></th>
 	        <th><i class="fa fa-tags"></i> Topic</th>
 	        <th><i class="fa fa-users"></i> Subscriber No.</th>
 	        <th>Event No.</th>
 	        <th>Subtopic No.</th>
-	        <th>Subtopics</th>
 	        <th>Created</th>
 	        <th>Delete</th>
 	    </tr>
@@ -15,17 +15,17 @@
 	<tbody>
 		{{#each controller}}
 			<tr>
+				<td>
+					{{#if hasSubTopics}}
+					    <a href="#" {{action "expandTopic" subTopics}}>
+					        <i class="fa fa-plus-square-o"></i>
+					    </a>
+					{{/if}}
+				</td>
 			    <td><b>{{#link-to 'topic' name}}{{name}}{{/link-to}}</b></td>
 			    <td>{{subscribersNumber}}</td>
 			    <td>{{eventsNumber}}</td>
 			    <td>{{subTopicsNumber}}</td>
-			    <td>
-			    	<ul>
-				        {{#each subTopics}} 
-				          <li>{{#link-to 'topic' this}} {{this}} {{/link-to}}</li> 
-				        {{/each}}
-			        </ul>
-			    </td>
 			    <td>{{prettyCreationDate}}</td>
 			    <td>
 			       <a class="pure-button delete-button pure-button-disabled">
