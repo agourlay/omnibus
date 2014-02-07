@@ -42,7 +42,7 @@ App.TopicView = Em.View.extend({
         var view = this;
         var seriesData = [ [], [], [] ];
         if (view.get('content').get('stats').length > 0 ){
-            $.each( view.get('content').get('stats').reverse(), function(i, topicStat){
+            $.each( view.get('content').get('stats'), function(i, topicStat){
                 var xTime = topicStat.timestamp;
                 seriesData[0].push({x: xTime, y: topicStat.throughputPerSec});
                 seriesData[1].push({x: xTime, y: topicStat.subscribersNumber});
