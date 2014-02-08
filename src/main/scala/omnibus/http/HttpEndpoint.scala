@@ -27,14 +27,12 @@ import omnibus.configuration._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 
-
-
 class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef) extends HttpServiceActor with ActorLogging {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
-  implicit def myExceptionHandler(implicit log: LoggingContext) = ExceptionHandler {
+  implicit def omnibusExceptionHandler(implicit log: LoggingContext) = ExceptionHandler {
   	case e : TopicNotFoundException  =>
   	requestUri { uri =>
       log.warning("Request to {} could not be handled normally; topic does not exist", uri)
@@ -42,17 +40,17 @@ class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef) extends
   	}
   	case e : Exception  =>
   	requestUri { uri =>
-      log.warning("Request to {} could not be handled normally; unknown exception", uri)
+      log.error("Request to {} could not be handled normally; unknown exception", uri)
       log.error("unknown exception : ", e)
   	  complete(StatusCodes.InternalServerError, "An unexpected error occured \n")
   	}
   }
 
   val routes =
-    new TopicRoute(omnibusService).route ~ // '/topics'
+    new TopicRoute(omnibusService).route ~                  // '/topics'
     new StatsRoute(omnibusService, httpStatService).route ~ // '/stats'
-    new AdminRoute(omnibusService).route ~ // '/admin/topics'
-    new AdminUIRoute().route               // '/ '
+    new AdminRoute(omnibusService).route ~                  // '/admin/topics'
+    new AdminUIRoute().route                                // '/ '
 
   def receive = runRoute(routes)
 

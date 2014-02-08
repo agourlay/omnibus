@@ -34,10 +34,7 @@ class HttpTopicViewStream(responder: ActorRef, roots: List[ActorRef]) extends St
   }
 
   override def receive = ({
-    case topic : TopicView => {
-        val nextChunk = MessageChunk("data: "+ formatTopicView.write(topic) +"\n\n")
-        responder ! nextChunk 
-    }
+    case topic : TopicView => responder ! MessageChunk("data: "+ formatTopicView.write(topic) +"\n\n")
   }: Receive) orElse super.receive
 }
 

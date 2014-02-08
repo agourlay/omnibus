@@ -20,11 +20,8 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
 
   var pendingTopic: Set[ActorRef] = topics
   var topicListened: Set[ActorRef] = Set.empty[ActorRef]
-  // set of all event ids seen by this subscriber 
-  var idsSeen: Set[Long] = Set.empty[Long]
-
+  var idsSeen: Set[Long] = Set.empty[Long]   // set of all event ids seen by this subscriber 
   val topicsName = topics.map(Topic.prettyPath(_))
-
 
   override def preStart() = {
     val prettyTopics = prettySubscription(topics)

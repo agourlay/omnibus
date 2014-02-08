@@ -65,7 +65,7 @@ class StatsRoute(omnibusService: ActorRef, httpStatService : ActorRef)
                     f.onComplete {
                       case Failure(result) => ctx.complete(s"Something wrong happened... \n")
                       case Success(result) => result match {
-                        case Some(ref) => context.actorOf(Props(new HttpTopicStatStream(ctx.responder, ref)))
+                        case Some(ref) => context.actorOf(HttpTopicStatStream.props(ctx.responder, ref))
                         case None      => ctx.complete(s"topic '$topic' not found \n")
                       }
                     }

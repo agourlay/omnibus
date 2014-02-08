@@ -99,7 +99,6 @@ object TopicStatProtocol {
   case object SubTopicAdded
   case object SubTopicRemoved
   case object PastStats
-  case object StreamStats
   case object LiveStats
   case object PurgeOldData
 }

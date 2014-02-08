@@ -37,10 +37,7 @@ class HttpStatStream(responder: ActorRef, statsRepo : ActorRef) extends Streamin
 
   override def receive = ({
     case RequestHttpStats => (statsRepo ? HttpStatisticsProtocol.LiveStats).mapTo[HttpStats] pipeTo self
-    case stat : HttpStats => {
-      val nextChunk = MessageChunk("data: "+ formatHttpServerStats.write(stat) +"\n\n")
-      responder ! nextChunk 
-    }
+    case stat : HttpStats => responder ! MessageChunk("data: "+ formatHttpServerStats.write(stat) +"\n\n")
   }: Receive) orElse super.receive
 }
 

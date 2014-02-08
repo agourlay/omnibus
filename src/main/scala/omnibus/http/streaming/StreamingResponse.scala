@@ -37,7 +37,6 @@ class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging {
       log.debug("Stopping response streaming due to {}", ev)
       context.stop(self)
     }
-    case ReceiveTimeout =>
-      responder ! MessageChunk(":\n") // Comment to keep connection alive  
+    case ReceiveTimeout => responder ! MessageChunk(":\n") // Comment to keep connection alive  
   }
 }
