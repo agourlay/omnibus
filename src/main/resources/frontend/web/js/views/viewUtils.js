@@ -36,11 +36,6 @@ function graphExtensions(graph) {
 
     } );
 
-    var order = new Rickshaw.Graph.Behavior.Series.Order( {
-        graph: graph,
-        legend: legend
-    } );
-
     var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
         graph: graph,
         legend: legend
