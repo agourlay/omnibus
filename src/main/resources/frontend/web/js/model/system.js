@@ -6,5 +6,6 @@ App.System = Em.Object.extend({
     openConnections : 0,
     maxOpenConnections : 0,
     requestTimeouts : 0,
-    uptime : 0
+    uptime : 0,
+    timestamp : 0
 });

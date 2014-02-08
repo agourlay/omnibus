@@ -29,8 +29,11 @@ import omnibus.repository._
 import omnibus.configuration._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
+import omnibus.http.stats._
+import omnibus.http.stats.HttpStatisticsProtocol._
 
-class StatsRoute(omnibusService: ActorRef) (implicit context: ActorContext) extends Directives {
+class StatsRoute(omnibusService: ActorRef, httpStatService : ActorRef)
+                (implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
@@ -44,9 +47,9 @@ class StatsRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
           get { ctx =>
             log.debug(s"Sending system stats with $mode")
               mode match {
-                case StatisticsMode.LIVE      => ctx.complete ((context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats])
-                case StatisticsMode.HISTORY   => ctx.complete("implementation missing \n") // TODO aggregate system stats
-                case StatisticsMode.STREAMING => context.actorOf(Props(new HttpStatStream(ctx.responder)))
+                case StatisticsMode.LIVE      => ctx.complete ((httpStatService ? HttpStatisticsProtocol.LiveStats).mapTo[HttpStats])
+                case StatisticsMode.HISTORY   => ctx.complete ((httpStatService ? HttpStatisticsProtocol.PastStats).mapTo[List[HttpStats]])
+                case StatisticsMode.STREAMING => context.actorOf(HttpStatStream.props(ctx.responder, httpStatService))
               }
             }
           } ~

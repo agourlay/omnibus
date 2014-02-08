@@ -13,6 +13,11 @@ App.IndexRoute = Ember.Route.extend({
   }
 });
 
+App.SystemRoute = Ember.Route.extend({
+  model: function() {
+    return App.Dao.systemStats();
+  }
+});
 
 App.TopicRoute = Ember.Route.extend({
 	model: function(params) {

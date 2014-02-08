@@ -29,7 +29,7 @@ import omnibus.service.OmnibusServiceProtocol._
 
 
 
-class HttpEndpoint(omnibusService: ActorRef) extends HttpServiceActor with ActorLogging {
+class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef) extends HttpServiceActor with ActorLogging {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
@@ -50,7 +50,7 @@ class HttpEndpoint(omnibusService: ActorRef) extends HttpServiceActor with Actor
 
   val routes =
     new TopicRoute(omnibusService).route ~ // '/topics'
-    new StatsRoute(omnibusService).route ~ // '/stats'
+    new StatsRoute(omnibusService, httpStatService).route ~ // '/stats'
     new AdminRoute(omnibusService).route ~ // '/admin/topics'
     new AdminUIRoute().route               // '/ '
 
@@ -59,5 +59,5 @@ class HttpEndpoint(omnibusService: ActorRef) extends HttpServiceActor with Actor
 }
 
 object HttpEndpoint {
-	def props(omnibusService: ActorRef) : Props = Props(classOf[HttpEndpoint], omnibusService)
+	def props(omnibusService: ActorRef, httpStatService : ActorRef) : Props = Props(classOf[HttpEndpoint], omnibusService, httpStatService)
 }

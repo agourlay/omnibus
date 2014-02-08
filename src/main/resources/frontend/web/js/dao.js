@@ -21,6 +21,24 @@ App.Dao = Em.Object.create({
                 console.log("Error during topics retrieval");                                        
             }
         }).then(function (data) {return dao.createSystemModel(data)});
+    },
+
+    systemStats : function() {
+        var dao = this;
+        return $.ajax({
+            url: "stats/system?mode=history",
+            type: 'GET',
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.log("Error during topics retrieval");                                        
+            }
+        }).then(function (stats) {
+            var systemStatsModel = Ember.A([]);
+            $.each( stats, function(i, stat){
+                var model = dao.createSystemModel(stat)
+                systemStatsModel.pushObject(model);        
+            });
+            return systemStatsModel;
+        });
     },     
 
     topicStats : function(topicName)  {
@@ -64,6 +82,7 @@ App.Dao = Em.Object.create({
         model.set('maxOpenConnections', system.maxOpenConnections);
         model.set('requestTimeouts',system.requestTimeouts);
         model.set('uptime',moment.duration(system.uptimeInMilli).humanize());
+        model.set('timestamp', system.timestamp);
         return model;
     },
 

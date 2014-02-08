@@ -53,7 +53,6 @@ App.TopicView = Em.View.extend({
                 series.push( {x: moment().unix(), y: NaN} );
             });
         }
-    
         
         var palette = new Rickshaw.Color.Palette( { scheme: 'colorwheel' } );
         var graph = new Rickshaw.Graph( {

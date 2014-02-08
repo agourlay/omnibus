@@ -16,6 +16,7 @@ import omnibus.http._
 import omnibus.service._
 import omnibus.repository._
 import omnibus.configuration._
+import omnibus.http.stats._
 
 object OmnibusBuilder {
 
@@ -37,8 +38,11 @@ object OmnibusBuilder {
     // awesome service layer
     val omnibusService = system.actorOf(OmnibusService.props(topicRepository, subRepository), "omnibus-service")
 
+    // http stats
+    val httpStatService = system.actorOf(HttpStatistics.props, "http-stat-service")
+
     // HttpService actor exposing omnibus routes
-    val omnibusHttp = system.actorOf(HttpEndpoint.props(omnibusService), "omnibus-http")
+    val omnibusHttp = system.actorOf(HttpEndpoint.props(omnibusService, httpStatService), "omnibus-http")
 
     log.info(s"Omnibus starting on port $httpPort ~~> ")
 

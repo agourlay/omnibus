@@ -3,11 +3,11 @@ package omnibus.domain.topic
 import omnibus.domain._
 
 case class TopicStatisticValue(seqNumber : Long
-							 , topic: String
-	                         , throughputPerSec : Double
-	                         , subscribersNumber: Long
-	                         , subTopicsNumber : Long,
-                               timestamp: Long = System.currentTimeMillis / 1000)
+					               		 , topic: String
+	                           , throughputPerSec : Double
+	                           , subscribersNumber: Long
+	                           , subTopicsNumber : Long
+                             , timestamp: Long = System.currentTimeMillis / 1000)
 
 case class TopicStatisticState(events: List[TopicStatisticValue] = Nil) {
   def update(msg: TopicStatisticValue) = copy(msg :: events)

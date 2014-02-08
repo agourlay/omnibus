@@ -1,6 +1,7 @@
 App.SystemView = Em.View.extend({
     tagName : 'div',
     elementId: 'system',
+    contentBinding: 'controller.content',
 
     totalRequests : 0,
     openRequests : 0,
@@ -45,9 +46,18 @@ App.SystemView = Em.View.extend({
     didInsertElement: function() {
         var view = this;
         var seriesData = [ [], [], [] ];
-        seriesData.forEach(function(series) {
-            series.push( {x: moment().unix(), y: NaN} );
-        });
+
+        if (view.get('content').length > 0 ){
+            $.each( view.get('content'), function(i, systemStat){
+                var xTime = systemStat.timestamp;
+                seriesData[0].push({x: xTime, y: systemStat.openRequests});
+                seriesData[1].push({x: xTime, y: systemStat.openConnections});      
+            });
+        } else {
+            seriesData.forEach(function(series) {
+                series.push( {x: moment().unix(), y: NaN} );
+            });
+        }
         
         var palette = new Rickshaw.Color.Palette( { scheme: 'colorwheel' } );
         var graph = new Rickshaw.Graph( {

@@ -192,7 +192,7 @@ If you just want to get raw data about usage, omnibus exposes statistics concern
 
 - `history` : get all statistics history available. (you can configure retention time)
   - e.g  http://localhost:8080/stats/topics/animals/furry/?mode=history
-  - e.g  http://localhost:8080/stats/system?mode=history (not yet available)
+  - e.g  http://localhost:8080/stats/system?mode=history
 
 - `streaming` : continous data stream of statistics in realtime
   - e.g  http://localhost:8080/stats/topics/animals/furry?mode=streaming

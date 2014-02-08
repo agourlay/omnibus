@@ -15,11 +15,12 @@ import scala.concurrent.duration._
 import scala.concurrent.Future
 
 import omnibus.http.JsonSupport._
+import omnibus.http.stats._
 import omnibus.configuration._
 import omnibus.http.streaming.HttpStatStreamProtocol._
 
 
-class HttpStatStream(responder: ActorRef) extends StreamingResponse(responder) {
+class HttpStatStream(responder: ActorRef, statsRepo : ActorRef) extends StreamingResponse(responder) {
 
   implicit def executionContext = context.dispatcher
   implicit def system = context.system
@@ -35,8 +36,8 @@ class HttpStatStream(responder: ActorRef) extends StreamingResponse(responder) {
   }
 
   override def receive = ({
-    case RequestHttpStats => (context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats] pipeTo self
-    case stat : Stats     => {
+    case RequestHttpStats => (statsRepo ? HttpStatisticsProtocol.LiveStats).mapTo[HttpStats] pipeTo self
+    case stat : HttpStats => {
       val nextChunk = MessageChunk("data: "+ formatHttpServerStats.write(stat) +"\n\n")
       responder ! nextChunk 
     }
@@ -45,4 +46,8 @@ class HttpStatStream(responder: ActorRef) extends StreamingResponse(responder) {
 
 object HttpStatStreamProtocol {
   object RequestHttpStats
+}
+
+object HttpStatStream {
+  def props(responder: ActorRef, statsRepo : ActorRef) : Props = Props(classOf[HttpStatStream], responder, statsRepo)
 }
