@@ -180,7 +180,7 @@ The administration module exposes only one API for now.
 
 - `DELETE /admin/topics/{topic-name}` to delete a topic and its subtopics
 
-You can also access the administration web interface running on http://localhost:8080/. (still a work in progress)
+You can also access the administration web interface running on http://localhost:8080/ to navigate through topics and follow API usage.
 
 ## Monitoring
 

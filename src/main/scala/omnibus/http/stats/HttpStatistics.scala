@@ -22,6 +22,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
 
   val storageInterval = Settings(system).Statistics.StorageInterval
   val retentionTime = Settings(system).Statistics.RetentionTime
+  val pushInterval = Settings(system).Statistics.PushInterval
 
   var state = HttpStatisticsState()
   def updateState(msg: HttpStats): Unit = {state = state.update(msg)}
@@ -32,7 +33,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, HttpStatisticsProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, HttpStatisticsProtocol.PurgeOldData)
-    context.system.scheduler.schedule(1.seconds,1.seconds){
+    system.scheduler.schedule(pushInterval, pushInterval){
       val stats = (context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats]
       stats pipeTo self
     }
