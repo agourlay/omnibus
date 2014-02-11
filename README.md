@@ -45,27 +45,18 @@ We can now retrieve informations about the topic we just created using GET
   "subTopicsNumber": 1,
   "subscribersNumber": 0,
   "eventsNumber": 0,
+  "creationDate" : 1390212312,
   "viewDate": 1390212364,
   "_embedded": {
-    "children": [{
-      "furry": {
-        "href": "/topics/animals/furry"
-      }
-    }]
+    "children": [
+      { "furry": { "href": "/topics/animals/furry" }}
+    ]
   },
-  "_links": [{
-    "self": {
-      "href": "/topics/animals"
-    }
-  }, {
-    "subscribe": {
-      "href": "/streams/topics/animals"
-    }
-  }, {
-    "stats": {
-      "href": "/stats/topics/animals"
-    }
-  }]
+  "_links": [
+    { "self": { "href": "/topics/animals" }},
+    { "subscribe": { "href": "/streams/topics/animals" }},
+    { "stats": { "href": "/stats/topics/animals" }}
+  ]
 }
 ``` 
 
