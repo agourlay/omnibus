@@ -96,7 +96,11 @@ class TopicRepository extends Actor with ActorLogging {
   def deleteTopic(topicName: String) = {
     log.debug(s"trying to delete topic $topicName")
     lookUpTopicWithCache(topicName) match {
-      case Some(topicRef) => topicRef ! TopicProtocol.Delete; mostAskedTopic.remove(topicName)
+      case Some(topicRef) => {
+        topicRef ! TopicProtocol.Delete
+        mostAskedTopic.remove(topicName)
+        if (rootTopics.contains(topicName)) rootTopics -= topicName
+      }
       case None => log.debug(s"trying to delete a non existing topic $topicName")
     }
   }

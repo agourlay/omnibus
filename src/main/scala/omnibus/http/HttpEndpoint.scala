@@ -41,7 +41,7 @@ class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef) extends
   	case e : Exception  =>
   	requestUri { uri =>
       log.error("Request to {} could not be handled normally; unknown exception", uri)
-      log.error("unknown exception : ", e)
+      log.error("unknown exception : {} ", e)
   	  complete(StatusCodes.InternalServerError, "An unexpected error occured \n")
   	}
   }
