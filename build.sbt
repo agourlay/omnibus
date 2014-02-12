@@ -67,7 +67,7 @@ libraryDependencies ++= {
       ,"org.specs2"            %%  "specs2-core"                    % specs2V      % "test"   withSources()
       ,"org.scalacheck"        %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
       ,"org.scalatest"         %%  "scalatest"                      % scalaTestV   % "test"   withSources()
-      ,"io.gatling.highcharts" % "gatling-charts-highcharts"        % gatlingV     % "test"   withSources()
+      ,"io.gatling.highcharts" %  "gatling-charts-highcharts"       % gatlingV     % "test"   withSources()
   )
 }
 

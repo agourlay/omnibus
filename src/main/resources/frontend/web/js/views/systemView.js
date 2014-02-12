@@ -16,9 +16,7 @@ App.SystemView = Em.View.extend({
 
      listenStats : function(series, graph) {   
      	var view = this;
-    	var source = new EventSource("stats/system?mode=streaming");
-        source.addEventListener('message', function(e) {
-            var stats = $.parseJSON(e.data);
+        App.Dao.get("eventBus").onValue(function(stats) {
             var totalRequests = stats.totalRequests;
             var openRequests = stats.openRequests;
             var maxOpenRequests = stats.maxOpenRequests;
@@ -40,7 +38,7 @@ App.SystemView = Em.View.extend({
             view.set('requestTimeouts',requestTimeouts);
             view.set('uptime',moment.duration(stats.uptimeInMilli).humanize());
             graph.update();
-        }, false);
+        });
     },
 
     didInsertElement: function() {

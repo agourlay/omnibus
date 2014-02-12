@@ -1,5 +1,36 @@
 App.Dao = Em.Object.create({
 
+    sourceSSE : null,
+    eventBus : null,
+
+    setupStream : function (streamUrl) {
+        var me = this;
+        // close previous stream if any
+        if (me.get("sourceSSE") != null) {
+            me.get("sourceSSE").close();
+        }
+
+        me.set('eventBus', new Bacon.Bus());
+
+        var source = new EventSource(streamUrl);
+        source.addEventListener('message', function(e) {
+            var data = $.parseJSON(e.data);
+            me.get("eventBus").push(data);
+        }, false);
+
+        source.addEventListener('open', function(e) {
+            console.log("Streaming open")
+        }, false);
+
+        source.addEventListener('error', function(e) {
+            if (e.readyState == EventSource.CLOSED) {
+                errorMessage("Streaming service error");
+            }
+        }, false);
+
+        me.set("sourceSSE", source);
+    },
+
     summary :function() {
         var dao = this;
         var systemPromise = dao.system()

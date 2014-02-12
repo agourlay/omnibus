@@ -9,10 +9,7 @@ App.TopicView = Em.View.extend({
 
     listenStats : function(series, graph) {   
      	var view = this;
-    	var source = new EventSource("stats/topics/"+view.get('content').get('topic')+"?mode=streaming");
-        source.addEventListener('message', function(e) {
-            var stats = $.parseJSON(e.data);
-
+        App.Dao.get("eventBus").onValue(function(stats) {
             var throughputPerSec = stats.throughputPerSec;
             var subscribersNumber = stats.subscribersNumber;
             var subTopicsNumber = stats.subTopicsNumber;
@@ -27,7 +24,7 @@ App.TopicView = Em.View.extend({
             series[2].push({x: xNow, y:subTopicsNumber});
 
             graph.update();
-        }, false);
+        });
     },
 
     calculateFitWidth : function() {
