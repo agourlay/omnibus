@@ -40,5 +40,5 @@ class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : S
 }
 
 object HttpTopicSubscriber {
-  def props(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) : Props = Props(classOf[HttpTopicSubscriber], responder, cmd, topicsPath)
+  def props(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) = Props(classOf[HttpTopicSubscriber], responder, cmd, topicsPath)
 }

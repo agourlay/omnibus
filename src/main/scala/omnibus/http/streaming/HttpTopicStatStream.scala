@@ -46,5 +46,5 @@ object HttpTopicStatStreamProtocol {
 }
 
 object HttpTopicStatStream {
-  def props(responder: ActorRef, topic : ActorRef) : Props = Props(classOf[HttpTopicStatStream], responder, topic)
+  def props(responder: ActorRef, topic : ActorRef) = Props(classOf[HttpTopicStatStream], responder, topic)
 }

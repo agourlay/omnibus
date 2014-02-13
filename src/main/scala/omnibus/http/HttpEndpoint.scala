@@ -34,16 +34,28 @@ class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef) extends
 
   implicit def omnibusExceptionHandler(implicit log: LoggingContext) = ExceptionHandler {
   	case e : TopicNotFoundException  =>
-  	requestUri { uri =>
-      log.warning("Request to {} could not be handled normally; topic does not exist", uri)
-  	  complete(StatusCodes.NotFound, s"Topic ${e.topicName} not found : please retry later or check topic name correctness\n")
-  	}
+    	requestUri { uri =>
+        log.warning("Request to {} could not be handled normally; topic does not exist", uri)
+    	  complete(StatusCodes.NotFound, s"Topic ${e.topicName} not found : please retry later or check topic name correctness\n")
+    	}
+    case e : AskTimeoutException  =>
+      requestUri { uri =>
+        log.error("Request to {} could not be handled normally; AskTimeoutException", uri)
+        log.error("AskTimeoutException : {} ", e)
+        complete(StatusCodes.InternalServerError, "Something is taking longer than expected, retry later \n")
+      }
+    case e : CircuitBreakerOpenException  =>
+      requestUri { uri =>
+        log.error("Request to {} could not be handled normally; CircuitBreakerOpenException", uri)
+        log.error("CircuitBreakerOpenException : {} ", e)
+        complete(StatusCodes.InternalServerError, "The system is currently under load and cannot process your request, retry later \n")
+      }  
   	case e : Exception  =>
-  	requestUri { uri =>
-      log.error("Request to {} could not be handled normally; unknown exception", uri)
-      log.error("unknown exception : {} ", e)
-  	  complete(StatusCodes.InternalServerError, "An unexpected error occured \n")
-  	}
+    	requestUri { uri =>
+        log.error("Request to {} could not be handled normally; unknown exception", uri)
+        log.error("unknown exception : {} ", e)
+    	  complete(StatusCodes.InternalServerError, "An unexpected error occured \n")
+    	}
   }
 
   val routes =
@@ -57,5 +69,5 @@ class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef) extends
 }
 
 object HttpEndpoint {
-	def props(omnibusService: ActorRef, httpStatService : ActorRef) : Props = Props(classOf[HttpEndpoint], omnibusService, httpStatService)
+	def props(omnibusService: ActorRef, httpStatService : ActorRef) = Props(classOf[HttpEndpoint], omnibusService, httpStatService)
 }

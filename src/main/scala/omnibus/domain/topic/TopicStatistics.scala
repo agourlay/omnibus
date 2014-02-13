@@ -2,6 +2,7 @@ package omnibus.domain.topic
 
 import akka.actor._
 import akka.persistence._
+import akka.pattern.CircuitBreaker
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -32,6 +33,11 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
 
   var lastMeasureMillis = System.currentTimeMillis
 
+  val breaker = new CircuitBreaker(system.scheduler,
+      maxFailures = 5,
+      callTimeout = 10.seconds,
+      resetTimeout = 1.minute)
+
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, TopicStatProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, TopicStatProtocol.PurgeOldData)
@@ -51,7 +57,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
     case SubTopicAdded       => subTopicsNumber = subTopicsNumber + 1
     case SubTopicRemoved     => subTopicsNumber = subTopicsNumber - 1
     case StoringTick         => storeStats()
-    case PastStats           => sender ! state.events.reverse
+    case PastStats           => sender ! breaker.withSyncCircuitBreaker(state.events.reverse)
     case LiveStats           => sender ! liveStats()
     case PurgeOldData        => purgeOldData()
     case ResetCounter        => resetCounter()
@@ -104,5 +110,5 @@ object TopicStatProtocol {
 }
 
 object TopicStatistics {
-  def props(ref : ActorRef) : Props = Props(classOf[TopicStatistics], ref)
+  def props(ref : ActorRef) = Props(classOf[TopicStatistics], ref).withDispatcher("statistics-dispatcher") 
 }

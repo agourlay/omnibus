@@ -30,6 +30,11 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
 
   var lastKnownState : Option[Stats] = None
 
+  val breaker = new CircuitBreaker(system.scheduler,
+    maxFailures = 5,
+    callTimeout = 10.seconds,
+    resetTimeout = 1.minute)
+
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, HttpStatisticsProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, HttpStatisticsProtocol.PurgeOldData)
@@ -48,7 +53,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
   val receiveCommand : Receive = {
     case stat :Stats         => lastKnownState = Some(stat)
     case StoringTick         => storeStats()
-    case PastStats           => sender ! state.events.reverse
+    case PastStats           => sender ! breaker.withSyncCircuitBreaker(state.events.reverse)
     case LiveStats           => sender ! liveStats()
     case PurgeOldData        => purgeOldData()
   }
@@ -81,5 +86,5 @@ object HttpStatisticsProtocol {
 }
 
 object HttpStatistics {
-  def props : Props = Props(classOf[HttpStatistics])
+  def props = Props(classOf[HttpStatistics]).withDispatcher("statistics-dispatcher") 
 }
