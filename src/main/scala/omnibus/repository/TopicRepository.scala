@@ -4,6 +4,7 @@ import akka.actor._
 import akka.pattern._
 
 import scala.concurrent._
+import scala.concurrent.Promise._
 import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -35,48 +36,64 @@ class TopicRepository extends Actor with ActorLogging {
   val mostAskedTopic: Cache[Option[ActorRef]] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
 
   def receive = {
-    case CreateTopicActor(topic)              => createTopic(topic)
-    case DeleteTopicActor(topic)              => deleteTopic(topic)
-    case CheckTopicActor(topic)               => sender ! checkTopic(topic)
-    case LookupTopicActor(topic)              => sender ! lookUpTopicWithCache(topic)
-    case PublishToTopicActor(topic, message)  => publishToTopic(topic, message)
-    case TopicPastStatActor(topic, replyTo)   => topicPastStat(topic, replyTo)
-    case TopicLiveStatActor(topic, replyTo)   => topicLiveStat(topic, replyTo)
-    case TopicViewActor(topic, replyTo)       => topicView(topic, replyTo)
-    case AllLeavesActor(replyTo)              => allLeaves(replyTo)
-    case AllRootsActor(replyTo)               => allRoots(replyTo)
-    case TopicProtocol.Propagation            => log.debug("message propagation reached TopicRepository")
+    case CreateTopic(topic)              => checkAndCreateTopic(topic) pipeTo sender
+    case DeleteTopic(topic)              => deleteTopic(topic) pipeTo sender
+    case CheckTopic(topic)               => sender ! checkTopic(topic) 
+    case LookupTopic(topic)              => sender ! lookUpTopicWithCache(topic)
+    case PublishToTopic(topic, message)  => publishToTopic(topic, message) pipeTo sender
+    case TopicPastStat(topic)            => topicPastStat(topic) pipeTo sender
+    case TopicLiveStat(topic)            => topicLiveStat(topic) pipeTo sender
+    case TopicViewReq(topic)             => topicView(topic) pipeTo sender
+    case AllLeaves(replyTo)              => allLeaves(replyTo)
+    case AllRoots                        => allRoots() pipeTo sender
+    case TopicProtocol.Propagation       => log.debug("message propagation reached TopicRepository")
   }
 
-  def createTopic(topicName: String) = {
-    val topicsList = topicName.split('/').toList
+  def checkAndCreateTopic(topicPath: TopicPath)  : Future[Boolean] = {
+    val p = promise[Boolean]
+    val f = p.future
+    lookUpTopicWithCache(topicPath) match {
+      case None           => createTopic(topicPath, p)
+      case Some(topicRef) => p.failure {new TopicAlreadyExistsException(topicPath.prettyStr())}
+    }
+    f
+  }  
+
+  def createTopic(topicPath: TopicPath, promise : Promise[Boolean]) = {
+    val topicsList = topicPath.segments
     val topicRoot = topicsList.head
     if (rootTopics.contains(topicRoot)) {
       log.debug(s"Root topic $topicRoot already exist, forward to sub topic")
-      rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail)
+      rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail, promise)
     } else {
       log.debug(s"Creating new root topic $topicRoot")
       val newRootTopic = context.actorOf(Topic.props(topicRoot), topicRoot)
       rootTopics += (topicRoot -> newRootTopic)
-      newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail)
+      newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail, promise)
     }
   }
 
-  def publishToTopic(topicNameIn: String, message: String) = {
-    //TODO fix ugly concat and cleaning to build topicName
-    val topicName = cleanUpTopicName(topicNameIn)
-    lookUpTopicWithCache(topicName) match {
-      case Some(topicRef) => topicRef ! TopicProtocol.PublishMessage(Message(nextEventId, "/"+topicName, message))
+  def publishToTopic(topicPath: TopicPath, message: String) : Future[Boolean] = {
+    val p = promise[Boolean]
+    val f = p.future
+    lookUpTopicWithCache(topicPath) match {
+      case Some(topicRef) => {
+        topicRef ! TopicProtocol.PublishMessage(Message(nextEventId, topicPath, message))
+        p.success(true)
+       } 
       case None => {
+        val topicName = topicPath.prettyStr
         log.warning(s"trying to push to non existing topic $topicName")
-        throw new TopicNotFoundException(topicName)
+        p.failure {new TopicNotFoundException(topicName)}
       }
     }
+    f
   }
 
-  def lookUpTopicWithCache(topic: String): Option[ActorRef] = {
+  def lookUpTopicWithCache(topicPath: TopicPath): Option[ActorRef] = {
+    val topic = topicPath.prettyStr
     log.debug(s"Lookup in cache for topic $topic")
-    val futureOpt: Future[Option[ActorRef]] = mostAskedTopic(topic) { lookUpTopic(topic) }
+    val futureOpt: Future[Option[ActorRef]] = mostAskedTopic(topic) { lookUpTopic(topicPath) }
     // we block here to provide an API based on Option[]
     val optResult : Option[ActorRef] = Await.result(futureOpt, timeout.duration).asInstanceOf[Option[ActorRef]]
     // do not let spray cache insert a none in the cache for the actor
@@ -84,7 +101,8 @@ class TopicRepository extends Actor with ActorLogging {
     optResult
   }
 
-  def lookUpTopic(topic: String): Future[Option[ActorRef]] = {
+  def lookUpTopic(topicPath: TopicPath): Future[Option[ActorRef]] = {
+    val topic = topicPath.prettyStr
     log.debug(s"Lookup for topic $topic")
     val future: Future[ActorRef] = context.actorSelection(topic).resolveOne
     future.map(actor => Some(actor)).recover { 
@@ -93,84 +111,87 @@ class TopicRepository extends Actor with ActorLogging {
     }
   }
 
-  def deleteTopic(topicName: String) = {
+  def deleteTopic(topicPath: TopicPath) : Future[Boolean] = {
+    val topicName = topicPath.prettyStr
+    val p = promise[Boolean]
+    val f = p.future
     log.debug(s"trying to delete topic $topicName")
-    lookUpTopicWithCache(topicName) match {
+    lookUpTopicWithCache(topicPath) match {
       case Some(topicRef) => {
         topicRef ! TopicProtocol.Delete
         mostAskedTopic.remove(topicName)
         if (rootTopics.contains(topicName)) rootTopics -= topicName
+        p.success(true)
       }
-      case None => log.debug(s"trying to delete a non existing topic $topicName")
+      case None =>  p.failure { new TopicNotFoundException(topicName)}
     }
+    f
   }
 
-  def checkTopic(topicName: String): Boolean = {
-    lookUpTopicWithCache(topicName) match {
+  def checkTopic(topicPath: TopicPath): Boolean = {
+    lookUpTopicWithCache(topicPath) match {
       case Some(topicRef) => true
       case None => false
     }
   }
 
-  def topicPastStat(topicName: String, replyTo : ActorRef) {
+  def topicPastStat(topicPath: TopicPath) : Future[List[TopicStatisticValue]] = {
     val p = promise[List[TopicStatisticValue]]
     val futurResult= p.future
-    lookUpTopicWithCache(topicName) match {
+    val topicName = topicPath.prettyStr
+    lookUpTopicWithCache(topicPath) match {
       case None => p.success(List.empty[TopicStatisticValue])
       case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.PastStats).mapTo[List[TopicStatisticValue]])
     }
-    futurResult pipeTo replyTo
+    futurResult
   }
 
-  def topicLiveStat(topicName: String, replyTo : ActorRef) {
+  def topicLiveStat(topicPath: TopicPath) : Future[TopicStatisticValue] ={
     val p = promise[TopicStatisticValue]
     val futurResult= p.future
-    lookUpTopicWithCache(topicName) match {
+    val topicName = topicPath.prettyStr
+    lookUpTopicWithCache(topicPath) match {
       case None => p.failure { new TopicNotFoundException(topicName)}
       case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticValue])
     }
-    futurResult pipeTo replyTo
+    futurResult
   }
 
-  def topicView(topicName: String, replyTo : ActorRef) {
+  def topicView(topicPath: TopicPath) : Future[TopicView] = {
     val p = promise[TopicView]
     val futurResult= p.future
-    lookUpTopicWithCache(topicName) match {
+    val topicName = topicPath.prettyStr
+    lookUpTopicWithCache(topicPath) match {
       case None => p.failure { new TopicNotFoundException(topicName)}
       case Some(topicRef) => p.completeWith((topicRef ? TopicProtocol.View).mapTo[TopicView])
     }
-    futurResult pipeTo replyTo
+    futurResult
   }  
 
   def allLeaves(replyTo : ActorRef) {
     context.actorOf(HttpTopicViewStream.props(replyTo, rootTopics.values.toList))
   }
 
-  def allRoots(replyTo : ActorRef) {
+  def allRoots() : Future[Iterable[TopicView]] = {
     val actorTopics = rootTopics.values
     val results = for (topic <- rootTopics.values) yield (topic ? TopicProtocol.View).mapTo[TopicView]
-    Future.sequence(results) pipeTo replyTo
-  }
-
-  def cleanUpTopicName(topicName : String) : String = {
-    topicName.reverse.dropWhile(_.equals('/')).reverse
+    Future.sequence(results)
   }
 }
 
 object TopicRepositoryProtocol {
-  case class CreateTopicActor(topicName: String)
-  case class DeleteTopicActor(topicName: String)
-  case class CheckTopicActor(topicName: String)
-  case class LookupTopicActor(topicName: String)
-  case class PublishToTopicActor(topicName: String, message: String)
-  case class TopicPastStatActor(topic: String, replyTo : ActorRef)
-  case class TopicLiveStatActor(topic: String, replyTo : ActorRef)
-  case class TopicViewActor(topic: String, replyTo : ActorRef)
-  case class AllLeavesActor(replyTo : ActorRef)
-  case class AllRootsActor(replyTo : ActorRef)
+  case class CreateTopic(topicName: TopicPath)
+  case class DeleteTopic(topicName: TopicPath)
+  case class CheckTopic(topicName: TopicPath)
+  case class LookupTopic(topicName: TopicPath)
+  case class PublishToTopic(topicName: TopicPath, message: String)
+  case class TopicPastStat(topic: TopicPath)
+  case class TopicLiveStat(topic: TopicPath)
+  case class TopicViewReq(topic: TopicPath)
+  case class AllLeaves(replyTo : ActorRef)
+  case object AllRoots
 }
 
-
 object TopicRepository {
-  def props : Props = Props(classOf[TopicRepository])
+  def props = Props(classOf[TopicRepository]).withDispatcher("topics-dispatcher")
 }

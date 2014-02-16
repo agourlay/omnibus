@@ -20,7 +20,7 @@ import omnibus.http.stats._
 
 object OmnibusBuilder {
 
-  def start(): OmnibusReceptionist = {
+  def start() = {
 
     implicit val system = ActorSystem("omnibus")
     implicit def executionContext = system.dispatcher
@@ -42,12 +42,10 @@ object OmnibusBuilder {
     val httpStatService = system.actorOf(HttpStatistics.props, "http-stat-service")
 
     // HttpService actor exposing omnibus routes
-    val omnibusHttp = system.actorOf(HttpEndpoint.props(omnibusService, httpStatService), "omnibus-http")
+    val omnibusHttp = system.actorOf(HttpEndpoint.props(omnibusService, httpStatService, topicRepository), "omnibus-http")
 
     log.info(s"Omnibus starting on port $httpPort ~~> ")
 
     IO(Http) ! Http.Bind(omnibusHttp, "localhost", port = httpPort)
-
-    new OmnibusReceptionist(system, omnibusService)
   }
 }

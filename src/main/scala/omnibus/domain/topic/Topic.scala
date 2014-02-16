@@ -4,6 +4,8 @@ import akka.actor._
 import akka.persistence._
 
 import scala.concurrent.duration._
+import scala.concurrent._
+import scala.concurrent.Promise._
 import scala.language.postfixOps
 import scala.collection.mutable.ListBuffer
 
@@ -50,7 +52,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     case ForwardToSubscribers(message)       => forwardToSubscribers(message)
     case Subscribe(subscriber)               => subscribe(subscriber)
     case Unsubscribe(subscriber)             => unsubscribe(subscriber)
-    case CreateSubTopic(topics)              => createSubTopic(topics)
+    case CreateSubTopic(topics, promise)     => createSubTopic(topics, promise)
     case Terminated(refSub)                  => unsubscribe(refSub) //TODO not the perfect method for the job
     case Replay(refSub)                      => forwardMessagesReplay(refSub)
     case Last(refSub)                        => forwardLastMessage(refSub)
@@ -71,9 +73,9 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   def view() : TopicView = {
-    val prettyPath = Topic.prettyPath(self)
+    val prettyPath = TopicPath.prettyStr(self)
     val subTopicNumber = subTopics.size
-    val prettyChildren = subTopics.values.map(Topic.prettyPath(_)).toSeq
+    val prettyChildren = subTopics.values.map(TopicPath.prettyStr(_)).toSeq
     TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents, creationDate)
   }
 
@@ -181,20 +183,20 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     statHolder ! TopicStatProtocol.SubscriberRemoved
   }
 
-  def createSubTopic(topics: List[String]) = topics match {
-    case head :: tail => createTopicAndForward(head, tail)
-    case _ => log.debug("No more sub topic to create")
+  def createSubTopic(topics: List[String], promise : Promise[Boolean]) = topics match {
+    case head :: tail => createTopicAndForward(head, tail, promise)
+    case _            => promise.success(true) ; log.debug("No more sub topic to create")
   }
 
-  def createTopicAndForward(subTopic: String, topics: List[String]) = {
+  def createTopicAndForward(subTopic: String, topics: List[String], promise : Promise[Boolean]) = {
     log.debug(s"Create sub topic $subTopic and forward $topics")
     if (subTopics.contains(subTopic)) {
       log.debug(s"sub topic $subTopic already exists, forward to its sub topics")
-      subTopics(subTopic) ! TopicProtocol.CreateSubTopic(topics)
+      subTopics(subTopic) ! TopicProtocol.CreateSubTopic(topics, promise)
     } else {
       val subTopicActor = context.actorOf(Topic.props(subTopic), subTopic)
       subTopics += (subTopic -> subTopicActor)
-      subTopicActor ! TopicProtocol.CreateSubTopic(topics)
+      subTopicActor ! TopicProtocol.CreateSubTopic(topics, promise)
       // report stats
       statHolder ! TopicStatProtocol.SubTopicAdded
     }
@@ -235,7 +237,7 @@ object TopicProtocol {
   case class SetupReactiveMode(subscriber: ActorRef, cmd : ReactiveCmd) extends Operation
   case class Subscribe(subscriber: ActorRef) extends Operation
   case class Unsubscribe(subscriber: ActorRef) extends Operation
-  case class CreateSubTopic(topics: List[String])
+  case class CreateSubTopic(topics: List[String], promise : Promise[Boolean])
   case class Leaves(replyTo : ActorRef)
   case object SubscriberNumber
   case object Delete
@@ -255,8 +257,6 @@ object TopicProtocol {
   trait Operation{}
 }
 
-object Topic {
-  def prettyPath(ref: ActorRef) = ref.path.toString.split("/topic-repository").toList(1)
-  
-  def props(topic: String) : Props = Props(classOf[Topic], topic)
+object Topic {  
+  def props(topic: String) = Props(classOf[Topic], topic).withDispatcher("topics-dispatcher")
 }

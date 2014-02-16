@@ -14,7 +14,7 @@ object SubscriptionMode extends Enumeration {
     def apply(value: String) : Either[DeserializationError, SubscriptionMode] = {
       try Right(SubscriptionMode.withName(value))
       catch {
-        case e: Exception => Left(MalformedContent(s"The subscriptionMode is not valid - please use one of ${SubscriptionMode.values}"))
+        case e: Exception => Left(MalformedContent(s"The subscriptionMode is not valid - please use one of ${SubscriptionMode.values} \n"))
       }  
     }
   } 

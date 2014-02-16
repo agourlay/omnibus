@@ -36,7 +36,7 @@ class HttpStatStream(responder: ActorRef, statsRepo : ActorRef) extends Streamin
   }
 
   override def receive = ({
-    case RequestHttpStats => (statsRepo ? HttpStatisticsProtocol.LiveStats).mapTo[HttpStats] pipeTo self
+    case RequestHttpStats => statsRepo ! HttpStatisticsProtocol.LiveStats
     case stat : HttpStats => responder ! MessageChunk("data: "+ formatHttpServerStats.write(stat) +"\n\n")
   }: Receive) orElse super.receive
 }
@@ -46,5 +46,5 @@ object HttpStatStreamProtocol {
 }
 
 object HttpStatStream {
-  def props(responder: ActorRef, statsRepo : ActorRef) = Props(classOf[HttpStatStream], responder, statsRepo)
+  def props(responder: ActorRef, statsRepo : ActorRef) = Props(classOf[HttpStatStream], responder, statsRepo).withDispatcher("streaming-dispatcher")
 }

@@ -7,7 +7,9 @@ import scala.language.postfixOps
 
 import omnibus.domain.subscriber.Subscriber
 import omnibus.domain.subscriber.ReactiveCmd
+import omnibus.domain.topic.TopicPath
 import omnibus.repository.SubscriberRepositoryProtocol._
+import omnibus.http.streaming.HttpTopicSubscriber
 
 class SubscriberRepository extends Actor with ActorLogging {
 
@@ -19,8 +21,14 @@ class SubscriberRepository extends Actor with ActorLogging {
 
   def createSub(topics: Set[ActorRef], responder: ActorRef, reactiveCmd: ReactiveCmd, http: Boolean) = {
     log.debug("Creating sub on topics " + topics)
-    context.actorOf(Subscriber.props(responder, topics, reactiveCmd, http))
+    // HttpSubscriber will proxify the responder
+    if (http) { 
+      val prettyTopics = TopicPath.prettySubscription(topics)     
+      val httpSub = context.actorOf(HttpTopicSubscriber.props(responder, reactiveCmd, prettyTopics))
+      context.actorOf(Subscriber.props(httpSub, topics, reactiveCmd))
+    } else context.actorOf(Subscriber.props(responder, topics, reactiveCmd))
   }
+
 }
 
 object SubscriberRepositoryProtocol {
@@ -28,5 +36,5 @@ object SubscriberRepositoryProtocol {
 }
 
 object SubscriberRepository {
-	def props : Props = Props(classOf[SubscriberRepository])
+	def props = Props(classOf[SubscriberRepository]).withDispatcher("subscribers-dispatcher")
 }

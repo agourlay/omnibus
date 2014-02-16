@@ -20,8 +20,7 @@ import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.ReactiveMode._
 import omnibus.domain.subscriber.SubscriberProtocol._
 
-class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String)
-                     extends StreamingResponse(responder) {
+class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) extends StreamingResponse(responder) {
 
   val react = cmd.react
   val sub = cmd.sub
@@ -31,14 +30,12 @@ class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : S
     case message: Message          => responder ! MessageObj.toMessageChunk(message)     
     case ev: Http.ConnectionClosed => {
       log.info("Stopping response streaming due to {}", ev)
-      // kill parent!
-      context.parent ! SubscriberProtocol.StopSubscription
-      // and kill itself just in case :D
       context.stop(self)
     }  
   }: Receive) orElse super.receive
 }
 
 object HttpTopicSubscriber {
-  def props(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) = Props(classOf[HttpTopicSubscriber], responder, cmd, topicsPath)
+  def props(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) =
+      Props(classOf[HttpTopicSubscriber], responder, cmd, topicsPath).withDispatcher("streaming-dispatcher")
 }

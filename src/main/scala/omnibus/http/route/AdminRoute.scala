@@ -29,10 +29,10 @@ import omnibus.http.JsonSupport._
 import omnibus.http.streaming._
 import omnibus.configuration._
 import omnibus.domain._
-import omnibus.service._
-import omnibus.service.OmnibusServiceProtocol._
+import omnibus.domain.topic._
+import omnibus.repository._
 
-class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) extends Directives {
+class AdminRoute(topicRepo : ActorRef) (implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
   implicit def system = context.system
@@ -45,10 +45,12 @@ class AdminRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
       authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
         path("topics" / Rest) { topic =>
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
+            val topicPath = TopicPath(topic)
+            val prettyTopic = topicPath.prettyStr()
             delete { ctx =>
-              val futureDel = (omnibusService ? OmnibusServiceProtocol.DeleteTopic(topic)).mapTo[Boolean]
+              val futureDel = (topicRepo ? TopicRepositoryProtocol.DeleteTopic(topicPath)).mapTo[Boolean]
               futureDel.onComplete {
-                case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Topic $topic deleted\n")
+                case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Topic $prettyTopic deleted\n")
                 case Failure(ex) => ctx.complete(ex)
               }
             }

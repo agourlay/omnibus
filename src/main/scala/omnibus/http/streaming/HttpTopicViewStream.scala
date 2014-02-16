@@ -39,5 +39,6 @@ class HttpTopicViewStream(responder: ActorRef, roots: List[ActorRef]) extends St
 }
 
 object HttpTopicViewStream {
-  def props(responder: ActorRef, roots: List[ActorRef]) : Props = Props(classOf[HttpTopicViewStream], responder, roots)
+  def props(responder: ActorRef, roots: List[ActorRef]) = 
+      Props(classOf[HttpTopicViewStream], responder, roots).withDispatcher("streaming-dispatcher")
 }

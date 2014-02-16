@@ -17,7 +17,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
   implicit val system = context.system
   implicit def executionContext = context.dispatcher
 
-  lazy val prettyPath = Topic.prettyPath(topicRef)
+  lazy val prettyPath = TopicPath.prettyStr(topicRef)
 
   val storageInterval = Settings(system).Statistics.StorageInterval
   val retentionTime = Settings(system).Statistics.RetentionTime

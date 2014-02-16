@@ -39,8 +39,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
     system.scheduler.schedule(storageInterval, storageInterval, self, HttpStatisticsProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, HttpStatisticsProtocol.PurgeOldData)
     system.scheduler.schedule(pushInterval, pushInterval){
-      val stats = (context.actorSelection("/user/IO-HTTP/listener-0") ? Http.GetStats).mapTo[Stats]
-      stats pipeTo self
+       context.actorSelection("/user/IO-HTTP/listener-0") ! Http.GetStats
     }
     log.debug(s"Creating system HttpStatistics holder")
     super.preStart()

@@ -43,7 +43,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val akkaV       = "2.3.0-RC2"
+  val akkaV       = "2.3.0-RC3"
   val sprayV      = "1.3-RC1"
   val sprayJsonV  = "1.2.5"
   val logbackV    = "1.1.1"
@@ -67,7 +67,7 @@ libraryDependencies ++= {
       ,"org.specs2"            %%  "specs2-core"                    % specs2V      % "test"   withSources()
       ,"org.scalacheck"        %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
       ,"org.scalatest"         %%  "scalatest"                      % scalaTestV   % "test"   withSources()
-      ,"io.gatling.highcharts" %  "gatling-charts-highcharts"       % gatlingV     % "test"   withSources()
+      ,"io.gatling.highcharts" %   "gatling-charts-highcharts"      % gatlingV     % "test"   withSources()
   )
 }
 

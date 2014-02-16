@@ -9,10 +9,8 @@ import omnibus.domain._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber.SubscriberProtocol._
 import omnibus.domain.subscriber.ReactiveMode._
-import omnibus.http.streaming.HttpTopicSubscriber
 
-class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd
-               , val http : Boolean, val timestamp: Long)
+class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long)
     extends Actor with ActorLogging {
 
   implicit val system = context.system
@@ -21,18 +19,16 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
   var pendingTopic: Set[ActorRef] = topics
   var topicListened: Set[ActorRef] = Set.empty[ActorRef]
   var idsSeen: Set[Long] = Set.empty[Long]   // set of all event ids seen by this subscriber 
-  val topicsName = topics.map(Topic.prettyPath(_))
+  val topicsPath : Set[TopicPath] = topics.map(TopicPath(_))
 
   override def preStart() = {
-    val prettyTopics = prettySubscription(topics)
+    val prettyTopics = TopicPath.prettySubscription(topics)
     val react = reactiveCmd.react
     val sub = reactiveCmd.sub
     log.debug(s"Creating sub on topics $prettyTopics with react $react and sub $sub")
 
-    if (http) {
-      // HttpSubscriber will proxify the responder, cool huh?
-      responder = context.actorOf(HttpTopicSubscriber.props(responder, reactiveCmd, prettyTopics))
-    }
+    // Death pact with responder! 
+    context.watch(responder)
 
     // subscribe to every topic
     for (topic <- topics) { topic ! TopicProtocol.Subscribe(self) }
@@ -45,10 +41,7 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
     case AcknowledgeSub(topicRef)   => ackSubscription(topicRef)
     case AcknowledgeUnsub(topicRef) => topicListened -= topicRef
     case StopSubscription           => stopSubscription()
-    case PendingAckTopic            => sender ! prettySubscription(pendingTopic)
-    case AcknowledgedTopic          => sender ! prettySubscription(topicListened)
     case RefreshTopics              => refreshTopics()
-    case Terminated(topicRef)       => handleTopicDeath(topicRef)
     case message: Message           => sendMessage(message)
   }
 
@@ -67,7 +60,7 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
 
   def filterAccordingSubMode(msg: Message) = reactiveCmd.sub match {
     case SubscriptionMode.WIDE => true
-    case SubscriptionMode.CLASSIC => topicsName.contains(msg.topicName)
+    case SubscriptionMode.CLASSIC => topicsPath.contains(msg.topicPath)
   }
 
   def sendMessage(msg: Message) = {
@@ -76,11 +69,6 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
       responder ! msg
       idsSeen += msg.id
     }
-  }
-
-  def handleTopicDeath(topicRef: ActorRef) = {
-    topicListened -= topicRef
-    pendingTopic += topicRef
   }
 
   def refreshTopics() {
@@ -94,6 +82,7 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
   def ackSubscription(topicRef: ActorRef) = {
     topicListened += topicRef
     pendingTopic -= topicRef
+    // Death pact with topic ! 
     context.watch(topicRef)
     log.debug(s"subscriber successfully subscribed to $topicRef")
     // we are successfully registered to the topic, let's use the reactive cm if not simple
@@ -102,23 +91,16 @@ class Subscriber(var responder: ActorRef, val topics: Set[ActorRef], val reactiv
       case _                   => topicRef ! TopicProtocol.SetupReactiveMode(self, reactiveCmd)
     }
   }
-
-  def prettySubscription(topicToDisplay: Set[ActorRef]): String = {
-    val setOfTopic = topicToDisplay.map(Topic.prettyPath(_))
-    setOfTopic.mkString(" + ")
-  }
 }
 
 object SubscriberProtocol {
   case class AcknowledgeSub(topic: ActorRef)
   case class AcknowledgeUnsub(topic: ActorRef)
   case object StopSubscription
-  case object PendingAckTopic
-  case object AcknowledgedTopic
   case object RefreshTopics
 }
 
 object Subscriber {
-  def props(responder: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd, http : Boolean) : Props 
-    = Props(classOf[Subscriber], responder, topics, reactiveCmd, http, System.currentTimeMillis / 1000)
+  def props(responder: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd) 
+    = Props(classOf[Subscriber], responder, topics, reactiveCmd, System.currentTimeMillis / 1000).withDispatcher("subscribers-dispatcher")
 }

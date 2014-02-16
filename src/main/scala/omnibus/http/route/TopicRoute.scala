@@ -28,10 +28,11 @@ import omnibus.domain._
 import omnibus.domain.subscriber._
 import omnibus.domain.topic._
 import omnibus.configuration._
+import omnibus.repository._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 
-class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) extends Directives {
+class TopicRoute(omnibusService: ActorRef, topicRepo : ActorRef) (implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
@@ -48,32 +49,28 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
 
   val route =
     path("topics" / Rest) { topic =>  
+      val topicPath = TopicPath(topic)
+      val prettyTopic = topicPath.prettyStr()
       get {
         respondWithMediaType(HALType) {
           complete {
-            if (topic.isEmpty) (omnibusService ? OmnibusServiceProtocol.AllRoots).mapTo[List[TopicView]]
-            else (omnibusService ? OmnibusServiceProtocol.ViewTopic(topic)).mapTo[TopicView]
+            if (topic.isEmpty) (topicRepo ? TopicRepositoryProtocol.AllRoots).mapTo[List[TopicView]]
+            else (topicRepo ? TopicRepositoryProtocol.TopicViewReq(topicPath)).mapTo[TopicView]
           }
         }
       } ~
-      post { ctx =>
-        val futureExist = (omnibusService ? OmnibusServiceProtocol.CheckTopic(topic)).mapTo[Boolean]
-        futureExist.onComplete {
-          case Success(exists) => {
-            if(exists) ctx.complete(StatusCodes.Accepted, Location(ctx.request.uri):: Nil, s"Topic $topic already exist \n")
-            else {                      
-              omnibusService ! OmnibusServiceProtocol.CreateTopic(topic)
-              ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $topic created \n") 
-            }
-          }
+      post { ctx =>                       
+        val futureCreate = (topicRepo ? TopicRepositoryProtocol.CreateTopic(topicPath)).mapTo[Boolean]
+        futureCreate.onComplete {
+          case Success(ok) => ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $prettyTopic created \n") 
           case Failure(ex) => ctx.complete(ex)
         } 
       } ~
       entity(as[String]) { message =>
         put { ctx =>
-          val futurePub = (omnibusService ? OmnibusServiceProtocol.PublishToTopic(topic, message)).mapTo[Boolean]
+          val futurePub = (topicRepo ? TopicRepositoryProtocol.PublishToTopic(topicPath, message)).mapTo[Boolean]
           futurePub.onComplete {
-            case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Message published to topic $topic\n")
+            case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
             case Failure(ex) => ctx.complete(ex)
           } 
         }
@@ -81,10 +78,10 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
     } ~ 
     pathPrefix("streams") {
       path("topics" / Rest) { topic =>
-        validate(!topic.isEmpty, "topic name cannot be empty \n") {    
+        validate(!topic.isEmpty, "topic name cannot be empty \n") {
           parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?, 'sub.as[String] ? "classic").as(ReactiveCmd) { reactiveCmd =>
             get { ctx =>
-              val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(topic, ctx.responder, reactiveCmd, true)).mapTo[Boolean]
+              val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(TopicPath(topic), ctx.responder, reactiveCmd, true)).mapTo[Boolean]
               future.onComplete {
                 case Success(result) => log.debug("Alles klar, let's stream")
                 case Failure(ex)     => ctx.complete(ex)
@@ -96,9 +93,8 @@ class TopicRoute(omnibusService: ActorRef) (implicit context: ActorContext) exte
     } ~
     path("leaves") {
       get { ctx =>
-        omnibusService ! OmnibusServiceProtocol.AllLeaves(ctx.responder)
+        topicRepo ! TopicRepositoryProtocol.AllLeaves(ctx.responder)
         context.system.scheduler.scheduleOnce(10.seconds){ctx.complete("Connection closes")}
       }
     }
-
 }

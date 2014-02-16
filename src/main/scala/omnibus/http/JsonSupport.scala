@@ -16,6 +16,15 @@ import omnibus.domain.topic._
 import omnibus.http.stats.HttpStats
 
 object JsonSupport {
+
+  implicit val formatTopicPath = new RootJsonFormat[TopicPath] {
+    def write(obj: TopicPath): JsValue = JsObject(
+      "topicPath"           -> JsString(obj.prettyStr())
+    )
+    // we don't need to deserialize the TopicPath
+    def read(json: JsValue): TopicPath = ???
+  }  
+
   implicit val formatMessage = jsonFormat4(Message)
 
   implicit val formatTopicStats = new RootJsonFormat[TopicStatisticValue] {
@@ -33,20 +42,20 @@ object JsonSupport {
 
   implicit val formatTopicView = new RootJsonFormat[TopicView] {
     def write(obj: TopicView): JsValue = JsObject(
-      "topic"              -> JsArray(obj.topic.split("/").tail.map(JsString(_)).toList),
+      "topic"              -> JsArray(obj.topic.split("/").map(JsString(_)).toList),
       "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
       "subscribersNumber"  -> JsNumber(obj.subscribersNumber),
       "eventsNumber"       -> JsNumber(obj.numEvents),
       "creationDate"       -> JsNumber(obj.creationDate),
       "viewDate"           -> JsNumber(obj.viewDate),  
       "_embedded"          -> JsObject("children" -> JsArray(
-        obj.children.map( child => JsObject( child.split("/").last ->  JsObject("href" -> JsString("/topics"+child)))).toList
+        obj.children.map( child => JsObject( child.split("/").last ->  JsObject("href" -> JsString("/topics/"+child)))).toList
         )
       ),
       "_links"             -> JsArray(
-        JsObject("self"      -> JsObject("href" -> JsString("/topics"+obj.topic))),
-        JsObject("subscribe" -> JsObject("href" -> JsString("/streams/topics"+obj.topic))),
-        JsObject("stats"     -> JsObject("href" -> JsString("/stats/topics"+obj.topic)))
+        JsObject("self"      -> JsObject("href" -> JsString("/topics/"+obj.topic))),
+        JsObject("subscribe" -> JsObject("href" -> JsString("/streams/topics/"+obj.topic))),
+        JsObject("stats"     -> JsObject("href" -> JsString("/stats/topics/"+obj.topic)))
       )
     )
 

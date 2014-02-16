@@ -7,7 +7,6 @@ Omnibus is an HTTP-friendly reactive message bus which means :
  - Updates are streamed by [Server-Sent-Event](http://www.html5rocks.com/en/tutorials/eventsource/basics/) which can be easily consumed by javascript frontends. 
  - With reactive modes it is possible to replay specific parts of the events.
  - Subscriptions can be composed via the url keyword `+`.
- - It can be integrated in an existing [Akka](http://akka.io/) application. (experimental)
 
 **This is still a work in progress, any API is likely to change** 
  
@@ -199,11 +198,7 @@ So far only [Cassandra](http://cassandra.apache.org/) is supported through the a
 
 The retention time is configurable as well for both persistence solutions.
 
-## Usage and installation
-
-There are two ways of running Omnibus
-
-### As a standalone process.
+## Installation and configuration
 
 Get the latest omnibus.tar distribution, extract and run the starting script in `/bin`.
 
@@ -211,36 +206,27 @@ This starts Omnibus on default port 8080.
 
 You can configure the system by changing the properties in `/conf/application.conf`.
 
-### As an embedded library (experimental)
-
-It is possible to integrate Omnibus in an existing Akka application. This is still an experimental feature, any feedback on the API is welcome.
-
-Add the latest omnibus.jar to your application by building from source with sbt `publishLocal`
-
 ```
-libraryDependencies += "com.agourlay" % "omnibus" % "0.2-SNAPSHOT"
+omnibus {
+    http {
+        port = 8080
+    }
+    admin {
+        userName = "admin"
+        password = "omnibus"
+    }
+    timeout {
+        ask = "5 seconds"
+    }
+    topic {
+        retentionTime = "3 days"
+    }
+    statistics{
+        storageInterval = "60 seconds"
+        pushInterval = "1 second"
+        retentionTime = "3 days"
+        resolution = "3 seconds"
+    }
+}
 ```
 
-and then call :
-
-```scala
-val receptionist : OmnibusReceptionist = omnibus.service.OmnibusBuilder.start()
-``` 
-
-This will start the Omnibus system on the given port and return an OmnibusReceptionist object that offers all the useful methods to interact with the system :
-
-```scala
-  def createTopic(topicName : String)
-  def deleteTopic(topicName : String)
-  def checkTopic(topicName : String) : Future[Boolean]
-  def publishToTopic(topicName : String, message : String) 
-  def subToTopic(topicName : String, subscriber : ActorRef, reactCmd : ReactiveCmd) : Future[Boolean]
-  def unsubFromTopic(topicName : String, subscriber : ActorRef)
-  def shutDownOmnibus()
-```  
-
-The subscriber's actorRef will receive this kind of updates
-
-```scala
-omnibus.domain.Message(id : Long, topicName : String, payload : String, timestamp : Long)
-```

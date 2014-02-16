@@ -18,5 +18,5 @@ case class ReactiveCmd(val react: ReactiveMode
     case SINCE_TS   => since.nonEmpty
     case BETWEEN_ID => since.nonEmpty && to.nonEmpty
     case BETWEEN_TS => since.nonEmpty && to.nonEmpty
-    }, s"reactiveMode argument(s) is missing ")
+    }, s"reactiveMode argument(s) is missing \n")
 }

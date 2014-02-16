@@ -36,7 +36,7 @@ class HttpTopicStatStream(responder: ActorRef, topic : ActorRef) extends Streami
   }
 
   override def receive = ({
-    case RequestTopicStats          => (topic ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticValue] pipeTo self
+    case RequestTopicStats          => topic ! TopicStatProtocol.LiveStats
     case stat : TopicStatisticValue => responder ! MessageChunk("data: "+ formatTopicStats.write(stat) +"\n\n")
   }: Receive) orElse super.receive
 }
@@ -46,5 +46,5 @@ object HttpTopicStatStreamProtocol {
 }
 
 object HttpTopicStatStream {
-  def props(responder: ActorRef, topic : ActorRef) = Props(classOf[HttpTopicStatStream], responder, topic)
+  def props(responder: ActorRef, topic : ActorRef) = Props(classOf[HttpTopicStatStream], responder, topic).withDispatcher("streaming-dispatcher")
 }
