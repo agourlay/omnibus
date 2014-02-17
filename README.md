@@ -9,7 +9,6 @@ Omnibus is an HTTP-friendly reactive message bus which means :
  - Subscriptions can be composed via the url keyword `+`.
 
 [![Build Status](https://travis-ci.org/agourlay/omnibus.png?branch=master)](https://travis-ci.org/agourlay/omnibus)
-[![Coverage Status](https://coveralls.io/repos/agourlay/omnibus/badge.png?branch=master)](https://coveralls.io/r/agourlay/omnibus?branch=master)
 
 **This is still a work in progress, any API is likely to change** 
  
