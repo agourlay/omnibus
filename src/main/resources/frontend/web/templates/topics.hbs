@@ -14,27 +14,33 @@
 	</thead>
 	<tbody>
 		{{#each controller}}
-			<tr>
+			{{#view App.TopicRowView topicBinding="this"}}
 				<td>
-					{{#if hasSubTopics}}
-					    <a href="#" {{action "expandTopic" subTopics}}>
-					        <i class="fa fa-plus-square-o"></i>
-					    </a>
+					{{#if view.topic.hasSubTopics}}
+						{{#if view.isExpanded}}
+						    <a href="#" {{action "expand" view.topic.subTopics target="view"}}>
+						        <i class="fa fa-minus-square-o"></i>
+						    </a>
+						{{else}} 
+							<a href="#" {{action "expand" view.topic.subTopics target="view"}}>
+						        <i class="fa fa-plus-square-o"></i>
+						    </a>
+						{{/if}}   
 					{{/if}}
 				</td>
 			    <td style="text-align: left;">
-			    	<b>{{#link-to 'topic' name}}{{name}}{{/link-to}}</b>
+			    	<b>{{#link-to 'topic' view.topic.name}}{{view.topic.name}}{{/link-to}}</b>
 			    </td>
-			    <td>{{subscribersNumber}}</td>
-			    <td>{{eventsNumber}}</td>
-			    <td>{{subTopicsNumber}}</td>
-			    <td>{{prettyCreationDate}}</td>
+			    <td>{{view.topic.subscribersNumber}}</td>
+			    <td>{{view.topic.eventsNumber}}</td>
+			    <td>{{view.topic.subTopicsNumber}}</td>
+			    <td>{{view.topic.prettyCreationDate}}</td>
 			    <td>
 			       <a class="pure-button delete-button pure-button-disabled">
 			       		<i class="fa fa-trash-o"></i>
 			       </a>
 			    </td>
-			</tr>
+			{{/view}}
 		{{/each}}
 	</tbody>
 </table>
