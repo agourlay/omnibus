@@ -1,4 +1,4 @@
-Omnibus [![Build Status](https://travis-ci.org/agourlay/omnibus.png?branch=master)](https://travis-ci.org/agourlay/omnibus)
+Omnibus 
 =========
 
 Omnibus is an HTTP-friendly reactive message bus which means :
@@ -7,6 +7,9 @@ Omnibus is an HTTP-friendly reactive message bus which means :
  - Updates are streamed by [Server-Sent-Event](http://www.html5rocks.com/en/tutorials/eventsource/basics/) which can be easily consumed by javascript frontends. 
  - With reactive modes it is possible to replay specific parts of the events.
  - Subscriptions can be composed via the url keyword `+`.
+
+[![Build Status](https://travis-ci.org/agourlay/omnibus.png?branch=master)](https://travis-ci.org/agourlay/omnibus)
+[![Coverage Status](https://coveralls.io/repos/agourlay/omnibus/badge.png?branch=master)](https://coveralls.io/r/agourlay/omnibus?branch=master)
 
 **This is still a work in progress, any API is likely to change** 
  
@@ -160,6 +163,38 @@ All the topics must exist at the moment of the subscription or the whole request
 
 Of course you are can use reactive modes on composed subscriptions but be ready to handle the flow of data if you target a root topic with the replay mode :D
 
+## Installation and configuration
+
+Get the latest omnibus.tar distribution, extract and run the starting script in `/bin`.
+
+This starts Omnibus on default port 8080.
+
+You can configure the system by changing the properties in `/conf/application.conf`.
+
+```
+omnibus {
+    http {
+        port = 8080
+    }
+    admin {
+        userName = "admin"
+        password = "omnibus"
+    }
+    timeout {
+        ask = "5 seconds"
+    }
+    topic {
+        retentionTime = "3 days"
+    }
+    statistics{
+        storageInterval = "60 seconds"
+        pushInterval = "1 second"
+        retentionTime = "3 days"
+        resolution = "3 seconds"
+    }
+}
+```
+
 ## Administration
 
 All administration features are protected by http basic authentication. (better than nothing for now)
@@ -197,36 +232,3 @@ By default those are persisted to disk but it is possible to store events using 
 So far only [Cassandra](http://cassandra.apache.org/) is supported through the akka-persistence-plugin, see [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for complete configuration.
 
 The retention time is configurable as well for both persistence solutions.
-
-## Installation and configuration
-
-Get the latest omnibus.tar distribution, extract and run the starting script in `/bin`.
-
-This starts Omnibus on default port 8080.
-
-You can configure the system by changing the properties in `/conf/application.conf`.
-
-```
-omnibus {
-    http {
-        port = 8080
-    }
-    admin {
-        userName = "admin"
-        password = "omnibus"
-    }
-    timeout {
-        ask = "5 seconds"
-    }
-    topic {
-        retentionTime = "3 days"
-    }
-    statistics{
-        storageInterval = "60 seconds"
-        pushInterval = "1 second"
-        retentionTime = "3 days"
-        resolution = "3 seconds"
-    }
-}
-```
-
