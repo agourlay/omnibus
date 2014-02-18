@@ -9,12 +9,26 @@ App.TopicsController = Ember.ArrayController.extend({
     var controller = this;
     if (newTopic) {
       App.Dao.postTopic(newTopic).done(function() {
-        App.Dao.topics().then(function(topics){
-          controller.content.clear();
-          controller.content.pushObjects(topics);  
-        });
+        controller.reloadContent();
       });
     }  
+  },
+
+  deleteTopic : function(topicName) {
+    var controller = this;
+    if (topicName) {
+      App.Dao.deleteTopic(topicName).done(function() {
+        controller.reloadContent();
+      });
+    }  
+  },
+
+  reloadContent : function() {
+    var controller = this;
+    App.Dao.topics().then(function(topics){
+      controller.content.clear();
+      controller.content.pushObjects(topics);  
+    });
   },
 
   expandTopic: function(topicsName){

@@ -164,7 +164,14 @@ App.Dao = Em.Object.create({
             method: "POST",
             contentType: "application/json"
         });
-    }
+    },
 
+    deleteTopic : function(topicName) {
+        return $.ajax({
+            url: "/admin/topics/"+topicName,
+            method: "DELETE",
+            contentType: "application/json"
+        });
+    }
 });
 

@@ -46,9 +46,9 @@
 			    <td>{{view.topic.subTopicsNumber}}</td>
 			    <td>{{view.topic.prettyCreationDate}}</td>
 			    <td>
-			       <a class="pure-button delete-button pure-button-disabled">
-			       		<i class="fa fa-trash-o"></i>
-			       </a>
+					<button class="pure-button delete-button" {{action "deleteTopic" view.topic.name}}>
+						<i class="fa fa-trash-o"></i>
+					</button>
 			    </td>
 			{{/view}}
 		{{/each}}
