@@ -53,7 +53,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     case Subscribe(subscriber)               => subscribe(subscriber)
     case Unsubscribe(subscriber)             => unsubscribe(subscriber)
     case CreateSubTopic(topics, promise)     => createSubTopic(topics, promise)
-    case Terminated(refSub)                  => unsubscribe(refSub) //TODO not the perfect method for the job
+    case Terminated(refSub)                  => handleTerminated(refSub)
     case Replay(refSub)                      => forwardMessagesReplay(refSub)
     case Last(refSub)                        => forwardLastMessage(refSub)
     case SinceID(refSub, eventID)            => forwardMessagesSinceID(refSub, eventID)
@@ -183,6 +183,17 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     statHolder ! TopicStatProtocol.SubscriberRemoved
   }
 
+  // It is either a subtopic or a subscriber
+  def handleTerminated(ref : ActorRef) = {
+    // FIXME it is SUPER ugly there
+    if (subTopics.values.toSeq.contains(ref)) {
+      val key = subTopics.find(_._2 == ref).get._1
+      subTopics -= (key)
+    } else {
+      unsubscribe(ref)
+    }
+  }
+
   def createSubTopic(topics: List[String], promise : Promise[Boolean]) = topics match {
     case head :: tail => createTopicAndForward(head, tail, promise)
     case _            => promise.success(true) ; log.debug("No more sub topic to create")
@@ -195,6 +206,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
       subTopics(subTopic) ! TopicProtocol.CreateSubTopic(topics, promise)
     } else {
       val subTopicActor = context.actorOf(Topic.props(subTopic), subTopic)
+      context.watch(subTopicActor)
       subTopics += (subTopic -> subTopicActor)
       subTopicActor ! TopicProtocol.CreateSubTopic(topics, promise)
       // report stats
