@@ -3,6 +3,20 @@ App.TopicsController = Ember.ArrayController.extend({
   sortProperties: ['name'],
   sortAscending: true,
 
+  newTopicName : null,
+
+  createTopic : function(newTopic) {
+    var controller = this;
+    if (newTopic) {
+      App.Dao.postTopic(newTopic).done(function() {
+        App.Dao.topics().then(function(topics){
+          controller.content.clear();
+          controller.content.pushObjects(topics);  
+        });
+      });
+    }  
+  },
+
   expandTopic: function(topicsName){
   	var controller = this;
     $.each(topicsName, function(i, topic){

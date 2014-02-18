@@ -1,3 +1,13 @@
+<h4>Create topics</h4>
+
+<form class="pure-form">
+	{{view Ember.TextField valueBinding="App.TopicsController.newTopicName" placeholder="new/topic" }}
+	<button class="pure-button pure-button-primary" 
+	{{action "createTopic" App.TopicsController.newTopicName}}>
+		<i class="fa fa-plus-circle"></i>
+	</button>
+</form>
+
 <h4>Root topics</h4>
 
 <table id="center-table" class="pure-table pure-table-horizontal pure-table-striped">

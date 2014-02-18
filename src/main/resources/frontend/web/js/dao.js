@@ -156,6 +156,14 @@ App.Dao = Em.Object.create({
             return model.get("name") + "/" +Object.keys(obj); 
         }))
         return model;
+    },
+
+    postTopic : function(topicName) {
+        return $.ajax({
+            url: "/topics/"+topicName,
+            method: "POST",
+            contentType: "application/json"
+        });
     }
 
 });
