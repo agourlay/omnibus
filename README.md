@@ -206,6 +206,8 @@ The administration module exposes only one API for now.
 
 You can also access the administration web interface running on http://localhost:8080/ to navigate through topics and follow API usage.
 
+![Screenshot](./docs/screenshot.png)
+
 ## Monitoring
 
 If you just want to get raw data about usage, omnibus exposes statistics concerning all topics and the system itself following three modes.
@@ -226,7 +228,7 @@ If you just want to get raw data about usage, omnibus exposes statistics concern
 
 Omnibus persists events in order to be able to replay them later.
 
-By default those are persisted to disk but it is possible to store events using an external database.
+By default those events are persisted to a local LevelDB instance. The location of the LevelDB files is a directory named `/data` in the current working directory but it is possible to store events using an external database.
 
 So far only [Cassandra](http://cassandra.apache.org/) is supported through the akka-persistence-plugin, see [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for complete configuration.
 
