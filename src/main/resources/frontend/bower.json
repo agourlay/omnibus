@@ -23,7 +23,7 @@
     "momentjs": "2.5.1",
     "rickshaw" : "1.4.6",
     "font-awesome": "4.0.3",
-    "d3" : "3.4.1",
+    "d3" : "3.4.2",
     "bacon" : "0.7.3"
   },
   "resolutions": {

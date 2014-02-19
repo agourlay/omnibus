@@ -233,3 +233,7 @@ By default those events are persisted to a local LevelDB instance. The location 
 So far only [Cassandra](http://cassandra.apache.org/) is supported through the akka-persistence-plugin, see [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for complete configuration.
 
 The retention time is configurable as well for both persistence solutions.
+
+## Contribute
+
+...
