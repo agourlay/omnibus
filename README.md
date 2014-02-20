@@ -236,18 +236,20 @@ So far only [Cassandra](http://cassandra.apache.org/) is supported through the a
 
 The retention time is configurable as well for both persistence solutions.
 
-## Contribute
+## Build and contribute
 
 Build the project with sbt, I personnaly like `~re-start` to restart the application automatically when a file system change occurs.
 
 If you want to build the frontend, you need [Bower](http://bower.io/) and [Grunt](http://gruntjs.com/) for javascript build management.
 
-Then in the folder 'src/main/resources/frontend' run 
+Then in the folder `src/main/resources/frontend` run 
 
 >npm install
 
 >bower install
 
 >grunt
+
+Then you are good to go!
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/agourlay/omnibus/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
