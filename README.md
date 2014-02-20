@@ -1,4 +1,4 @@
-Omnibus 
+Omnibus  [![Build Status](https://travis-ci.org/agourlay/omnibus.png?branch=master)](https://travis-ci.org/agourlay/omnibus)
 =========
 
 Omnibus is an HTTP-friendly reactive message bus which means :
@@ -7,8 +7,6 @@ Omnibus is an HTTP-friendly reactive message bus which means :
  - Updates are streamed by [Server-Sent-Event](http://www.html5rocks.com/en/tutorials/eventsource/basics/) which can be easily consumed by javascript frontends. 
  - With reactive modes it is possible to replay specific parts of the events.
  - Subscriptions can be composed via the url keyword `+`.
-
-[![Build Status](https://travis-ci.org/agourlay/omnibus.png?branch=master)](https://travis-ci.org/agourlay/omnibus)
 
 **This is still a work in progress, any API is likely to change** 
  
@@ -236,4 +234,13 @@ The retention time is configurable as well for both persistence solutions.
 
 ## Contribute
 
-...
+Build the project with sbt, I personnaly like `~re-start` to restart the application automatically when file system changes occur.
+
+If you want to build the frontend, you need [Bower](http://bower.io/) and [Grunt](http://gruntjs.com/) for javascript build management.
+
+In the folder 'src/main/resources/frontend' run 
+>npm install
+>bower install
+>grunt
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/agourlay/omnibus/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
