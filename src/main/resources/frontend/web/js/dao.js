@@ -33,12 +33,14 @@ App.Dao = Em.Object.create({
 
     summary :function() {
         var dao = this;
-        var systemPromise = dao.system()
-        var topicsPromise = dao.topics()
-        return $.when(systemPromise, topicsPromise).then(function (system, topics) {
+        var systemPromise = dao.system();
+        var topicsPromise = dao.topics();
+        var subscribersPromise = dao.subscribers();
+        return $.when(systemPromise, topicsPromise, subscribersPromise).then(function (system, topics, subs) {
             var model = App.Summary.create();
             model.set('system', system);
             model.set('rootTopics', topics);
+            model.set('subscriptions', subs);
             return model;
         });
     },
@@ -70,7 +72,25 @@ App.Dao = Em.Object.create({
             });
             return systemStatsModel;
         });
-    },     
+    }, 
+
+    subscribers : function() {
+        var dao = this;
+        return $.ajax({
+            url: "admin/subscribers/",
+            type: 'GET',
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.log("Error during subscribers retrieval");                                        
+            }
+        }).then(function (subs) {
+            var subsModel = Ember.A([]);
+            $.each(subs, function(i, sub){
+                var model = dao.createSubscriberModel(sub)
+                subsModel.pushObject(model);        
+            });
+            return subsModel;
+        });
+    },      
 
     topicStats : function(topicName)  {
         var dao = this;
@@ -100,6 +120,15 @@ App.Dao = Em.Object.create({
         model.set('subscribersNumber', topicStat.subscribersNumber);
         model.set('subTopicsNumber', topicStat.subTopicsNumber);
         model.set('timestamp', topicStat.timestamp);
+        return model;
+    },
+
+    createSubscriberModel : function(sub) {
+        var model = App.Subscriber.create();
+        model.set('topic', sub.topic);
+        model.set('id', sub.id);
+        model.set('ip', sub.ip);
+        model.set('creationDate', sub.creationDate);
         return model;
     },
 
@@ -169,6 +198,14 @@ App.Dao = Em.Object.create({
     deleteTopic : function(topicName) {
         return $.ajax({
             url: "/admin/topics/"+topicName,
+            method: "DELETE",
+            contentType: "application/json"
+        });
+    },
+
+    deleteSubscriber : function(subId) {
+        return $.ajax({
+            url: "/admin/subscribers/"+subId,
             method: "DELETE",
             contentType: "application/json"
         });

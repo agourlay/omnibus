@@ -13,6 +13,7 @@ import DefaultJsonProtocol._
 
 import omnibus.domain._
 import omnibus.domain.topic._
+import omnibus.domain.subscriber._
 import omnibus.http.stats.HttpStats
 
 object JsonSupport {
@@ -26,6 +27,18 @@ object JsonSupport {
   }  
 
   implicit val formatMessage = jsonFormat4(Message)
+
+  implicit val formatSubView = new RootJsonFormat[SubscriberView] {
+    def write(obj: SubscriberView): JsValue = JsObject(
+      "topic"        -> JsString(obj.topic),
+      "id"           -> JsString(obj.id),
+      "ip"           -> JsString(obj.ip),
+      "creationDate" -> JsNumber(obj.creationDate)
+    )
+
+    // we don't need to deserialize the SubscriberView
+    def read(json: JsValue): SubscriberView = ???
+  }  
 
   implicit val formatTopicStats = new RootJsonFormat[TopicStatisticValue] {
     def write(obj: TopicStatisticValue): JsValue = JsObject(

@@ -40,5 +40,11 @@
     <div class="pure-u-1 summary-box-title">	
         Subscriptions
     </div>
-    Coming soon...
+    <ul class="summary-box-content">
+        {{#each view.content.subscriptions}}
+           <li>from <b>{{ip}}</b> on {{#link-to 'topic' topic}}{{topic}}{{/link-to}}</li>
+        {{else}}
+            No subscriptions
+        {{/each}}
+    </ul>
 </div>

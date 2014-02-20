@@ -198,11 +198,15 @@ All administration features are protected by http basic authentication. (better 
 
 By default the admin credentials are `admin/omnibus`, this can be changed in the configuration file.
 
-The administration module exposes only one API for now.
+The administration module exposes 3 API :
 
 - `DELETE /admin/topics/{topic-name}` to delete a topic and its subtopics
 
-You can also access the administration web interface running on http://localhost:8080/ to navigate through topics and follow API usage.
+- `GET /admin/subscribers/` get all subscriptions
+
+- `DELETE /admin/subscribers/{subscriber-id}` kill a subscription
+
+You can also use the administration web interface running on http://localhost:8080/ to manually access most of the API and statistics.
 
 ![Screenshot](./docs/screenshot.png)
 
@@ -234,13 +238,16 @@ The retention time is configurable as well for both persistence solutions.
 
 ## Contribute
 
-Build the project with sbt, I personnaly like `~re-start` to restart the application automatically when file system changes occur.
+Build the project with sbt, I personnaly like `~re-start` to restart the application automatically when a file system change occurs.
 
 If you want to build the frontend, you need [Bower](http://bower.io/) and [Grunt](http://gruntjs.com/) for javascript build management.
 
-In the folder 'src/main/resources/frontend' run 
+Then in the folder 'src/main/resources/frontend' run 
+
 >npm install
+
 >bower install
+
 >grunt
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/agourlay/omnibus/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

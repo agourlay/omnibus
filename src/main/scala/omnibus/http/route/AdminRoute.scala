@@ -30,9 +30,10 @@ import omnibus.http.streaming._
 import omnibus.configuration._
 import omnibus.domain._
 import omnibus.domain.topic._
+import omnibus.domain.subscriber._
 import omnibus.repository._
 
-class AdminRoute(topicRepo : ActorRef) (implicit context: ActorContext) extends Directives {
+class AdminRoute(topicRepo : ActorRef, subRepo : ActorRef) (implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
   implicit def system = context.system
@@ -55,7 +56,22 @@ class AdminRoute(topicRepo : ActorRef) (implicit context: ActorContext) extends 
               }
             }
           }
-        }
+        } ~ 
+        path("subscribers" / Rest) { sub =>
+          get {
+            complete {
+              if (sub.isEmpty) (subRepo ? SubscriberRepositoryProtocol.AllSubs).mapTo[List[SubscriberView]]
+              else (subRepo ? SubscriberRepositoryProtocol.SubById(sub)).mapTo[SubscriberView]
+            }
+          } ~ 
+          delete { ctx =>
+              val futureDel = (subRepo ? SubscriberRepositoryProtocol.KillSub(sub)).mapTo[Boolean]
+              futureDel.onComplete {
+                case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Subscriber $sub deleted\n")
+                case Failure(ex) => ctx.complete(ex)
+              }
+            } 
+        }  
       }
     }  
 }

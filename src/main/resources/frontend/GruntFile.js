@@ -47,6 +47,8 @@ module.exports = function(grunt) {
             "web/js/model/topicStat.js",
             "web/js/model/system.js",
             "web/js/model/summary.js",
+            "web/js/model/subscriber.js",
+            "web/js/controllers/subscribersController.js",
             "web/js/controllers/topicsController.js",
             "web/js/views/viewUtils.js",
             "web/js/views/topicRowView.js",

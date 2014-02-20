@@ -32,3 +32,9 @@ App.TopicsRoute = Ember.Route.extend({
 		return App.Dao.topics();
   }
 });
+
+App.SubscriptionsRoute = Ember.Route.extend({
+  model: function() {
+    return App.Dao.subscribers();
+  }
+});

@@ -29,7 +29,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     (topicRepo ? TopicRepositoryProtocol.LookupTopic(topicPath)).mapTo[Option[ActorRef]]
   }
 
-  def subToTopic(topicPath: TopicPath, responder: ActorRef, reactiveCmd: ReactiveCmd, httpMode: Boolean): Future[Boolean] = {
+  def subToTopic(topicPath: TopicPath, responder: ActorRef, reactiveCmd: ReactiveCmd, ip: String): Future[Boolean] = {
     val topicName = topicPath.prettyStr
     log.info(s"Request to subscribe to $topicName with reactive cmd $reactiveCmd")
     val p = promise[Boolean]
@@ -48,7 +48,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
         // All topics must exist in case of a composed subscriptions
         if (optTopicRefList.forall(_.nonEmpty)) {
           val topicRefList: List[ActorRef] = optTopicRefList.filter(_.nonEmpty).map(_.get)
-          subscriberRepo ! SubscriberRepositoryProtocol.CreateSub(topicRefList.toSet, responder, reactiveCmd, httpMode)
+          subscriberRepo ! SubscriberRepositoryProtocol.CreateSub(topicRefList.toSet, responder, reactiveCmd, ip)
           p.success(true)
         } else {
           log.info("None of the topics exist")
@@ -61,7 +61,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
 }
 
 object OmnibusServiceProtocol {
-  case class SubToTopic(topic: TopicPath, subscriber: ActorRef, reactiveCmd: ReactiveCmd, http: Boolean)
+  case class SubToTopic(topic: TopicPath, subscriber: ActorRef, reactiveCmd: ReactiveCmd, ip: String)
 }
 
 object OmnibusService {

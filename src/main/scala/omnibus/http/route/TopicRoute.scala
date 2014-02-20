@@ -80,11 +80,13 @@ class TopicRoute(omnibusService: ActorRef, topicRepo : ActorRef) (implicit conte
       path("topics" / Rest) { topic =>
         validate(!topic.isEmpty, "topic name cannot be empty \n") {
           parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?, 'sub.as[String] ? "classic").as(ReactiveCmd) { reactiveCmd =>
-            get { ctx =>
-              val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(TopicPath(topic), ctx.responder, reactiveCmd, true)).mapTo[Boolean]
-              future.onComplete {
-                case Success(result) => log.debug("Alles klar, let's stream")
-                case Failure(ex)     => ctx.complete(ex)
+            clientIP { ip =>
+              get { ctx =>
+                val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(TopicPath(topic), ctx.responder, reactiveCmd, ip.toOption.get.toString)).mapTo[Boolean]
+                future.onComplete {
+                  case Success(result) => log.debug("Alles klar, let's stream")
+                  case Failure(ex)     => ctx.complete(ex)
+                }
               }
             }
           }

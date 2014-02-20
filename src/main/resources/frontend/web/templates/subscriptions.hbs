@@ -1,14 +1,26 @@
 <h4>Subscriptions</h4>
-Coming soon...
 
 <table id="center-table" class="pure-table pure-table-horizontal">
 	<thead>
 	    <tr>
 	        <th><i class="fa fa-tags"></i> Topic</th>
-	        <th>Type</th>
 	        <th>IP Address</th>
 	        <th>Creation date</th>
 	        <th>Kill</th>
 	    </tr>
 	</thead>
+	<tbody>
+  		{{#each controller}}
+  			<tr>
+  			    <td><b>{{#link-to 'topic' topic}}{{topic}}{{/link-to}}</b></td>
+  			    <td>{{ip}}</td>
+  		     	<td>{{prettyCreationDate}}</td>
+ 				 <td>
+					<button class="pure-button delete-button" {{action "deleteSubscriber" id}}>
+						<i class="fa fa-trash-o"></i>
+					</button>
+			    </td>
+			</tr>    
+		{{/each}}
+	</tbody>	
 </table>

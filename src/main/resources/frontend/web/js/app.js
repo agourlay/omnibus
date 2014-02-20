@@ -7,7 +7,6 @@ window.App = Ember.Application.createWithMixins({
   LOG_VERSION: true
 });
 
-
 App.ApplicationView = Em.View.extend({
   tagName : 'div',
   elementId: 'app'

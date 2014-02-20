@@ -26,11 +26,12 @@ import omnibus.http.JsonSupport._
 import omnibus.http.route._
 import omnibus.domain._
 import omnibus.domain.topic._
+import omnibus.domain.subscriber._
 import omnibus.configuration._
 import omnibus.service._
 import omnibus.service.OmnibusServiceProtocol._
 
-class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef, topicRepo : ActorRef) extends HttpServiceActor with ActorLogging {
+class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef) extends HttpServiceActor with ActorLogging {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
@@ -47,6 +48,12 @@ class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef, topicRe
         log.warning("Request to {} could not be handled normally -> topic {} already exists", uri, e.topicName)
         complete(StatusCodes.Accepted, Location(uri):: Nil, s"Topic ${e.topicName} already exist \n")
       }    
+
+    case e : SubscriberNotFoundException  =>
+      requestUri { uri =>
+        log.warning("Request to {} could not be handled normally -> subscriber does not exist", uri)
+        complete(StatusCodes.NotFound, s"Subscriber ${e.subId} not found : please retry later or check subscriber id correctness\n")
+      }
 
     case e : AskTimeoutException  =>
       requestUri { uri =>
@@ -80,7 +87,7 @@ class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef, topicRe
   val routes =
     new TopicRoute(omnibusService, topicRepo).route ~       // '/topics'
     new StatsRoute(httpStatService, topicRepo).route ~      // '/stats'
-    new AdminRoute(topicRepo).route ~                       // '/admin/topics'
+    new AdminRoute(topicRepo, subRepo).route ~              // '/admin/topics'
     new AdminUIRoute().route                                // '/ '
 
   def receive = runRoute(routes)
@@ -88,6 +95,6 @@ class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef, topicRe
 }
 
 object HttpEndpoint {
-	def props(omnibusService: ActorRef, httpStatService : ActorRef, topicRepo : ActorRef)
-   = Props(classOf[HttpEndpoint], omnibusService, httpStatService, topicRepo)
+	def props(omnibusService: ActorRef, httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef)
+   = Props(classOf[HttpEndpoint], omnibusService, httpStatService, topicRepo, subRepo)
 }
