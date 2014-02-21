@@ -10,7 +10,7 @@ import omnibus.domain.topic._
 import omnibus.domain.subscriber.SubscriberProtocol._
 import omnibus.domain.subscriber.ReactiveMode._
 
-class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long)
+class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long)
     extends Actor with ActorLogging {
 
   implicit val system = context.system
@@ -27,14 +27,18 @@ class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiv
     val sub = reactiveCmd.sub
     log.debug(s"Creating sub on topics $prettyTopics with react $react and sub $sub")
 
-    // Death pact with responder! 
-    context.watch(responder)
+    // Death pact with channel! 
+    context.watch(channel)
 
     // subscribe to every topic
     for (topic <- topics) { topic ! TopicProtocol.Subscribe(self) }
 
     // schedule pending retry every minute
     system.scheduler.schedule(1 minute, 1 minute, self, SubscriberProtocol.RefreshTopics)
+  }
+
+  override def postStop() = {
+    channel ! PoisonPill
   }
 
   def receive = {
@@ -66,7 +70,7 @@ class Subscriber(val responder: ActorRef, val topics: Set[ActorRef], val reactiv
   def sendMessage(msg: Message) = {
     // An event can only be played once by subscription
     if (notYetPlayed(msg) && filterAccordingReactMode(msg) && filterAccordingSubMode(msg)) {
-      responder ! msg
+      channel ! msg
       idsSeen += msg.id
     }
   }
@@ -101,6 +105,6 @@ object SubscriberProtocol {
 }
 
 object Subscriber {
-  def props(responder: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd) 
-    = Props(classOf[Subscriber], responder, topics, reactiveCmd, System.currentTimeMillis / 1000).withDispatcher("subscribers-dispatcher")
+  def props(channel: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd) 
+    = Props(classOf[Subscriber], channel, topics, reactiveCmd, System.currentTimeMillis / 1000).withDispatcher("subscribers-dispatcher")
 }

@@ -31,6 +31,10 @@ class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging {
     super.preStart
     responder ! ChunkedResponseStart(responseStart)
   }
+
+  override def postStop() = {
+    responder ! ChunkedMessageEnd
+  }
   
   def receive = {   
     case ev: Http.ConnectionClosed => {
