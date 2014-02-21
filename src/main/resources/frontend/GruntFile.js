@@ -9,14 +9,14 @@ module.exports = function(grunt) {
           templateFileExtensions: /\.hbs/
         },
         files: {
-          "web/dist/templates.js": ["web/templates/**/*.hbs"]
+          "web/dist/js/templates.js": ["web/templates/**/*.hbs"]
         }
       }
     },
     concat : {
       libjs : {
         src : [
-          "web/bower_components/jquery/jquery.min.js",
+          "web/bower_components/jquery/dist/jquery.min.js",
           "web/bower_components/handlebars/handlebars.runtime.min.js",
           "web/bower_components/ember/ember.min.js",
           "web/bower_components/momentjs/min/moment.min.js",
@@ -25,21 +25,22 @@ module.exports = function(grunt) {
           "web/bower_components/d3/d3.min.js",
           "web/bower_components/rickshaw/rickshaw.min.js"
         ],
-        dest: 'web/dist/libs.min.js'
+        dest: 'web/dist/js/libs.min.js'
       },
       libcss : {
         src : [
           "web/bower_components/pure/pure-min.css",
-          "web/bower_components/rickshaw/rickshaw.min.css"
+          "web/bower_components/rickshaw/rickshaw.min.css",
+          "web/bower_components/font-awesome/css/font-awesome.min.css"
         ],
-        dest : 'web/dist/libs.min.css'
+        dest : 'web/dist/css/libs.min.css'
       }
     },
     uglify: {
       js: {
         files: {
-          'web/dist/omnibus.min.js': [
-            "web/dist/templates.js",
+          'web/dist/js/omnibus.min.js': [
+            "web/dist/js/templates.js",
             "web/js/app.js",
             "web/js/dao.js",
             "web/js/router.js",
@@ -62,11 +63,26 @@ module.exports = function(grunt) {
     cssmin : {
       combine: {
         files: {
-          "web/dist/omnibus.min.css" : [
+          "web/dist/css/omnibus.min.css" : [
             "web/css/layout.css"
             ]
         } 
       }   
+    },
+    copy: {
+      fonts: {
+        src: 'web/bower_components/font-awesome/fonts/*',
+        dest: "web/dist/fonts/",
+        filter: 'isFile',
+        flatten: true,
+        expand: true
+      },
+      maps: {
+        cwd : "web/bower_components/jquery/dist/",
+        src: "jquery.min.map",
+        dest: "web/dist/js/",
+        expand: true
+      }
     },
     watch: {
       files: ["web/css/**","web/js/**","web/templates/**"],
@@ -79,8 +95,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-ember-templates');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task(s).
-  grunt.registerTask('default', ['emberTemplates','concat','uglify','cssmin' ]);
+  grunt.registerTask('default', ['emberTemplates','concat','uglify','cssmin','copy' ]);
 
 };
