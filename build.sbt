@@ -6,6 +6,8 @@ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 packageArchetype.java_application
 
+incOptions := incOptions.value.withNameHashing(true)
+
 organization := "com.agourlay"
 
 name := "omnibus"
