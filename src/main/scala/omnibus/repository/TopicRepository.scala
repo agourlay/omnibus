@@ -39,7 +39,7 @@ class TopicRepository extends Actor with ActorLogging {
     case CreateTopic(topic)              => checkAndCreateTopic(topic) pipeTo sender
     case DeleteTopic(topic)              => deleteTopic(topic) pipeTo sender
     case CheckTopic(topic)               => sender ! checkTopic(topic) 
-    case LookupTopic(topic)              => sender ! lookUpTopicWithCache(topic)
+    case LookupTopic(topic)              => sender ! topicPathRef(topic)
     case PublishToTopic(topic, message)  => publishToTopic(topic, message) pipeTo sender
     case TopicPastStat(topic)            => topicPastStat(topic) pipeTo sender
     case TopicLiveStat(topic)            => topicLiveStat(topic) pipeTo sender
@@ -47,6 +47,11 @@ class TopicRepository extends Actor with ActorLogging {
     case AllLeaves(replyTo)              => allLeaves(replyTo)
     case AllRoots                        => allRoots() pipeTo sender
     case TopicProtocol.Propagation       => log.debug("message propagation reached TopicRepository")
+  }
+
+  def topicPathRef(topicPath: TopicPath) : TopicPathRef = {
+    val option = lookUpTopicWithCache(topicPath)
+    TopicPathRef(topicPath, option)
   }
 
   def checkAndCreateTopic(topicPath: TopicPath)  : Future[Boolean] = {

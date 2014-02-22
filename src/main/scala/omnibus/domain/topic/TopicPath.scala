@@ -4,6 +4,8 @@ import akka.actor._
 
 import omnibus.domain._
 
+case class TopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef])
+
 case class TopicPath(segments : List[String]) {
 	require(segments.size != 0 , s"Topic path is empty \n")
 	require(segments.size < 50 , s"Topic path is too long \n")

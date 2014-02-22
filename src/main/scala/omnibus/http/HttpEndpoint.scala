@@ -28,8 +28,6 @@ import omnibus.domain._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.configuration._
-import omnibus.service._
-import omnibus.service.OmnibusServiceProtocol._
 
 class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef) extends HttpServiceActor with ActorLogging {
 

@@ -29,10 +29,9 @@ import omnibus.domain.subscriber._
 import omnibus.domain.topic._
 import omnibus.configuration._
 import omnibus.repository._
-import omnibus.service._
-import omnibus.service.OmnibusServiceProtocol._
+import omnibus.http.request.SubToTopicRequest
 
-class TopicRoute(omnibusService: ActorRef, topicRepo : ActorRef) (implicit context: ActorContext) extends Directives {
+class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
@@ -92,11 +91,7 @@ class TopicRoute(omnibusService: ActorRef, topicRepo : ActorRef) (implicit conte
           parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?, 'sub.as[String] ? "classic").as(ReactiveCmd) { reactiveCmd =>
             clientIP { ip =>
               get { ctx =>
-                val future = (omnibusService ? OmnibusServiceProtocol.SubToTopic(TopicPath(topic), ctx.responder, reactiveCmd, ip.toOption.get.toString)).mapTo[Boolean]
-                future.onComplete {
-                  case Success(result) => log.debug("Alles klar, let's stream")
-                  case Failure(ex)     => ctx.complete(ex)
-                }
+                context.actorOf(SubToTopicRequest.props(TopicPath(topic), reactiveCmd, ip.toOption.get.toString, ctx, subRepo, topicRepo))
               }
             }
           }
