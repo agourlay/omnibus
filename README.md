@@ -209,6 +209,7 @@ The administration module exposes 3 API :
 You can also use the administration web interface running on http://localhost:8080/ to manually access most of the API and statistics.
 
 ![Screenshot](./docs/screenshot.png)
+![Screenshot](./docs/load.png)
 
 ## Monitoring
 
