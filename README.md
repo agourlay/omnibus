@@ -22,7 +22,7 @@ Topics are trees, you can create them simply with a POST request.
 
 The root url of every topic is `/topics`.
 
-> curl -X GET http://localhost:8080/topics/
+> curl -X GET http://localhost:8080/topics
 
 ```json
 []
@@ -187,7 +187,6 @@ omnibus {
         storageInterval = "60 seconds"
         pushInterval = "1 second"
         retentionTime = "3 days"
-        resolution = "3 seconds"
     }
 }
 ```
@@ -202,13 +201,16 @@ The administration module exposes 3 API :
 
 - `DELETE /admin/topics/{topic-name}` to delete a topic and its subtopics
 
-- `GET /admin/subscribers/` get all subscriptions
+- `GET /admin/subscribers` get all subscriptions
 
 - `DELETE /admin/subscribers/{subscriber-id}` kill a subscription
 
 You can also use the administration web interface running on http://localhost:8080/ to manually access most of the API and statistics.
 
 ![Screenshot](./docs/screenshot.png)
+
+And here some realtime stats about a topic
+
 ![Screenshot](./docs/load.png)
 
 ## Monitoring

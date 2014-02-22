@@ -48,33 +48,43 @@ class TopicRoute(omnibusService: ActorRef, topicRepo : ActorRef) (implicit conte
      ))
 
   val route =
-    path("topics" / Rest) { topic =>  
-      val topicPath = TopicPath(topic)
-      val prettyTopic = topicPath.prettyStr()
+    path("topics") {
       get {
         respondWithMediaType(HALType) {
           complete {
-            if (topic.isEmpty) (topicRepo ? TopicRepositoryProtocol.AllRoots).mapTo[List[TopicView]]
-            else (topicRepo ? TopicRepositoryProtocol.TopicViewReq(topicPath)).mapTo[TopicView]
+            (topicRepo ? TopicRepositoryProtocol.AllRoots).mapTo[List[TopicView]]
           }
         }
-      } ~
-      post { ctx =>                       
-        val futureCreate = (topicRepo ? TopicRepositoryProtocol.CreateTopic(topicPath)).mapTo[Boolean]
-        futureCreate.onComplete {
-          case Success(ok) => ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $prettyTopic created \n") 
-          case Failure(ex) => ctx.complete(ex)
-        } 
-      } ~
-      entity(as[String]) { message =>
-        put { ctx =>
-          val futurePub = (topicRepo ? TopicRepositoryProtocol.PublishToTopic(topicPath, message)).mapTo[Boolean]
-          futurePub.onComplete {
-            case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
+      }
+    } ~
+    path("topics" / Rest) { topic =>
+      validate(!topic.isEmpty, "topic name cannot be empty \n") {  
+        val topicPath = TopicPath(topic)
+        val prettyTopic = topicPath.prettyStr()
+        get {
+          respondWithMediaType(HALType) {
+            complete {
+              (topicRepo ? TopicRepositoryProtocol.TopicViewReq(topicPath)).mapTo[TopicView]
+            }
+          }
+        } ~
+        post { ctx =>                       
+          val futureCreate = (topicRepo ? TopicRepositoryProtocol.CreateTopic(topicPath)).mapTo[Boolean]
+          futureCreate.onComplete {
+            case Success(ok) => ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $prettyTopic created \n") 
             case Failure(ex) => ctx.complete(ex)
           } 
+        } ~
+        entity(as[String]) { message =>
+          put { ctx =>
+            val futurePub = (topicRepo ? TopicRepositoryProtocol.PublishToTopic(topicPath, message)).mapTo[Boolean]
+            futurePub.onComplete {
+              case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
+              case Failure(ex) => ctx.complete(ex)
+            } 
+          }
         }
-      }
+      }  
     } ~ 
     pathPrefix("streams") {
       path("topics" / Rest) { topic =>

@@ -31,7 +31,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
 
   def subToTopic(topicPath: TopicPath, responder: ActorRef, reactiveCmd: ReactiveCmd, ip: String): Future[Boolean] = {
     val topicName = topicPath.prettyStr
-    log.info(s"Request to subscribe to $topicName with reactive cmd $reactiveCmd")
+    log.debug(s"Request to subscribe to $topicName with reactive cmd $reactiveCmd")
     val p = promise[Boolean]
     val futurResult: Future[Boolean] = p.future
 

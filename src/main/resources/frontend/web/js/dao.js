@@ -77,7 +77,7 @@ App.Dao = Em.Object.create({
     subscribers : function() {
         var dao = this;
         return $.ajax({
-            url: "admin/subscribers/",
+            url: "admin/subscribers",
             type: 'GET',
             error: function(xhr, ajaxOptions, thrownError) {
                 console.log("Error during subscribers retrieval");                                        
@@ -149,7 +149,7 @@ App.Dao = Em.Object.create({
 	topics : function()  {
         var dao = this;
         return $.ajax({
-            url: "topics/",
+            url: "topics",
             type: 'GET',
             error: function(xhr, ajaxOptions, thrownError) {
                 console.log("Error during topics retrieval");                                        

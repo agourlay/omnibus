@@ -57,20 +57,28 @@ class AdminRoute(topicRepo : ActorRef, subRepo : ActorRef) (implicit context: Ac
             }
           }
         } ~ 
-        path("subscribers" / Rest) { sub =>
+        path("subscribers") {
           get {
             complete {
-              if (sub.isEmpty) (subRepo ? SubscriberRepositoryProtocol.AllSubs).mapTo[List[SubscriberView]]
-              else (subRepo ? SubscriberRepositoryProtocol.SubById(sub)).mapTo[SubscriberView]
+              (subRepo ? SubscriberRepositoryProtocol.AllSubs).mapTo[List[SubscriberView]]
             }
-          } ~ 
-          delete { ctx =>
+          }  
+        } ~ 
+        path("subscribers" / Rest) { sub =>
+          validate(!sub.isEmpty, "sub id cannot be empty \n") {
+            get {
+              complete {
+                (subRepo ? SubscriberRepositoryProtocol.SubById(sub)).mapTo[SubscriberView]
+              }
+            } ~ 
+            delete { ctx =>
               val futureDel = (subRepo ? SubscriberRepositoryProtocol.KillSub(sub)).mapTo[Boolean]
               futureDel.onComplete {
                 case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Subscriber $sub deleted\n")
                 case Failure(ex) => ctx.complete(ex)
               }
-            } 
+            }
+          }   
         }  
       }
     }  
