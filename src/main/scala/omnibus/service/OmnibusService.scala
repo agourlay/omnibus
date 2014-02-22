@@ -36,7 +36,7 @@ class OmnibusService(topicRepo: ActorRef, subscriberRepo: ActorRef) extends Acto
     val futurResult: Future[Boolean] = p.future
 
     // Get all future topic ActorRef to subscribe to
-    val actorTopics = for (topic <- TopicPath.splitMultiTopic(topicName)) yield lookupTopic(topicPath)
+    val actorTopics = for (topic <- TopicPath.multi(topicName)) yield lookupTopic(topic)
 
     //List[Future[Option]] to Future[List[Option]]                 
     Future.sequence(actorTopics).onComplete {
