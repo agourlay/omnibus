@@ -7,11 +7,11 @@ App.Topic = Em.Object.extend({
     
     subTopicsNumber: function(){
         return this.subTopics.length ;
-    }.property(),
+    }.property("subTopics"),
 
     hasSubTopics: function(){
         return this.subTopics.length > 0;
-    }.property(),
+    }.property("subTopics"),
 
     prettyCreationDate : function(){
     	return moment.unix(this.creationDate).fromNow();
