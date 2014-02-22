@@ -37,7 +37,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   override def preStart() = {
     val myPath = self.path
-    log.info(s"Creating new topic $myPath")
+    log.debug(s"Creating new topic $myPath")
     system.scheduler.schedule(retentionTime, retentionTime, self, TopicProtocol.PurgeTopicData)
     super.preStart()
   }

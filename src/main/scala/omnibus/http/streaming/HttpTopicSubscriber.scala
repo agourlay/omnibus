@@ -27,11 +27,7 @@ class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : S
   override def startText = s"~~> Streaming updates on topics $topicsPath with react $react and sub $sub\n\n"
 
   override def receive = ({
-    case message: Message          => responder ! MessageObj.toMessageChunk(message)     
-    case ev: Http.ConnectionClosed => {
-      log.info("Stopping response streaming due to {}", ev)
-      context.stop(self)
-    }  
+    case message: Message => responder ! MessageObj.toMessageChunk(message) 
   }: Receive) orElse super.receive
 }
 
