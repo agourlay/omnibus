@@ -52,6 +52,8 @@ class SubToTopicRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: Stri
       topicRepo ! TopicRepositoryProtocol.LookupTopic(topic)
     }
   }  
+
+  def receive = receiveTopicPathRef orElse handleTimeout
  
   def handleTimeout : Receive = {
     case RequestTimeout => {
@@ -60,17 +62,18 @@ class SubToTopicRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: Stri
     }  
   }
 
-  def receive = ({
-    case tpr : TopicPathRef => handleTopicPathRef(tpr)
-  }: Receive) orElse handleTimeout
+  def receiveTopicPathRef : Receive = {
+    case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
+  }
 
-  def handleTopicPathRef(tpr : TopicPathRef) = tpr.topicRef match {
-    case None           => {
-      ctx.complete(new TopicNotFoundException(tpr.topicPath.prettyStr))
+
+  def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
+    case None      => {
+      ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
       self ! PoisonPill
     }  
-    case Some(topicRef) => {
-      ack += topicRef
+    case Some(ref) => {
+      ack += ref
       if (ack.size == pending.size) {
         subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, ctx.responder, reactiveCmd, ip)
         self ! PoisonPill
