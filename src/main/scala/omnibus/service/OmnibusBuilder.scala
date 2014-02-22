@@ -39,7 +39,7 @@ object OmnibusBuilder {
     val httpStatService = system.actorOf(HttpStatistics.props, "http-stat-service")
 
     // HttpService actor exposing omnibus routes
-    val omnibusHttp = system.actorOf(HttpEndpoint.props(subRepository, httpStatService, topicRepository, subRepository), "omnibus-http")
+    val omnibusHttp = system.actorOf(HttpEndpoint.props(httpStatService, topicRepository, subRepository), "omnibus-http")
 
     log.info(s"Omnibus starting on port $httpPort ~~> ")
 

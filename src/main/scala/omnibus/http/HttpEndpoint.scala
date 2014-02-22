@@ -29,7 +29,7 @@ import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.configuration._
 
-class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef) extends HttpServiceActor with ActorLogging {
+class HttpEndpoint(httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef) extends HttpServiceActor with ActorLogging {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
@@ -83,7 +83,7 @@ class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef, topicRe
   }
 
   val routes =
-    new TopicRoute(omnibusService, topicRepo).route ~       // '/topics'
+    new TopicRoute(subRepo, topicRepo).route ~       // '/topics'
     new StatsRoute(httpStatService, topicRepo).route ~      // '/stats'
     new AdminRoute(topicRepo, subRepo).route ~              // '/admin/topics'
     new AdminUIRoute().route                                // '/ '
@@ -93,6 +93,6 @@ class HttpEndpoint(omnibusService: ActorRef, httpStatService : ActorRef, topicRe
 }
 
 object HttpEndpoint {
-	def props(omnibusService: ActorRef, httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef)
-   = Props(classOf[HttpEndpoint], omnibusService, httpStatService, topicRepo, subRepo)
+	def props(httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef)
+    = Props(classOf[HttpEndpoint], httpStatService, topicRepo, subRepo)
 }
