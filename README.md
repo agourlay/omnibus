@@ -9,6 +9,36 @@ Omnibus is an HTTP-friendly reactive message bus which means :
  - Subscriptions can be composed via the url keyword `+`.
 
 **This is still a work in progress, any API is likely to change** 
+
+## Getting started
+
+Get the latest omnibus.tar distribution, extract and run the starting script in `/bin`.
+
+This starts Omnibus on default port 8080.
+
+You can configure the system by changing the properties in `/conf/application.conf`.
+
+```
+omnibus {
+    http {
+        port = 8080
+    }
+    admin {
+        userName = "admin"
+        password = "omnibus"
+    }
+    topic {
+        retentionTime = "3 days"
+    }
+    statistics{
+        storageInterval = "60 seconds"
+        pushInterval = "1 second"
+        retentionTime = "3 days"
+    }
+}
+```
+
+The system is running, now let's explore the API.
  
 ## REST & hal+json
 
@@ -159,37 +189,6 @@ You can compose subscriptions with the char `+` in order to merge notifications 
 All the topics must exist at the moment of the subscription or the whole request will be rejected.
 
 Of course you are can use reactive modes on composed subscriptions but be ready to handle the flow of data if you target a root topic with the replay mode :D
-
-## Installation and configuration
-
-Get the latest omnibus.tar distribution, extract and run the starting script in `/bin`.
-
-This starts Omnibus on default port 8080.
-
-You can configure the system by changing the properties in `/conf/application.conf`.
-
-```
-omnibus {
-    http {
-        port = 8080
-    }
-    admin {
-        userName = "admin"
-        password = "omnibus"
-    }
-    timeout {
-        ask = "5 seconds"
-    }
-    topic {
-        retentionTime = "3 days"
-    }
-    statistics{
-        storageInterval = "60 seconds"
-        pushInterval = "1 second"
-        retentionTime = "3 days"
-    }
-}
-```
 
 ## Administration
 

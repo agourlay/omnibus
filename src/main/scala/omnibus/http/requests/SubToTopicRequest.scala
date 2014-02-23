@@ -66,7 +66,6 @@ class SubToTopicRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: Stri
     case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
   }
 
-
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
