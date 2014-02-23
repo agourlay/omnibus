@@ -80,11 +80,14 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   def purgeOldData() {
-    val limitEvt = state.events
-                        .find(_.msg.timestamp < (System.currentTimeMillis - retentionTime.toMillis))
+    val timeLimit = System.currentTimeMillis - retentionTime.toMillis
+    val limitEvt = state.events.find(_.msg.timestamp < timeLimit)
     limitEvt match {
-      case Some(evt) =>  deleteMessages(evt.seqNumber)
       case None      =>  log.debug(s"Nothing to purge yet in topic")
+      case Some(evt) =>  {
+        deleteMessages(evt.seqNumber, true)
+        state = TopicState(state.events.filterNot(_.msg.timestamp < timeLimit))
+      }
     }                   
   }
 

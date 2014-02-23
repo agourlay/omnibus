@@ -76,11 +76,14 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
   }
 
   def purgeOldData() {
-    val limitStat = state.events
-                         .find(_.timestamp < (System.currentTimeMillis - retentionTime.toMillis))
+    val timeLimit = System.currentTimeMillis - retentionTime.toMillis
+    val limitStat = state.events.find(_.timestamp < timeLimit)
 
     limitStat match {
-      case Some(stat) => deleteMessages(stat.seqNumber)
+      case Some(stat) => {
+        deleteMessages(stat.seqNumber, true)
+        state = TopicStatisticState(state.events.filterNot(_.timestamp < timeLimit))
+      }  
       case None      =>  log.debug(s"Nothing to purge yet in topicStatistic")
     }                   
   }
