@@ -60,10 +60,10 @@ class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef)(implicit cont
                   case StatisticsMode.LIVE      => ctx.complete ((topicRepo ? TopicRepositoryProtocol.TopicLiveStat(topicPath)).mapTo[TopicStatisticValue])
                   case StatisticsMode.HISTORY   => ctx.complete ((topicRepo ? TopicRepositoryProtocol.TopicPastStat(topicPath)).mapTo[List[TopicStatisticValue]])
                   case StatisticsMode.STREAMING => {
-                    val f = (topicRepo ? TopicRepositoryProtocol.LookupTopic(topicPath)).mapTo[Option[ActorRef]]
+                    val f = (topicRepo ? TopicRepositoryProtocol.LookupTopic(topicPath)).mapTo[TopicPathRef]
                     f.onComplete {
-                      case Failure(result) => ctx.complete(s"Something wrong happened... \n")
-                      case Success(result) => result match {
+                      case Failure(ex)     => ctx.complete(ex)
+                      case Success(result) => result.topicRef match {
                         case Some(ref) => context.actorOf(HttpTopicStatStream.props(ctx.responder, ref))
                         case None      => ctx.complete(s"topic '$prettyTopic' not found \n")
                       }
