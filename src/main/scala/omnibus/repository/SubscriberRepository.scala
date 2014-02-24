@@ -9,6 +9,7 @@ import scala.language.postfixOps
 import scala.concurrent.Future
 import scala.concurrent.Promise._
 import scala.util._
+import scala.util.control.NoStackTrace
 
 import java.security.SecureRandom
 import java.math.BigInteger
@@ -52,7 +53,7 @@ class SubscriberRepository extends Actor with ActorLogging {
     val p = promise[Boolean]
     val f = p.future
     subs.find(_.id == id) match {
-      case None => p.failure {new SubscriberNotFoundException(id)}
+      case None => p.failure {new SubscriberNotFoundException(id) with NoStackTrace }
       case Some (sub) =>  {
         sub.ref ! PoisonPill
         subs -= (sub)

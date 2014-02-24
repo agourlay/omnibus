@@ -9,6 +9,7 @@ import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util._
+import scala.util.control.NoStackTrace
 
 import spray.caching.{ LruCache, Cache }
 
@@ -59,7 +60,7 @@ class TopicRepository extends Actor with ActorLogging {
     val f = p.future
     lookUpTopicWithCache(topicPath) match {
       case None           => createTopic(topicPath, p)
-      case Some(topicRef) => p.failure {new TopicAlreadyExistsException(topicPath.prettyStr())}
+      case Some(topicRef) => p.failure {new TopicAlreadyExistsException(topicPath.prettyStr()) with NoStackTrace}
     }
     f
   }  
@@ -89,7 +90,7 @@ class TopicRepository extends Actor with ActorLogging {
       case None => {
         val topicName = topicPath.prettyStr
         log.warning(s"trying to push to non existing topic $topicName")
-        p.failure {new TopicNotFoundException(topicName)}
+        p.failure {new TopicNotFoundException(topicName) with NoStackTrace }
       }
     }
     f
@@ -128,7 +129,7 @@ class TopicRepository extends Actor with ActorLogging {
         if (rootTopics.contains(topicName)) rootTopics -= topicName
         p.success(true)
       }
-      case None =>  p.failure { new TopicNotFoundException(topicName)}
+      case None =>  p.failure { new TopicNotFoundException(topicName) with NoStackTrace }
     }
     f
   }
@@ -156,7 +157,7 @@ class TopicRepository extends Actor with ActorLogging {
     val futurResult= p.future
     val topicName = topicPath.prettyStr
     lookUpTopicWithCache(topicPath) match {
-      case None => p.failure { new TopicNotFoundException(topicName)}
+      case None => p.failure { new TopicNotFoundException(topicName) with NoStackTrace }
       case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticValue])
     }
     futurResult
@@ -167,7 +168,7 @@ class TopicRepository extends Actor with ActorLogging {
     val futurResult= p.future
     val topicName = topicPath.prettyStr
     lookUpTopicWithCache(topicPath) match {
-      case None => p.failure { new TopicNotFoundException(topicName)}
+      case None => p.failure { new TopicNotFoundException(topicName) with NoStackTrace }
       case Some(topicRef) => p.completeWith((topicRef ? TopicProtocol.View).mapTo[TopicView])
     }
     futurResult
