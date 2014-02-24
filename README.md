@@ -7,6 +7,7 @@ Omnibus is an HTTP-friendly reactive message bus which means :
  - Updates are streamed by [Server-Sent-Event](http://www.html5rocks.com/en/tutorials/eventsource/basics/) which can be easily consumed by javascript frontends. 
  - With reactive modes it is possible to replay specific parts of the events.
  - Subscriptions can be composed via the url keyword `+`.
+ - Most of the features can be accessed via the administration web interface.
 
 **This is still a work in progress, any API is likely to change** 
 
