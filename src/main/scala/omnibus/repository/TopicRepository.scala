@@ -2,6 +2,7 @@ package omnibus.repository
 
 import akka.actor._
 import akka.pattern._
+import akka.persistence._
 
 import scala.concurrent._
 import scala.concurrent.Promise._
@@ -19,12 +20,15 @@ import omnibus.domain.topic._
 import omnibus.http.streaming.HttpTopicViewStream
 import omnibus.repository.TopicRepositoryProtocol._
 
-class TopicRepository extends Actor with ActorLogging {
+class TopicRepository extends EventsourcedProcessor with ActorLogging {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   var rootTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
+
+  var state = TopicRepoState()
+  def updateState(msg: TopicRepoStateValue): Unit = {state = state.update(msg)} 
 
   var _seqEventId = 1L
   def nextEventId = {
@@ -36,8 +40,19 @@ class TopicRepository extends Actor with ActorLogging {
   // cache of most looked up topicRef, conf values to be tuned
   val mostAskedTopic: Cache[Option[ActorRef]] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
 
-  def receive = {
-    case CreateTopic(topic)              => checkAndCreateTopic(topic) pipeTo sender
+  val receiveRecover: Receive = {
+    case t: TopicRepoStateValue                          => {
+      createTopic(t.topicPath, promise[Boolean])
+      updateState(TopicRepoStateValue(t.seqNumber, t.topicPath))
+    }  
+    case SnapshotOffer(_, snapshot: TopicRepoState) => {
+      state = snapshot
+      state.events foreach { t => createTopic(t.topicPath, promise[Boolean])}
+    }  
+  }
+
+  val receiveCommand: Receive = {
+    case CreateTopic(topic)              => persistTopic(topic) pipeTo sender
     case DeleteTopic(topic)              => deleteTopic(topic) pipeTo sender
     case CheckTopic(topic)               => sender ! checkTopic(topic) 
     case LookupTopic(topic)              => sender ! topicPathRef(topic)
@@ -47,7 +62,7 @@ class TopicRepository extends Actor with ActorLogging {
     case TopicViewReq(topic)             => topicView(topic) pipeTo sender
     case AllLeaves(replyTo)              => allLeaves(replyTo)
     case AllRoots                        => allRoots() pipeTo sender
-    case TopicProtocol.Propagation       => log.debug("message propagation reached TopicRepository")
+    case TopicProtocol.Propagation       => log.debug("message propagation reached Repo")
   }
 
   def topicPathRef(topicPath: TopicPath) : TopicPathRef = {
@@ -55,12 +70,15 @@ class TopicRepository extends Actor with ActorLogging {
     TopicPathRef(topicPath, option)
   }
 
-  def checkAndCreateTopic(topicPath: TopicPath)  : Future[Boolean] = {
+  def persistTopic(topicPath: TopicPath)  : Future[Boolean] = {
     val p = promise[Boolean]
     val f = p.future
     lookUpTopicWithCache(topicPath) match {
-      case None           => createTopic(topicPath, p)
       case Some(topicRef) => p.failure {new TopicAlreadyExistsException(topicPath.prettyStr()) with NoStackTrace}
+      case None           => persist(TopicRepoStateValue(lastSequenceNr + 1, topicPath)) { t =>
+        createTopic(t.topicPath, p)
+        updateState(TopicRepoStateValue(lastSequenceNr, topicPath))
+      }
     }
     f
   }  
@@ -99,11 +117,11 @@ class TopicRepository extends Actor with ActorLogging {
   def lookUpTopicWithCache(topicPath: TopicPath): Option[ActorRef] = {
     val topic = topicPath.prettyStr
     log.debug(s"Lookup in cache for topic $topic")
-    val futureOpt: Future[Option[ActorRef]] = mostAskedTopic(topic) { lookUpTopic(topicPath) }
+    val futureOpt: Future[Option[ActorRef]] = mostAskedTopic(topicPath) { lookUpTopic(topicPath) }
     // we block here to provide an API based on Option[]
     val optResult : Option[ActorRef] = Await.result(futureOpt, timeout.duration).asInstanceOf[Option[ActorRef]]
     // do not let spray cache insert a none in the cache for the actor
-    if (optResult.isEmpty) mostAskedTopic.remove(topic)
+    if (optResult.isEmpty) mostAskedTopic.remove(topicPath)
     optResult
   }
 
@@ -123,13 +141,22 @@ class TopicRepository extends Actor with ActorLogging {
     val f = p.future
     log.debug(s"trying to delete topic $topicName")
     lookUpTopicWithCache(topicPath) match {
+      case None           =>  p.failure { new TopicNotFoundException(topicName) with NoStackTrace }
       case Some(topicRef) => {
         topicRef ! TopicProtocol.Delete
         mostAskedTopic.remove(topicName)
         if (rootTopics.contains(topicName)) rootTopics -= topicName
+        val delete = state.events.find(_.topicPath == topicPath)
+        delete match {
+          case None        => log.info(s"Cannot find topic in repo state")
+          case Some(topic) => {
+            log.info(s"delete stuff $topic")
+            deleteMessage(topic.seqNumber, true)
+            state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
+          }  
+        }   
         p.success(true)
       }
-      case None =>  p.failure { new TopicNotFoundException(topicName) with NoStackTrace }
     }
     f
   }
