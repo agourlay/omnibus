@@ -7,7 +7,7 @@ import Prop._
 
 object TopicPathSpecification extends Properties("TopicPath") {
 
-	val notTooLong = Gen.identifier filter (_.size <= 20)
+	val notTooLong = Gen.identifier filter (_.size < 20)
     implicit val listString = Gen.nonEmptyContainerOf[List,String](notTooLong)
 
 	property("notEmpty") = forAll(listString) { randomList =>
