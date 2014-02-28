@@ -41,23 +41,23 @@ class SubToTopicRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: Stri
   implicit def system = context.system
   implicit val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
 
+  val timeoutCancellable = system.scheduler.scheduleOnce(timeout.duration, self, SubToTopicRequestProtocol.RequestTimeout)
+  
   var pending: Set[TopicPath] = Set.empty[TopicPath] 
   var ack: Set[ActorRef] = Set.empty[ActorRef]
 
-  override def preStart() = {
-    system.scheduler.scheduleOnce(timeout.duration, self, SubToTopicRequestProtocol.RequestTimeout)
-    val topics = TopicPath.multi(topicPath.prettyStr)
-    topics foreach { topic =>
-      pending += topic
-      topicRepo ! TopicRepositoryProtocol.LookupTopic(topic)
-    }
-  }  
-
+  val topics = TopicPath.multi(topicPath.prettyStr)
+  topics foreach { topic =>
+    pending += topic
+    topicRepo ! TopicRepositoryProtocol.LookupTopic(topic)
+  }
+  
   def receive = receiveTopicPathRef orElse handleTimeout
  
   def handleTimeout : Receive = {
     case RequestTimeout => {
       ctx.complete(new AskTimeoutException("Subscription timeout"))
+      timeoutCancellable.cancel()
       self ! PoisonPill
     }  
   }
@@ -69,12 +69,14 @@ class SubToTopicRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: Stri
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
+      timeoutCancellable.cancel()
       self ! PoisonPill
     }  
     case Some(ref) => {
       ack += ref
       if (ack.size == pending.size) {
         subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, ctx.responder, reactiveCmd, ip)
+        timeoutCancellable.cancel()
         self ! PoisonPill
       }
     }  
