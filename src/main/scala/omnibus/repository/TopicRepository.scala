@@ -41,7 +41,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   val mostAskedTopic: Cache[Option[ActorRef]] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
 
   val receiveRecover: Receive = {
-    case t: TopicRepoStateValue                          => {
+    case t: TopicRepoStateValue                     => {
       createTopic(t.topicPath, promise[Boolean])
       updateState(TopicRepoStateValue(t.seqNumber, t.topicPath))
     }  
