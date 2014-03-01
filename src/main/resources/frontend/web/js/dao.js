@@ -3,6 +3,26 @@ App.Dao = Em.Object.create({
     sourceSSE : null,
     eventBus : null,
 
+    getJSON : function(url) {
+      var promise = new Ember.RSVP.Promise(function(resolve, reject){
+        var client = new XMLHttpRequest();
+        client.open("GET", url);
+        client.onreadystatechange = handler;
+        client.responseType = "json";
+        client.setRequestHeader("Accept", "application/json");
+        client.send();
+
+        function handler() {
+          if (this.readyState === this.DONE) {
+            if (this.status === 200) { resolve(this.response); }
+            else { reject(this); }
+          }
+        };
+      });
+
+      return promise;
+    },
+
     setupStream : function (streamUrl) {
         var me = this;
         // close previous stream if any
@@ -51,27 +71,24 @@ App.Dao = Em.Object.create({
             url: "stats/system",
             type: 'GET',
             error: function(xhr, ajaxOptions, thrownError) {
-                console.log("Error during topics retrieval");                                        
+                console.log("Error during current system stat retrieval");                                        
             }
         }).then(function (data) {return dao.createSystemModel(data)});
     },
 
     systemStats : function() {
         var dao = this;
-        return $.ajax({
-            url: "stats/system?mode=history",
-            type: 'GET',
-            error: function(xhr, ajaxOptions, thrownError) {
-                console.log("Error during topics retrieval");                                        
-            }
-        }).then(function (stats) {
-            var systemStatsModel = Ember.A([]);
-            $.each( stats, function(i, stat){
-                var model = dao.createSystemModel(stat)
-                systemStatsModel.pushObject(model);        
-            });
-            return systemStatsModel;
-        });
+        return this.getJSON("stats/system?mode=history")
+                    .then(function (stats) {
+                        var systemStatsModel = Ember.A([]);
+                        $.each( stats, function(i, stat){
+                            var model = dao.createSystemModel(stat)
+                            systemStatsModel.pushObject(model);        
+                        });
+                        return systemStatsModel;
+                    }, function(error) { 
+                        return Ember.A([]);
+                    });
     }, 
 
     subscribers : function() {
@@ -94,23 +111,24 @@ App.Dao = Em.Object.create({
 
     topicStats : function(topicName)  {
         var dao = this;
-        return $.ajax({
-            url: "stats/topics/"+topicName+"?mode=history",
-            type: 'GET',
-            error: function(xhr, ajaxOptions, thrownError) {
-                console.log("Error during topics retrieval");                                        
-            }
-        }).then(function (topicStats) {
-            var container = App.TopicStatContainer.create();
-            var topicStatsModel = Ember.A([]);
-            $.each( topicStats, function(i, topicStat){
-                var model = dao.createTopicStatModel(topicStat);
-                topicStatsModel.pushObject(model);        
-            });
-            container.set("topic", topicName);
-            container.set("stats", topicStatsModel); 
-            return container
-        });
+        return this.getJSON("stats/topics/"+topicName+"?mode=history")
+                    .then(function (topicStats) {
+                        var container = App.TopicStatContainer.create();
+                        var topicStatsModel = Ember.A([]);
+                        $.each( topicStats, function(i, topicStat){
+                            var model = dao.createTopicStatModel(topicStat);
+                            topicStatsModel.pushObject(model);        
+                        });
+                        container.set("topic", topicName);
+                        container.set("stats", topicStatsModel); 
+                        return container
+                    }, function(error) { 
+                        var container = App.TopicStatContainer.create();
+                        container.set("topic", topicName);
+                        container.set("stats", Ember.A([]));
+                        console.log(container) ;
+                        return container ;
+                    });
     },
    
     createTopicStatModel : function(topicStat) {
@@ -211,4 +229,3 @@ App.Dao = Em.Object.create({
         });
     }
 });
-

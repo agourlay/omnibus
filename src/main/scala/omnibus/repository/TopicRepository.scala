@@ -144,13 +144,12 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
       case None           =>  p.failure { new TopicNotFoundException(topicName) with NoStackTrace }
       case Some(topicRef) => {
         topicRef ! TopicProtocol.Delete
-        mostAskedTopic.remove(topicName)
+        mostAskedTopic.remove(topicPath)
         if (rootTopics.contains(topicName)) rootTopics -= topicName
         val delete = state.events.find(_.topicPath == topicPath)
         delete match {
           case None        => log.info(s"Cannot find topic in repo state")
           case Some(topic) => {
-            log.info(s"delete stuff $topic")
             deleteMessage(topic.seqNumber, true)
             state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
           }  

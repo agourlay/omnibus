@@ -15,16 +15,22 @@ App.IndexRoute = Ember.Route.extend({
 
 App.SystemRoute = Ember.Route.extend({
   model: function() {
+    return App.Dao.systemStats();
+  },
+    
+  afterModel: function(data) {
     App.Dao.setupStream("stats/system?mode=streaming");
-    return App.Dao.systemStats().then(null, function() { return Ember.A([]) ;});
-    }
+  }  
 });
 
 App.TopicRoute = Ember.Route.extend({
 	model: function(params) {
-    App.Dao.setupStream("stats/topics/"+params.topic_id+"?mode=streaming");
-		return App.Dao.topicStats(params.topic_id).then(null, function() { return Ember.A([]) ;});
-  }
+		return App.Dao.topicStats(params.topic_id);
+  },
+
+  afterModel: function(container) {
+    App.Dao.setupStream("stats/topics/"+container.topic+"?mode=streaming");
+  } 
 });
 
 App.TopicsRoute = Ember.Route.extend({

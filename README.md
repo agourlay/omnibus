@@ -33,7 +33,6 @@ omnibus {
     }
     statistics{
         storageInterval = "60 seconds"
-        pushInterval = "1 second"
         retentionTime = "3 days"
     }
 }
