@@ -49,11 +49,16 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   val receiveCommand: Receive = {
     case PublishMessage(message)             => publishMessage(message)
-    case ForwardToSubscribers(message)       => forwardToSubscribers(message)
+    case ForwardToSubscribers(message)       => sendToSubscribers(message)
     case Subscribe(subscriber)               => subscribe(subscriber)
     case Unsubscribe(subscriber)             => unsubscribe(subscriber)
     case CreateSubTopic(topics, promise)     => createSubTopic(topics, promise)
     case Terminated(refSub)                  => handleTerminated(refSub)
+    case Delete                              => deleteTopic()
+    case Leaves(replyTo)                     => leaves(replyTo)
+    case View                                => sender ! view()
+    case PurgeTopicData                      => purgeOldData()
+
     case Replay(refSub)                      => forwardMessagesReplay(refSub)
     case Last(refSub)                        => forwardLastMessage(refSub)
     case SinceID(refSub, eventID)            => forwardMessagesSinceID(refSub, eventID)
@@ -61,10 +66,6 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     case BetweenID(refSub, startId, endID)   => forwardMessagesBetweenID(refSub, startId, endID)
     case BetweenTS(refSub, startTs, endTs)   => forwardMessagesBetweenTS(refSub, startTs, endTs)
     case SetupReactiveMode(refSub, reactCmd) => setupReactiveMode(refSub, reactCmd)
-    case Delete                              => deleteTopic()
-    case Leaves(replyTo)                     => leaves(replyTo)
-    case View                                => sender ! view()
-    case PurgeTopicData                      => purgeOldData()
 
     case Propagation(operation, direction)   => handlePropagation(operation, direction)
 
@@ -145,8 +146,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
       case ReactiveMode.BETWEEN_ID => TopicProtocol.BetweenTS(refSub, cmd.since.get, cmd.to.get)
       case ReactiveMode.BETWEEN_TS => TopicProtocol.BetweenTS(refSub, cmd.since.get, cmd.to.get)
     }
-    // propagate up and down the topic tree
-    propagateToDirection(reactiveMessageToFW, PropagationDirection.UP)
+    // forward message to children
     propagateToDirection(reactiveMessageToFW, PropagationDirection.DOWN)
   }
 
@@ -156,14 +156,13 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     persist(MessageTopic(seqNumber, message)) { evt => 
       updateState(evt) 
       // push to subscribers
-      forwardToSubscribers(evt.msg)
-      // forward message down and up the topic tree
-      propagateToDirection(ForwardToSubscribers(evt.msg), PropagationDirection.UP)
+      sendToSubscribers(evt.msg)
+      // forward message to children
       propagateToDirection(ForwardToSubscribers(evt.msg), PropagationDirection.DOWN)
     }
   }
 
-  def forwardToSubscribers(message: Message) = {
+  def sendToSubscribers(message: Message) = {
     subscribers.foreach { actorRef => actorRef ! message }  // push to subscribers
     statHolder ! TopicStatProtocol.MessageReceived  // report stats
   }
