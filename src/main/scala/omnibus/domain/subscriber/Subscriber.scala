@@ -24,8 +24,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   override def preStart() = {
     val prettyTopics = TopicPath.prettySubscription(topics)
     val react = reactiveCmd.react
-    val sub = reactiveCmd.sub
-    log.debug(s"Creating sub on topics $prettyTopics with react $react and sub $sub")
+    log.debug(s"Creating sub on topics $prettyTopics with react $react")
 
     // Death pact with channel! 
     context.watch(channel)
@@ -62,14 +61,9 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     case _ => true
   }
 
-  def filterAccordingSubMode(msg: Message) = reactiveCmd.sub match {
-    case SubscriptionMode.WIDE => true
-    case SubscriptionMode.CLASSIC => topicsPath.contains(msg.topicPath)
-  }
-
   def sendMessage(msg: Message) = {
     // An event can only be played once by subscription
-    if (notYetPlayed(msg) && filterAccordingReactMode(msg) && filterAccordingSubMode(msg)) {
+    if (notYetPlayed(msg) && filterAccordingReactMode(msg) && topicsPath.contains(msg.topicPath)) {
       channel ! msg
       idsSeen += msg.id
     }

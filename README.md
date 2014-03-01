@@ -113,30 +113,10 @@ And finally you can of course subscribe to the notifications on a topic.
 
 ## Subscription models
 
-By default Omnibus follows the common subscription model used in similar systems :
+Omnibus follows the common subscription model used in similar systems :
 
 - when subscribing to a `parent` topic, one will see all updates occuring in the subtopics as well.
 - when subscribing to a `leaf` topic, one will only see the updates targeting this topic directly.
-
-Although this model is enough for most use cases, Omnibus goes further by proposing another model.
-
-It is possible to listen to all activities occuring in the higher part of the topic path. 
-
-For example, subscribing to "/topics/animals/furry/cats" the client could receive
-
->id: 11345 
-
->event: /animals/furry
-
->data: A message for all furry animals!
-
->timestamp: 1388250283
-
-Then the client can decide dynamically according to his use case to do something with this event or not.
-
-To enable this behaviour, use the http param `?sub=wide` when subscribing
-
-- e.g http://localhost:8080/streams/topics/animals/furry/cats?sub=wide
 
 ## Reactive modes
 

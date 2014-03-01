@@ -88,7 +88,7 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
     pathPrefix("streams") {
       path("topics" / Rest) { topic =>
         validate(!topic.isEmpty, "topic name cannot be empty \n") {
-          parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?, 'sub.as[String] ? "classic").as(ReactiveCmd) { reactiveCmd =>
+          parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveCmd) { reactiveCmd =>
             clientIP { ip =>
               get { ctx =>
                 context.actorOf(SubToTopicRequest.props(TopicPath(topic), reactiveCmd, ip.toOption.get.toString, ctx, subRepo, topicRepo))
