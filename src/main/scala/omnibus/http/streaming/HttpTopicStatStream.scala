@@ -24,7 +24,6 @@ class HttpTopicStatStream(responder: ActorRef, topic : ActorRef) extends Streami
 
   implicit def executionContext = context.dispatcher
   implicit def system = context.system
-  implicit val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
 
   val pushInterval = Settings(system).Statistics.PushInterval
   

@@ -49,6 +49,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
   }
 
   val receiveRecover: Receive = {
+    case s : TopicStatisticValue                         => updateState(s)
     case SnapshotOffer(_, snapshot: TopicStatisticState) => state = snapshot
   }
 

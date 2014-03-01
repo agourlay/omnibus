@@ -32,7 +32,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   var subscribers: Set[ActorRef] = Set.empty[ActorRef]
   var subTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
 
-  val statHolder = context.actorOf(TopicStatistics.props(self))
+  val statHolder = context.actorOf(TopicStatistics.props(self), "internal-topic-stats")
   val creationDate = System.currentTimeMillis / 1000L
 
   override def preStart() = {

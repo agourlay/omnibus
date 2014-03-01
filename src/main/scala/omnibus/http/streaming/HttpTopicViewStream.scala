@@ -23,8 +23,6 @@ class HttpTopicViewStream(responder: ActorRef, roots: List[ActorRef]) extends St
 
   implicit def executionContext = context.dispatcher
   implicit def system = context.system
-
-  implicit val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
   
   override def startText = s"~~> Streaming topic view\n"
 

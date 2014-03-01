@@ -99,7 +99,7 @@ If you publish a message at the `/animals` level, all subtopics will receive it 
 
 It is possible to DELETE a topic and all its subtopics via the [administration](https://github.com/agourlay/omnibus#administration) API. 
 
-You can also request the collection of leaves topic using `GET /admin/leaves`. It is a streamed API, so you will receive topics as the topic trees are traversed. 
+You can also request the collection of leaves topic using `GET /leaves`. It is a streamed API, so you will receive topics as the topic trees are traversed. 
 
 > curl -X GET http://localhost:8080/leaves
 
