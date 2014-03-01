@@ -33,6 +33,8 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
 
   var lastMeasureMillis = System.currentTimeMillis
 
+  var toStore = false
+
   val breaker = new CircuitBreaker(system.scheduler,
       maxFailures = 5,
       callTimeout = 10.seconds,
@@ -51,11 +53,12 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
   }
 
   val receiveCommand : Receive = {
-    case MessageReceived     => messageReceived = messageReceived + 1
-    case SubscriberAdded     => subscribersNumber = subscribersNumber + 1
-    case SubscriberRemoved   => subscribersNumber = subscribersNumber - 1
-    case SubTopicAdded       => subTopicsNumber = subTopicsNumber + 1
-    case SubTopicRemoved     => subTopicsNumber = subTopicsNumber - 1
+    case MessageReceived     => messageReceived += 1  ; toStore = true
+    case SubscriberAdded     => subscribersNumber += 1; toStore = true
+    case SubscriberRemoved   => subscribersNumber -= 1; toStore = true
+    case SubTopicAdded       => subTopicsNumber += 1  ; toStore = true
+    case SubTopicRemoved     => subTopicsNumber -= 1  ; toStore = true
+
     case StoringTick         => storeStats()
     case PastStats           => sender ! breaker.withSyncCircuitBreaker(state.events.reverse)
     case LiveStats           => sender ! liveStats()
@@ -72,7 +75,11 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
   }
 
   def storeStats() = {
-    persist(liveStats()) { s => updateState(s) }
+    // avoid persisting data if nothing changed
+    if (toStore){
+      persist(liveStats()) { s => updateState(s) }
+      toStore = false
+    }
   }
 
   def purgeOldData() {
@@ -84,7 +91,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
         deleteMessages(stat.seqNumber, true)
         state = TopicStatisticState(state.events.filterNot(_.timestamp < timeLimit))
       }  
-      case None      =>  log.debug(s"Nothing to purge yet in topicStatistic")
+      case None       =>  log.debug(s"Nothing to purge yet in topicStatistic")
     }                   
   }
 

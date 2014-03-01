@@ -75,7 +75,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
         deleteMessages(stat.seqNumber, true)
         state = HttpStatisticsState(state.events.filterNot(_.timestamp < timeLimit))
       }  
-      case None      =>  log.debug(s"Nothing to purge yet in HttpStatistics")
+      case None       =>  log.debug(s"Nothing to purge yet in HttpStatistics")
     }                   
   }
 }
