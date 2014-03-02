@@ -19,6 +19,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
 
   lazy val prettyPath = TopicPath.prettyStr(topicRef)
 
+  val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
   val storageInterval = Settings(system).Statistics.StorageInterval
   val retentionTime = Settings(system).Statistics.RetentionTime
   val sampling = Settings(system).Statistics.Sampling
