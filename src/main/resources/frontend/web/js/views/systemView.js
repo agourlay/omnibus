@@ -57,12 +57,13 @@ App.SystemView = Em.View.extend({
             });
         }
         
-        var palette = new Rickshaw.Color.Palette( { scheme: 'colorwheel' } );
+        var palette = new Rickshaw.Color.Palette( { scheme: 'munin' } );
         var graph = new Rickshaw.Graph( {
             element: document.getElementById("chart"),
             width: calculateFitWidth(),
             height: calculateFitHeight(),
             renderer: 'line',
+            interpolation: 'linear',
             padding : {
                 top : 0.05,
                 bottom : 0.05

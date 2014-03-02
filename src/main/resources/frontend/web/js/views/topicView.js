@@ -27,14 +27,6 @@ App.TopicView = Em.View.extend({
         });
     },
 
-    calculateFitWidth : function() {
-        return $(window).width() - $("#chart").offset().left - 70;
-    },
-
-    calculateFitHeight : function() {
-        return $(window).height() - $("#chart").offset().top - 60;
-    },
-
     didInsertElement: function() {
         var view = this;
         var seriesData = [ [], [], [] ];
@@ -51,12 +43,13 @@ App.TopicView = Em.View.extend({
             });
         }
         
-        var palette = new Rickshaw.Color.Palette( { scheme: 'colorwheel' } );
+        var palette = new Rickshaw.Color.Palette( { scheme: 'munin' } );
         var graph = new Rickshaw.Graph( {
             element: document.getElementById("chart"),
             width: calculateFitWidth(),
             height: calculateFitHeight(),
             renderer: 'line',
+            interpolation: 'linear',
             padding : {
                 top : 0.05,
                 bottom : 0.05

@@ -46,6 +46,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
   }
 
   val receiveRecover: Receive = {
+    case s : HttpStats                                   => updateState(s)
     case SnapshotOffer(_, snapshot: HttpStatisticsState) => state = snapshot
   }
 
