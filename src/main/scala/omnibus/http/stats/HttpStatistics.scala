@@ -32,8 +32,10 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
 
   val cb = new CircuitBreaker(system.scheduler,
     maxFailures = 5,
-    callTimeout = 10.seconds,
-    resetTimeout = 1.minute)
+    callTimeout = timeout.duration,
+    resetTimeout = timeout.duration * 10).onOpen(log.warning("CircuitBreaker is now open"))
+                                         .onClose(log.warning("CircuitBreaker is now closed"))
+                                         .onHalfOpen(log.warning("CircuitBreaker is now half-open"))
 
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, HttpStatisticsProtocol.StoringTick)
