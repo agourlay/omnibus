@@ -64,7 +64,7 @@ class HttpEndpoint(httpStatService : ActorRef, topicRepo : ActorRef, subRepo : A
       requestUri { uri =>
         log.error("Request to {} could not be handled normally -> CircuitBreakerOpenException", uri)
         log.error("CircuitBreakerOpenException : {} ", e)
-        complete(StatusCodes.InternalServerError, "The system is currently under load and cannot process your request, retry later \n")
+        complete(StatusCodes.InternalServerError, "Omnibus is currently under high load and cannot process your request, retry later \n")
       } 
 
     case e : IllegalArgumentException  => 

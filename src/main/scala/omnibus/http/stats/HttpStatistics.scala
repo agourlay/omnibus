@@ -22,7 +22,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
 
   val storageInterval = Settings(system).Statistics.StorageInterval
   val retentionTime = Settings(system).Statistics.RetentionTime
-  val pushInterval = Settings(system).Statistics.PushInterval
+  val sampling = Settings(system).Statistics.Sampling
 
   var state = HttpStatisticsState()
   def updateState(msg: HttpStats): Unit = {state = state.update(msg)}
@@ -30,7 +30,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
 
   var lastKnownState : Option[Stats] = None
 
-  val breaker = new CircuitBreaker(system.scheduler,
+  val cb = new CircuitBreaker(system.scheduler,
     maxFailures = 5,
     callTimeout = 10.seconds,
     resetTimeout = 1.minute)
@@ -38,7 +38,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, HttpStatisticsProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, HttpStatisticsProtocol.PurgeOldData)
-    system.scheduler.schedule(pushInterval, pushInterval){
+    system.scheduler.schedule(sampling, sampling){
        context.actorSelection("/user/IO-HTTP/listener-0") ! Http.GetStats
     }
     log.debug(s"Creating system HttpStatistics holder")
@@ -53,7 +53,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
   val receiveCommand : Receive = {
     case stat :Stats         => lastKnownState = Some(stat)
     case StoringTick         => storeStats()
-    case PastStats           => sender ! breaker.withSyncCircuitBreaker(state.events.reverse)
+    case PastStats           => sender ! cb.withSyncCircuitBreaker(state.events.reverse)
     case LiveStats           => sender ! liveStats()
     case PurgeOldData        => purgeOldData()
   }

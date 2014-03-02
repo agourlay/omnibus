@@ -40,6 +40,12 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   // cache of most looked up topicRef, conf values to be tuned
   val mostAskedTopic: Cache[Option[ActorRef]] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
 
+  val cb = new CircuitBreaker(context.system.scheduler,
+      maxFailures = 5,
+      callTimeout = timeout.duration,
+      resetTimeout = timeout.duration * 10).onOpen(log.warning("CircuitBreaker is now open"))
+                                           .onClose(log.warning("CircuitBreaker is now closed"))
+                                           .onHalfOpen(log.warning("CircuitBreaker is now half-open"))
   val receiveRecover: Receive = {
     case t: TopicRepoStateValue                     => {
       createTopic(t.topicPath, promise[Boolean])
@@ -52,17 +58,18 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   }
 
   val receiveCommand: Receive = {
-    case CreateTopic(topic)              => persistTopic(topic) pipeTo sender
-    case DeleteTopic(topic)              => deleteTopic(topic) pipeTo sender
-    case CheckTopic(topic)               => sender ! checkTopic(topic) 
-    case LookupTopic(topic)              => sender ! topicPathRef(topic)
-    case PublishToTopic(topic, message)  => publishToTopic(topic, message) pipeTo sender
-    case TopicPastStat(topic)            => topicPastStat(topic) pipeTo sender
-    case TopicLiveStat(topic)            => topicLiveStat(topic) pipeTo sender
-    case TopicViewReq(topic)             => topicView(topic) pipeTo sender
-    case AllLeaves(replyTo)              => allLeaves(replyTo)
-    case AllRoots                        => allRoots() pipeTo sender
-    case TopicProtocol.Propagation       => log.debug("message propagation reached Repo")
+    case CreateTopic(topic)          => cb.withCircuitBreaker( persistTopic(topic) ) pipeTo sender
+    case DeleteTopic(topic)          => cb.withCircuitBreaker( deleteTopic(topic) ) pipeTo sender
+    case PublishToTopic(topic, msg)  => cb.withCircuitBreaker( publishToTopic(topic, msg) ) pipeTo sender
+    case TopicPastStat(topic)        => cb.withCircuitBreaker( topicPastStat(topic) ) pipeTo sender
+    case TopicLiveStat(topic)        => cb.withCircuitBreaker( topicLiveStat(topic) ) pipeTo sender
+    case TopicViewReq(topic)         => cb.withCircuitBreaker( topicView(topic) ) pipeTo sender
+    case AllRoots                    => cb.withCircuitBreaker( allRoots() ) pipeTo sender()
+    
+    case AllLeaves(replyTo)          => allLeaves(replyTo)
+    case CheckTopic(topic)           => sender ! checkTopic(topic) 
+    case LookupTopic(topic)          => sender ! topicPathRef(topic)
+    case TopicProtocol.Propagation   => log.debug("message propagation reached Repo")
   }
 
   def topicPathRef(topicPath: TopicPath) : TopicPathRef = {

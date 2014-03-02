@@ -21,7 +21,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
 
   val storageInterval = Settings(system).Statistics.StorageInterval
   val retentionTime = Settings(system).Statistics.RetentionTime
-  val resolution = Settings(system).Statistics.Resolution
+  val sampling = Settings(system).Statistics.Sampling
 
   var state = TopicStatisticState()
   def updateState(msg: TopicStatisticValue): Unit = {state = state.update(msg)}
@@ -35,7 +35,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
 
   var toStore = false
 
-  val breaker = new CircuitBreaker(system.scheduler,
+  val cb = new CircuitBreaker(system.scheduler,
       maxFailures = 5,
       callTimeout = 10.seconds,
       resetTimeout = 1.minute)
@@ -43,7 +43,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
   override def preStart() = {
     system.scheduler.schedule(storageInterval, storageInterval, self, TopicStatProtocol.StoringTick)
     system.scheduler.schedule(retentionTime, retentionTime, self, TopicStatProtocol.PurgeOldData)
-    system.scheduler.schedule(resolution, resolution, self, TopicStatProtocol.ResetCounter)
+    system.scheduler.schedule(sampling, sampling, self, TopicStatProtocol.ResetCounter)
     log.debug(s"Creating new TopicStats for $prettyPath")
     super.preStart()
   }
@@ -61,7 +61,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
     case SubTopicRemoved     => subTopicsNumber -= 1  ; toStore = true
 
     case StoringTick         => storeStats()
-    case PastStats           => sender ! breaker.withSyncCircuitBreaker(state.events.reverse)
+    case PastStats           => sender ! cb.withSyncCircuitBreaker(state.events.reverse)
     case LiveStats           => sender ! liveStats()
     case PurgeOldData        => purgeOldData()
     case ResetCounter        => resetCounter()

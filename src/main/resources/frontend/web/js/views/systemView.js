@@ -49,7 +49,8 @@ App.SystemView = Em.View.extend({
             $.each( view.get('content'), function(i, systemStat){
                 var xTime = systemStat.timestamp;
                 seriesData[0].push({x: xTime, y: systemStat.openRequests});
-                seriesData[1].push({x: xTime, y: systemStat.openConnections});      
+                seriesData[1].push({x: xTime, y: systemStat.openConnections}); 
+                seriesData[2].push({x: xTime, y: systemStat.requestTimeouts});      
             });
         } else {
             seriesData.forEach(function(series) {
@@ -62,7 +63,7 @@ App.SystemView = Em.View.extend({
             element: document.getElementById("chart"),
             width: calculateFitWidth(),
             height: calculateFitHeight(),
-            renderer: 'line',
+            renderer: 'multi',
             interpolation: 'linear',
             padding : {
                 top : 0.05,
@@ -74,11 +75,18 @@ App.SystemView = Em.View.extend({
                 {
                     color: palette.color(),
                     data: seriesData[0],
-                    name: 'Opened requests'
+                    name: 'Opened requests',
+                    renderer: 'line'
                 }, {
                     color: palette.color(),
                     data: seriesData[1],
-                    name: 'Opened connections'
+                    name: 'Opened connections',
+                    renderer: 'line'
+                }, {
+                    color: palette.color(),
+                    data: seriesData[2],
+                    name: 'Timeouts',
+                    renderer: 'scatterplot'
                 }
             ]
         } );

@@ -25,13 +25,13 @@ class HttpTopicStatStream(responder: ActorRef, topic : ActorRef) extends Streami
   implicit def executionContext = context.dispatcher
   implicit def system = context.system
 
-  val pushInterval = Settings(system).Statistics.PushInterval
+  val sampling = Settings(system).Statistics.Sampling
   
   override def startText = s"~~> Streaming topic statistics\n"
 
   override def preStart() = {
     super.preStart
-    context.system.scheduler.schedule(pushInterval, pushInterval, self, HttpTopicStatStreamProtocol.RequestTopicStats)
+    context.system.scheduler.schedule(sampling, sampling, self, HttpTopicStatStreamProtocol.RequestTopicStats)
   }
 
   override def receive = ({

@@ -26,13 +26,13 @@ class HttpStatStream(responder: ActorRef, statsRepo : ActorRef) extends Streamin
   implicit def system = context.system
 
   implicit val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
-  val pushInterval = Settings(system).Statistics.PushInterval
+  val sampling = Settings(system).Statistics.Sampling
   
   override def startText = s"~~> Streaming http statistics\n"
 
   override def preStart() = {
     super.preStart
-    context.system.scheduler.schedule(pushInterval, pushInterval, self, HttpStatStreamProtocol.RequestHttpStats)
+    context.system.scheduler.schedule(sampling, sampling, self, HttpStatStreamProtocol.RequestHttpStats)
   }
 
   override def receive = ({

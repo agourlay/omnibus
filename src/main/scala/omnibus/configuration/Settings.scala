@@ -26,9 +26,8 @@ class Settings(config: Config, extendedSystem: ExtendedActorSystem) extends Exte
 
   object Statistics {
     val StorageInterval = FiniteDuration(config.getDuration("omnibus.statistics.storageInterval", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
-    val PushInterval = FiniteDuration(config.getDuration("omnibus.statistics.pushInterval", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
     val RetentionTime = FiniteDuration(config.getDuration("omnibus.statistics.retentionTime", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
-    val Resolution = FiniteDuration(config.getDuration("omnibus.statistics.resolution", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
+    val Sampling = FiniteDuration(config.getDuration("omnibus.statistics.sampling", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
   }
 }
 
