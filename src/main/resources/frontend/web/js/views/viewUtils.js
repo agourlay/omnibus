@@ -3,7 +3,7 @@ function calculateFitWidth ()  {
 }
 
 function calculateFitHeight () {
-    return $(window).height() - $("#chart").offset().top - 110;
+    return $(window).height() - $("#chart").offset().top - 150;
 }
 
 function graphExtensions(graph) {
