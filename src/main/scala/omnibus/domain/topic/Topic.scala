@@ -1,6 +1,7 @@
 package omnibus.domain.topic
 
 import akka.actor._
+import akka.pattern._
 import akka.persistence._
 
 import scala.concurrent.duration._
@@ -48,7 +49,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   val receiveCommand: Receive = {
-    case PublishMessage(message)             => publishMessage(message)
+    case PublishMessage(message)             => publishMessage(message) pipeTo sender
     case ForwardToSubscribers(message)       => sendToSubscribers(message)
     case Subscribe(subscriber)               => subscribe(subscriber)
     case Unsubscribe(subscriber)             => unsubscribe(subscriber)
@@ -150,7 +151,9 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     propagateToDirection(reactiveMessageToFW, PropagationDirection.DOWN)
   }
 
-  def publishMessage(message: Message) = {
+  def publishMessage(message: Message) : Future[Boolean]= {
+    val p = promise[Boolean]
+    val f = p.future
     // persist in topic state
     val seqNumber = lastSequenceNr + 1
     persist(MessageTopic(seqNumber, message)) { evt => 
@@ -159,7 +162,9 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
       sendToSubscribers(evt.msg)
       // forward message to parent for ancestor visibility
       propagateToDirection(ForwardToSubscribers(evt.msg), PropagationDirection.UP)
+      p.success(true)
     }
+    f
   }
 
   def sendToSubscribers(message: Message) = {
