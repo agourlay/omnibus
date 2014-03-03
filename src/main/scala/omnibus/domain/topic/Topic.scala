@@ -153,7 +153,6 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   def publishMessage(message: Message) : Future[Boolean]= {
     val p = promise[Boolean]
-    val f = p.future
     // persist in topic state
     val seqNumber = lastSequenceNr + 1
     persist(MessageTopic(seqNumber, message)) { evt => 
@@ -164,7 +163,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
       propagateToDirection(ForwardToSubscribers(evt.msg), PropagationDirection.UP)
       p.success(true)
     }
-    f
+    p.future
   }
 
   def sendToSubscribers(message: Message) = {
@@ -177,8 +176,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
       context.watch(subscriber)
       subscribers += subscriber
       subscriber ! SubscriberProtocol.AcknowledgeSub(self)
-      // report stats
-      statHolder ! TopicStatProtocol.SubscriberAdded
+      statHolder ! TopicStatProtocol.SubscriberAdded       // report stats
     }
   }
 
@@ -186,8 +184,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     context.unwatch(subscriber)
     subscribers -= subscriber
     subscriber ! SubscriberProtocol.AcknowledgeUnsub(self)
-    // report stats
-    statHolder ! TopicStatProtocol.SubscriberRemoved
+    statHolder ! TopicStatProtocol.SubscriberRemoved    // report stats
   }
 
   // It is either a subtopic or a subscriber
@@ -216,8 +213,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
       context.watch(subTopicActor)
       subTopics += (subTopic -> subTopicActor)
       subTopicActor ! TopicProtocol.CreateSubTopic(topics, promise)
-      // report stats
-      statHolder ! TopicStatProtocol.SubTopicAdded
+      statHolder ! TopicStatProtocol.SubTopicAdded     // report stats
     }
   }
 

@@ -63,7 +63,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
 
   def sendMessage(msg: Message) = {
     // An event can only be played once by subscription
-    if (notYetPlayed(msg) && filterAccordingReactMode(msg) && topicsPath.contains(msg.topicPath)) {
+    if (notYetPlayed(msg) && filterAccordingReactMode(msg)) {
       channel ! msg
       idsSeen += msg.id
     }

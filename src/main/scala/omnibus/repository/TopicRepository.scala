@@ -113,9 +113,8 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
         val topicName = topicPath.prettyStr
         log.warning(s"trying to push to non existing topic $topicName")
         val p = promise[Boolean]
-        val f = p.future
         p.failure {new TopicNotFoundException(topicName) with NoStackTrace }
-        f
+        p.future
       }
     }
   }
