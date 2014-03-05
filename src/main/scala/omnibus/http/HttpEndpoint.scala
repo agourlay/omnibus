@@ -82,12 +82,13 @@ class HttpEndpoint(httpStatService : ActorRef, topicRepo : ActorRef, subRepo : A
     	}
   }
 
-  val routes =
-    new TopicRoute(subRepo, topicRepo).route ~       // '/topics'
-    new StatsRoute(httpStatService, topicRepo).route ~      // '/stats'
-    new AdminRoute(topicRepo, subRepo).route ~              // '/admin/topics'
-    new AdminUIRoute().route                                // '/ '
+  val topicRoute = new TopicRoute(subRepo, topicRepo).route         // '/topics'
+  val statsRoute = new StatsRoute(httpStatService, topicRepo).route // '/stats'
+  val adminRoute = new AdminRoute(topicRepo, subRepo).route         // '/admin/topics'
+  val adminUIRoute = new AdminUIRoute().route                       // '/ '
 
+  val routes = topicRoute ~ statsRoute ~ adminRoute ~ adminUIRoute         
+                                  
   def receive = runRoute(routes)
 
 }
