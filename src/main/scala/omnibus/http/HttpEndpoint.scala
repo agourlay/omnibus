@@ -29,9 +29,9 @@ import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.configuration._
 
-class HttpEndpoint(httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef) extends HttpServiceActor with ActorLogging {
+class HttpEndpoint(httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef) extends HttpService with Actor {
 
-  implicit def executionContext = context.dispatcher
+  implicit def actorRefFactory = context
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   implicit def omnibusExceptionHandler(implicit log: LoggingContext) = ExceptionHandler {
