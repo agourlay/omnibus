@@ -32,16 +32,9 @@ import omnibus.domain._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.repository._
-import omnibus.http.request.SubToTopicRequestProtocol._
 
-class SubToTopicRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx : RequestContext
-                      , subRepo : ActorRef, topicRepo: ActorRef) extends Actor with ActorLogging {
-
-  implicit def executionContext = context.dispatcher
-  implicit def system = context.system
-  implicit val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
-
-  val timeoutCancellable = system.scheduler.scheduleOnce(timeout.duration, self, SubToTopicRequestProtocol.RequestTimeout)
+class SubscribeRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx : RequestContext
+                     , subRepo : ActorRef, topicRepo: ActorRef) extends RestRequest(ctx) {
   
   var pending: Set[TopicPath] = Set.empty[TopicPath] 
   var ack: Set[ActorRef] = Set.empty[ActorRef]
@@ -52,15 +45,7 @@ class SubToTopicRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: Stri
     topicRepo ! TopicRepositoryProtocol.LookupTopic(topic)
   }
   
-  def receive = receiveTopicPathRef orElse handleTimeout
- 
-  def handleTimeout : Receive = {
-    case RequestTimeout => {
-      ctx.complete(new AskTimeoutException("Subscription timeout"))
-      timeoutCancellable.cancel()
-      self ! PoisonPill
-    }  
-  }
+  override def receive = receiveTopicPathRef orElse handleTimeout
 
   def receiveTopicPathRef : Receive = {
     case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
@@ -69,25 +54,19 @@ class SubToTopicRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: Stri
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      timeoutCancellable.cancel()
       self ! PoisonPill
     }  
     case Some(ref) => {
       ack += ref
       if (ack.size == pending.size) {
         subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, ctx.responder, reactiveCmd, ip)
-        timeoutCancellable.cancel()
         self ! PoisonPill
       }
     }  
   }
 }
 
-object SubToTopicRequest {
+object SubscribeRequest {
    def props(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx : RequestContext, subRepo : ActorRef, topicRepo: ActorRef) 
-     = Props(classOf[SubToTopicRequest], topicPath, reactiveCmd, ip, ctx, subRepo , topicRepo).withDispatcher("subscribers-dispatcher")
-}
-
-object SubToTopicRequestProtocol {
-  case object RequestTimeout
+     = Props(classOf[SubscribeRequest], topicPath, reactiveCmd, ip, ctx, subRepo , topicRepo)
 }

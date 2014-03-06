@@ -29,7 +29,7 @@ import omnibus.domain.subscriber._
 import omnibus.domain.topic._
 import omnibus.configuration._
 import omnibus.repository._
-import omnibus.http.request.SubToTopicRequest
+import omnibus.http.request._
 
 class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: ActorContext) extends Directives {
 
@@ -75,13 +75,7 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
           } 
         } ~
         entity(as[String]) { message =>
-          put { ctx =>
-            val futurePub = (topicRepo ? TopicRepositoryProtocol.PublishToTopic(topicPath, message)).mapTo[Boolean]
-            futurePub.onComplete {
-              case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
-              case Failure(ex) => ctx.complete(ex)
-            } 
-          }
+          put { ctx => context.actorOf(PublishRequest.props(topicPath, message, ctx, topicRepo)) }
         }
       }  
     } ~ 
@@ -91,7 +85,7 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
           parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveCmd) { reactiveCmd =>
             clientIP { ip =>
               get { ctx =>
-                context.actorOf(SubToTopicRequest.props(TopicPath(topic), reactiveCmd, ip.toOption.get.toString, ctx, subRepo, topicRepo))
+                context.actorOf(SubscribeRequest.props(TopicPath(topic), reactiveCmd, ip.toOption.get.toString, ctx, subRepo, topicRepo))
               }
             }
           }
@@ -101,7 +95,7 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
     path("leaves") {
       get { ctx =>
         topicRepo ! TopicRepositoryProtocol.AllLeaves(ctx.responder)
-        context.system.scheduler.scheduleOnce(10.seconds){ctx.complete("Connection closes")}
+        context.system.scheduler.scheduleOnce(10.seconds){ctx.complete("Connection closed")}
       }
     }
 }

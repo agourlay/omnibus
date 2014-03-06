@@ -104,19 +104,9 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
     }
   }
 
-  def publishToTopic(topicPath: TopicPath, message: String) : Future[Boolean] = {
-    lookUpTopicWithCache(topicPath) match {
-      case Some(topicRef) => {
-        ( topicRef ? TopicProtocol.PublishMessage(Message(nextEventId, topicPath, message)) ).mapTo[Boolean]
-       } 
-      case None => {
-        val topicName = topicPath.prettyStr
-        log.warning(s"trying to push to non existing topic $topicName")
-        val p = promise[Boolean]
-        p.failure {new TopicNotFoundException(topicName) with NoStackTrace }
-        p.future
-      }
-    }
+  def publishToTopic(topicRef: ActorRef, message: String) : Future[Boolean] = {
+    val event = Message(nextEventId, TopicPath(topicRef), message)
+    ( topicRef ? TopicProtocol.PublishMessage(event) ).mapTo[Boolean]
   }
 
   def lookUpTopicWithCache(topicPath: TopicPath): Option[ActorRef] = {
@@ -221,7 +211,7 @@ object TopicRepositoryProtocol {
   case class DeleteTopic(topicName: TopicPath)
   case class CheckTopic(topicName: TopicPath)
   case class LookupTopic(topicName: TopicPath)
-  case class PublishToTopic(topicName: TopicPath, message: String)
+  case class PublishToTopic(topicName: ActorRef, message: String)
   case class TopicPastStat(topic: TopicPath)
   case class TopicLiveStat(topic: TopicPath)
   case class TopicViewReq(topic: TopicPath)
