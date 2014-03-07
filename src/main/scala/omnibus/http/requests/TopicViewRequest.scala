@@ -25,6 +25,7 @@ import scala.concurrent.Future
 import DefaultJsonProtocol._
 import reflect.ClassTag
 
+import omnibus.http.CustomMediaType
 import omnibus.http.JsonSupport._
 import omnibus.http.streaming._
 import omnibus.configuration._
@@ -33,7 +34,7 @@ import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.repository._
 
-class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
+class TopicViewRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
   val prettyTopic = topicPath.prettyStr()
 
@@ -41,15 +42,11 @@ class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext
 
   override def receive = waitingLookup orElse handleTimeout
 
-  def waitingAck : Receive = {
-    case true        => {
-      ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
+  def waitingTopicView : Receive = {
+    case tv : TopicView  => {
+      ctx.complete (tv)
       self ! PoisonPill
-    }  
-    case Failure(ex) => {
-      ctx.complete(ex)
-      self ! PoisonPill
-    }  
+    }
   }
 
   def waitingLookup : Receive = {
@@ -58,8 +55,8 @@ class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(ref) => {
-      ref ! TopicProtocol.PublishMessage(message)
-      context.become(waitingAck orElse handleTimeout)
+      ref ! TopicProtocol.View
+      context.become(waitingTopicView orElse handleTimeout)
     }
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
@@ -68,7 +65,7 @@ class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext
   }
 }
 
-object PublishRequest {
-   def props(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[PublishRequest], topicPath, message, ctx, topicRepo)
+object TopicViewRequest {
+   def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
+     = Props(classOf[TopicViewRequest], topicPath, ctx, topicRepo)
 }

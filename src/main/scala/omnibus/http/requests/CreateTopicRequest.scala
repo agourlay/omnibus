@@ -33,7 +33,7 @@ import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.repository._
 
-class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
+class CreateTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
   val prettyTopic = topicPath.prettyStr()
 
@@ -43,7 +43,7 @@ class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext
 
   def waitingAck : Receive = {
     case true        => {
-      ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
+      ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $prettyTopic created \n")
       self ! PoisonPill
     }  
     case Failure(ex) => {
@@ -58,17 +58,17 @@ class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(ref) => {
-      ref ! TopicProtocol.PublishMessage(message)
-      context.become(waitingAck orElse handleTimeout)
+      ctx.complete(new TopicAlreadyExistsException(topicPath.prettyStr()))
+      self ! PoisonPill
     }
     case None      => {
-      ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      self ! PoisonPill
+      topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)
+      context.become(waitingAck orElse handleTimeout)
     }  
   }
 }
 
-object PublishRequest {
-   def props(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[PublishRequest], topicPath, message, ctx, topicRepo)
+object CreateTopicRequest {
+   def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
+     = Props(classOf[CreateTopicRequest], topicPath, ctx, topicRepo)
 }

@@ -23,6 +23,7 @@ import scala.util._
 import DefaultJsonProtocol._
 import reflect.ClassTag
 
+import omnibus.http.CustomMediaType
 import omnibus.http.JsonSupport._
 import omnibus.domain._
 import omnibus.domain.subscriber._
@@ -38,41 +39,20 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
 
   val log: Logger = LoggerFactory.getLogger("omnibus.route.topic")
 
-  lazy val HALType = register(
-    MediaType.custom(
-      mainType = "application",
-      subType = "hal+json",
-      compressible = false,
-      binary = false
-     ))
-
   val route =
     path("topics") {
-      get {
-        respondWithMediaType(HALType) {
-          complete {
-            (topicRepo ? TopicRepositoryProtocol.AllRoots).mapTo[List[TopicView]]
-          }
-        }
+      get { ctx =>
+        context.actorOf(TopicRootsRequest.props(ctx, topicRepo))
       }
     } ~
     path("topics" / Rest) { topic =>
       validate(!topic.isEmpty, "topic name cannot be empty \n") {  
         val topicPath = TopicPath(topic)
-        val prettyTopic = topicPath.prettyStr()
-        get {
-          respondWithMediaType(HALType) {
-            complete {
-              (topicRepo ? TopicRepositoryProtocol.TopicViewReq(topicPath)).mapTo[TopicView]
-            }
-          }
+        get { ctx =>
+          context.actorOf(TopicViewRequest.props(topicPath, ctx, topicRepo)) 
         } ~
-        post { ctx =>                       
-          val futureCreate = (topicRepo ? TopicRepositoryProtocol.CreateTopic(topicPath)).mapTo[Boolean]
-          futureCreate.onComplete {
-            case Success(ok) => ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $prettyTopic created \n") 
-            case Failure(ex) => ctx.complete(ex)
-          } 
+        post { ctx => 
+          context.actorOf(CreateTopicRequest.props(topicPath, ctx, topicRepo)) 
         } ~
         entity(as[String]) { message =>
           put { ctx => context.actorOf(PublishRequest.props(topicPath, message, ctx, topicRepo)) }

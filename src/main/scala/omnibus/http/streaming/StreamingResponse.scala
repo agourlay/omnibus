@@ -9,21 +9,15 @@ import HttpHeaders._
 import spray.can.Http
 import scala.language.postfixOps
 
+import omnibus.http.CustomMediaType
+
 
 class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging {
-
-  lazy val EventStreamType = register(
-	  MediaType.custom(
-	    mainType = "text",
-	    subType = "event-stream",
-	    compressible = false,
-	    binary = false
-	   ))
 
   def startText = "Generic streaming...\n"
 
   lazy val responseStart = HttpResponse(
- 		entity  = HttpEntity(EventStreamType, startText),
+ 		entity  = HttpEntity(CustomMediaType.EventStreamType, startText),
   	headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
   )
 

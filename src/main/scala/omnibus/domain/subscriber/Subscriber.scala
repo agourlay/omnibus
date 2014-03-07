@@ -18,7 +18,6 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
 
   var pendingTopic: Set[ActorRef] = topics
   var topicListened: Set[ActorRef] = Set.empty[ActorRef]
-  var idsSeen: Set[Long] = Set.empty[Long]   // set of all event ids seen by this subscriber 
   val topicsPath : Set[TopicPath] = topics.map(TopicPath(_))
 
   override def preStart() = {
@@ -53,8 +52,6 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     self ! PoisonPill
   }
 
-  def notYetPlayed(msg: Message): Boolean = !idsSeen.contains(msg.id)
-
   def filterAccordingReactMode(msg: Message) = reactiveCmd.react match {
     case ReactiveMode.BETWEEN_ID => msg.id >= reactiveCmd.since.get && msg.id <= reactiveCmd.to.get
     case ReactiveMode.BETWEEN_TS => msg.timestamp >= reactiveCmd.since.get && msg.timestamp <= reactiveCmd.to.get
@@ -62,10 +59,8 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   }
 
   def sendMessage(msg: Message) = {
-    // An event can only be played once by subscription
-    if (notYetPlayed(msg) && filterAccordingReactMode(msg)) {
+    if (filterAccordingReactMode(msg)) {
       channel ! msg
-      idsSeen += msg.id
     }
   }
 

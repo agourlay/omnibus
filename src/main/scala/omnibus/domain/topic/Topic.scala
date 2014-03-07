@@ -23,6 +23,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   implicit val system = context.system
   implicit def executionContext = context.dispatcher
+  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   var state = TopicState()
   def updateState(msg: MessageTopic): Unit = {state = state.update(msg)}
@@ -35,6 +36,14 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   val statHolder = context.actorOf(TopicStatistics.props(self), "internal-topic-stats")
   val creationDate = System.currentTimeMillis / 1000L
+  val topicPath = TopicPath(self)
+
+  val cb = new CircuitBreaker(context.system.scheduler,
+      maxFailures = 5,
+      callTimeout = timeout.duration,
+      resetTimeout = timeout.duration * 10).onOpen(log.warning("CircuitBreaker is now open"))
+                                           .onClose(log.warning("CircuitBreaker is now closed"))
+                                           .onHalfOpen(log.warning("CircuitBreaker is now half-open"))
 
   override def preStart() = {
     val myPath = self.path
@@ -49,7 +58,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   val receiveCommand: Receive = {
-    case PublishMessage(message)             => publishMessage(message) pipeTo sender
+    case PublishMessage(message)             => cb.withCircuitBreaker(publishMessage(message)) pipeTo sender
     case ForwardToSubscribers(message)       => sendToSubscribers(message)
     case Subscribe(subscriber)               => subscribe(subscriber)
     case Unsubscribe(subscriber)             => unsubscribe(subscriber)
@@ -151,11 +160,12 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     propagateToDirection(reactiveMessageToFW, PropagationDirection.DOWN)
   }
 
-  def publishMessage(message: Message) : Future[Boolean]= {
+  def publishMessage(message: String) : Future[Boolean]= {
     val p = promise[Boolean]
     // persist in topic state
     val seqNumber = lastSequenceNr + 1
-    persist(MessageTopic(seqNumber, message)) { evt => 
+    val event = Message(seqNumber, topicPath, message)
+    persist(MessageTopic(seqNumber, event)) { evt => 
       updateState(evt) 
       // push to subscribers
       sendToSubscribers(evt.msg)
@@ -247,7 +257,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 }
 
 object TopicProtocol {
-  case class PublishMessage(message: Message) extends Operation
+  case class PublishMessage(message: String) extends Operation
   case class ForwardToSubscribers(message: Message) extends Operation
   case class SetupReactiveMode(subscriber: ActorRef, cmd : ReactiveCmd) extends Operation
   case class Subscribe(subscriber: ActorRef) extends Operation

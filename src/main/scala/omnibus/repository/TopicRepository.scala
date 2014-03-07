@@ -30,13 +30,6 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   var state = TopicRepoState()
   def updateState(msg: TopicRepoStateValue): Unit = {state = state.update(msg)} 
 
-  var _seqEventId = 1L
-  def nextEventId = {
-    val ret = _seqEventId
-    _seqEventId += 1
-    ret
-  }
-
   // cache of most looked up topicRef, conf values to be tuned
   val mostAskedTopic: Cache[Option[ActorRef]] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
 
@@ -60,10 +53,8 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   val receiveCommand: Receive = {
     case CreateTopic(topic)          => cb.withCircuitBreaker( persistTopic(topic) ) pipeTo sender
     case DeleteTopic(topic)          => cb.withCircuitBreaker( deleteTopic(topic) ) pipeTo sender
-    case PublishToTopic(topic, msg)  => cb.withCircuitBreaker( publishToTopic(topic, msg) ) pipeTo sender
     case TopicPastStat(topic)        => cb.withCircuitBreaker( topicPastStat(topic) ) pipeTo sender
     case TopicLiveStat(topic)        => cb.withCircuitBreaker( topicLiveStat(topic) ) pipeTo sender
-    case TopicViewReq(topic)         => cb.withCircuitBreaker( topicView(topic) ) pipeTo sender
     case AllRoots                    => cb.withCircuitBreaker( allRoots() ) pipeTo sender()
     
     case AllLeaves(replyTo)          => allLeaves(replyTo)
@@ -79,15 +70,11 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
 
   def persistTopic(topicPath: TopicPath)  : Future[Boolean] = {
     val p = promise[Boolean]
-    val f = p.future
-    lookUpTopicWithCache(topicPath) match {
-      case Some(topicRef) => p.failure {new TopicAlreadyExistsException(topicPath.prettyStr()) with NoStackTrace}
-      case None           => persist(TopicRepoStateValue(lastSequenceNr + 1, topicPath)) { t =>
-        createTopic(t.topicPath, p)
-        updateState(TopicRepoStateValue(lastSequenceNr, topicPath))
-      }
+    persist(TopicRepoStateValue(lastSequenceNr + 1, topicPath)) { t =>
+      createTopic(t.topicPath, p)
+      updateState(TopicRepoStateValue(lastSequenceNr, topicPath))
     }
-    f
+    p.future
   }  
 
   def createTopic(topicPath: TopicPath, promise : Promise[Boolean]) = {
@@ -102,11 +89,6 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
       rootTopics += (topicRoot -> newRootTopic)
       newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail, promise)
     }
-  }
-
-  def publishToTopic(topicRef: ActorRef, message: String) : Future[Boolean] = {
-    val event = Message(nextEventId, TopicPath(topicRef), message)
-    ( topicRef ? TopicProtocol.PublishMessage(event) ).mapTo[Boolean]
   }
 
   def lookUpTopicWithCache(topicPath: TopicPath): Option[ActorRef] = {
@@ -182,18 +164,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
       case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticValue])
     }
     futurResult
-  }
-
-  def topicView(topicPath: TopicPath) : Future[TopicView] = {
-    val p = promise[TopicView]
-    val futurResult= p.future
-    val topicName = topicPath.prettyStr
-    lookUpTopicWithCache(topicPath) match {
-      case None => p.failure { new TopicNotFoundException(topicName) with NoStackTrace }
-      case Some(topicRef) => p.completeWith((topicRef ? TopicProtocol.View).mapTo[TopicView])
-    }
-    futurResult
-  }  
+  } 
 
   def allLeaves(replyTo : ActorRef) {
     context.actorOf(HttpTopicViewStream.props(replyTo, rootTopics.values.toList))
@@ -211,10 +182,8 @@ object TopicRepositoryProtocol {
   case class DeleteTopic(topicName: TopicPath)
   case class CheckTopic(topicName: TopicPath)
   case class LookupTopic(topicName: TopicPath)
-  case class PublishToTopic(topicName: ActorRef, message: String)
   case class TopicPastStat(topic: TopicPath)
   case class TopicLiveStat(topic: TopicPath)
-  case class TopicViewReq(topic: TopicPath)
   case class AllLeaves(replyTo : ActorRef)
   case object AllRoots
 }
