@@ -37,12 +37,24 @@ class TopicRootsRequest(ctx : RequestContext, topicRepo: ActorRef) extends RestR
 
   topicRepo ! TopicRepositoryProtocol.AllRoots
 
-  override def receive = waitingLookup orElse handleTimeout
+  override def receive = waitingTopicsPathRef orElse handleTimeout
 
-  def waitingLookup : Receive = {
-    case roots : List[TopicView] => {
-      ctx.complete(roots)
-      self ! PoisonPill
+  var roots : Set[TopicView] = Set.empty[TopicView]
+
+  def waitingTopicsPathRef : Receive = {
+    case rootsPath : List[TopicPathRef] => {
+      rootsPath.foreach (_.topicRef.get ! TopicProtocol.View)
+      context.become(waitingTopicsView(rootsPath.size) orElse handleTimeout)
+    }  
+  }
+
+  def waitingTopicsView(expected : Integer) : Receive = {
+    case root : TopicView => {
+      roots += root
+      if (roots.size == expected){
+        ctx.complete(roots)
+        self ! PoisonPill
+      }
     }  
   }
 }

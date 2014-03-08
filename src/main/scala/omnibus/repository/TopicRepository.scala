@@ -54,7 +54,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
     case CreateTopic(topic)         => cb.withCircuitBreaker( persistTopic(topic) ) pipeTo sender
     case DeleteTopic(topic)         => cb.withCircuitBreaker( deleteTopic(topic) ) pipeTo sender
 
-    case AllRoots                   => cb.withCircuitBreaker( allRoots() ) pipeTo sender()
+    case AllRoots                   => sender ! allRoots()
     case AllLeaves(replyTo)         => allLeaves(replyTo) 
 
     case LookupTopic(topic)         => lookUpTopic(topic) pipeTo sender()
@@ -115,10 +115,8 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
     context.actorOf(HttpTopicViewStream.props(replyTo, rootTopics.values.toList))
   }
 
-  def allRoots() : Future[Iterable[TopicView]] = {
-    val actorTopics = rootTopics.values
-    val results = for (topic <- rootTopics.values) yield (topic ? TopicProtocol.View).mapTo[TopicView]
-    Future.sequence(results)
+  def allRoots() : List[TopicPathRef] = {
+    rootTopics.values.toList.map( ref => TopicPathRef(TopicPath(ref), Some(ref)))
   }
 }
 
