@@ -32,6 +32,7 @@ import omnibus.domain._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.repository._
+import omnibus.http.request._
 
 class AdminRoute(topicRepo : ActorRef, subRepo : ActorRef) (implicit context: ActorContext) extends Directives {
 
@@ -46,14 +47,8 @@ class AdminRoute(topicRepo : ActorRef, subRepo : ActorRef) (implicit context: Ac
       authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
         path("topics" / Rest) { topic =>
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
-            val topicPath = TopicPath(topic)
-            val prettyTopic = topicPath.prettyStr()
             delete { ctx =>
-              val futureDel = (topicRepo ? TopicRepositoryProtocol.DeleteTopic(topicPath)).mapTo[Boolean]
-              futureDel.onComplete {
-                case Success(ok) => ctx.complete(StatusCodes.Accepted, s"Topic $prettyTopic deleted\n")
-                case Failure(ex) => ctx.complete(ex)
-              }
+              context.actorOf(DeleteTopicRequest.props(TopicPath(topic), ctx, topicRepo)) 
             }
           }
         } ~ 

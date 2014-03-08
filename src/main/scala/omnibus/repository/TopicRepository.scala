@@ -31,7 +31,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   def updateState(msg: TopicRepoStateValue): Unit = {state = state.update(msg)} 
 
   // cache of most looked up topicRef, conf values to be tuned
-  val mostAskedTopic: Cache[Option[ActorRef]] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
+  val mostAskedTopic: Cache[ActorRef] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
 
   val cb = new CircuitBreaker(context.system.scheduler,
       maxFailures = 5,
@@ -56,17 +56,12 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
 
     case AllRoots                   => cb.withCircuitBreaker( allRoots() ) pipeTo sender()
     case AllLeaves(replyTo)         => allLeaves(replyTo) 
-    
-    case LookupTopic(topic)         => sender ! topicPathRef(topic)
+
+    case LookupTopic(topic)         => lookUpTopic(topic) pipeTo sender()
     case TopicProtocol.Propagation  => log.debug("message propagation reached Repo")
   }
 
-  def topicPathRef(topicPath: TopicPath) : TopicPathRef = {
-    val option = lookUpTopicWithCache(topicPath)
-    TopicPathRef(topicPath, option)
-  }
-
-  def persistTopic(topicPath: TopicPath)  : Future[Boolean] = {
+  def persistTopic(topicPath: TopicPath) : Future[Boolean] = {
     val p = promise[Boolean]
     persist(TopicRepoStateValue(lastSequenceNr + 1, topicPath)) { t =>
       createTopic(t.topicPath, p)
@@ -89,50 +84,31 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
     }
   }
 
-  def lookUpTopicWithCache(topicPath: TopicPath): Option[ActorRef] = {
+  def lookUpTopic(topicPath: TopicPath): Future[TopicPathRef] = {
     val topic = topicPath.prettyStr
     log.debug(s"Lookup in cache for topic $topic")
-    val futureOpt: Future[Option[ActorRef]] = mostAskedTopic(topicPath) { lookUpTopic(topicPath) }
-    // we block here to provide an API based on Option[]
-    val optResult : Option[ActorRef] = Await.result(futureOpt, timeout.duration).asInstanceOf[Option[ActorRef]]
-    // do not let spray cache insert a none in the cache for the actor
-    if (optResult.isEmpty) mostAskedTopic.remove(topicPath)
-    optResult
-  }
-
-  def lookUpTopic(topicPath: TopicPath): Future[Option[ActorRef]] = {
-    val topic = topicPath.prettyStr
-    log.debug(s"Lookup for topic $topic")
-    val future: Future[ActorRef] = context.actorSelection(topic).resolveOne
-    future.map(actor => Some(actor)).recover { 
-      case e: ActorNotFound => log.debug("ActorNotFound $topic during lookup"); None
-      case e: Exception => log.error("Error during topic $topic lookup"); None
-    }
+    val futureOpt: Future[ActorRef] = mostAskedTopic(topicPath) { context.actorSelection(topic).resolveOne }
+    futureOpt.map{ topicRef => Some(topicRef) }
+             .recover{ case e : Exception => log.debug(s"$e"); mostAskedTopic.remove(topicPath); None }
+             .map{ optTopicRef => TopicPathRef(topicPath, optTopicRef) }
   }
 
   def deleteTopic(topicPath: TopicPath) : Future[Boolean] = {
     val topicName = topicPath.prettyStr
     val p = promise[Boolean]
-    val f = p.future
     log.debug(s"trying to delete topic $topicName")
-    lookUpTopicWithCache(topicPath) match {
-      case None           =>  p.failure { new TopicNotFoundException(topicName) with NoStackTrace }
-      case Some(topicRef) => {
-        topicRef ! TopicProtocol.Delete
-        mostAskedTopic.remove(topicPath)
-        if (rootTopics.contains(topicName)) rootTopics -= topicName
-        val delete = state.events.find(_.topicPath == topicPath)
-        delete match {
-          case None        => log.info(s"Cannot find topic in repo state")
-          case Some(topic) => {
-            deleteMessage(topic.seqNumber, true)
-            state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
-          }  
-        }   
-        p.success(true)
-      }
-    }
-    f
+    mostAskedTopic.remove(topicPath)
+    if (rootTopics.contains(topicName)) rootTopics -= topicName
+    val delete = state.events.find(_.topicPath == topicPath)
+    delete match {
+      case None        => log.info(s"Cannot find topic in repo state")
+      case Some(topic) => {
+        deleteMessage(topic.seqNumber, true)
+        state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
+      }  
+    }   
+    p.success(true)
+    p.future
   }
 
   def allLeaves(replyTo : ActorRef) {
