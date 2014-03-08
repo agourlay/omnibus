@@ -53,6 +53,13 @@ class HttpEndpoint(httpStatService : ActorRef, topicRepo : ActorRef, subRepo : A
         complete(StatusCodes.NotFound, s"Subscriber ${e.subId} not found : please retry later or check subscriber id correctness\n")
       }
 
+    case e : RestRequestTimeoutException  =>
+      requestUri { uri =>
+        log.error("Request to {} could not be handled normally -> RestRequestTimeout", uri)
+        log.error("RestRequestTimeout : {} ", e)
+        complete(StatusCodes.InternalServerError, "Something is taking longer than expected, retry later \n")
+      }
+
     case e : AskTimeoutException  =>
       requestUri { uri =>
         log.error("Request to {} could not be handled normally -> AskTimeoutException", uri)

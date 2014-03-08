@@ -32,6 +32,7 @@ import omnibus.domain._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.repository._
+import omnibus.http.RestRequestTimeoutException
 import omnibus.http.request.RestRequestProtocol._
 
 class RestRequest(ctx : RequestContext) extends Actor with ActorLogging {
@@ -46,7 +47,7 @@ class RestRequest(ctx : RequestContext) extends Actor with ActorLogging {
 
   def handleTimeout : Receive = {
     case RequestTimeout => {
-      ctx.complete(new AskTimeoutException("request timeout"))
+      ctx.complete(new RestRequestTimeoutException())
       self ! PoisonPill
     }  
   }
