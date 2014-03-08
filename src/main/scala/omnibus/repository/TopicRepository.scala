@@ -57,8 +57,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
     case TopicLiveStat(topic)        => cb.withCircuitBreaker( topicLiveStat(topic) ) pipeTo sender
     case AllRoots                    => cb.withCircuitBreaker( allRoots() ) pipeTo sender()
     
-    case AllLeaves(replyTo)          => allLeaves(replyTo)
-    case CheckTopic(topic)           => sender ! checkTopic(topic) 
+    case AllLeaves(replyTo)          => allLeaves(replyTo) 
     case LookupTopic(topic)          => sender ! topicPathRef(topic)
     case TopicProtocol.Propagation   => log.debug("message propagation reached Repo")
   }
@@ -137,13 +136,6 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
     f
   }
 
-  def checkTopic(topicPath: TopicPath): Boolean = {
-    lookUpTopicWithCache(topicPath) match {
-      case Some(topicRef) => true
-      case None => false
-    }
-  }
-
   def topicPastStat(topicPath: TopicPath) : Future[List[TopicStatisticValue]] = {
     val p = promise[List[TopicStatisticValue]]
     val futurResult= p.future
@@ -180,7 +172,6 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
 object TopicRepositoryProtocol {
   case class CreateTopic(topicName: TopicPath)
   case class DeleteTopic(topicName: TopicPath)
-  case class CheckTopic(topicName: TopicPath)
   case class LookupTopic(topicName: TopicPath)
   case class TopicPastStat(topic: TopicPath)
   case class TopicLiveStat(topic: TopicPath)
