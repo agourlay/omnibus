@@ -27,8 +27,7 @@ import omnibus.domain.topic._
 import omnibus.domain.topic.StatisticsMode._
 import omnibus.repository._
 import omnibus.configuration._
-import omnibus.http.stats._
-import omnibus.http.stats.HttpStatisticsProtocol._
+import omnibus.http.request._
 
 class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef)(implicit context: ActorContext) extends Directives {
 
@@ -44,8 +43,8 @@ class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef)(implicit cont
           get { ctx =>
             log.debug(s"Sending system stats with $mode")
               mode match {
-                case StatisticsMode.LIVE      => ctx.complete ((httpStatService ? HttpStatisticsProtocol.LiveStats).mapTo[HttpStats])
-                case StatisticsMode.HISTORY   => ctx.complete ((httpStatService ? HttpStatisticsProtocol.PastStats).mapTo[List[HttpStats]])
+                case StatisticsMode.LIVE      => context.actorOf(HttpLiveStatsRequest.props(ctx,httpStatService))
+                case StatisticsMode.HISTORY   => context.actorOf(HttpPastStatsRequest.props(ctx,httpStatService))
                 case StatisticsMode.STREAMING => context.actorOf(HttpStatStream.props(ctx.responder, httpStatService))
               }
             }
@@ -57,18 +56,9 @@ class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef)(implicit cont
               get { ctx =>
                 log.debug(s"Sending stats from topic $prettyTopic with $mode")
                 mode match {
-                  case StatisticsMode.LIVE      => ctx.complete ((topicRepo ? TopicRepositoryProtocol.TopicLiveStat(topicPath)).mapTo[TopicStatisticValue])
-                  case StatisticsMode.HISTORY   => ctx.complete ((topicRepo ? TopicRepositoryProtocol.TopicPastStat(topicPath)).mapTo[List[TopicStatisticValue]])
-                  case StatisticsMode.STREAMING => {
-                    val f = (topicRepo ? TopicRepositoryProtocol.LookupTopic(topicPath)).mapTo[TopicPathRef]
-                    f.onComplete {
-                      case Failure(ex)     => ctx.complete(ex)
-                      case Success(result) => result.topicRef match {
-                        case Some(ref) => context.actorOf(HttpTopicStatStream.props(ctx.responder, ref))
-                        case None      => ctx.complete(s"topic '$prettyTopic' not found \n")
-                      }
-                    }
-                  }
+                  case StatisticsMode.LIVE      => context.actorOf(TopicLiveStatsRequest.props(topicPath, ctx, topicRepo))
+                  case StatisticsMode.HISTORY   => context.actorOf(TopicPastStatsRequest.props(topicPath, ctx, topicRepo))
+                  case StatisticsMode.STREAMING => context.actorOf(HttpTopicStatStream.props(topicPath, ctx, topicRepo))
                 }    
               }
             }

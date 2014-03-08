@@ -51,15 +51,14 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   }
 
   val receiveCommand: Receive = {
-    case CreateTopic(topic)          => cb.withCircuitBreaker( persistTopic(topic) ) pipeTo sender
-    case DeleteTopic(topic)          => cb.withCircuitBreaker( deleteTopic(topic) ) pipeTo sender
-    case TopicPastStat(topic)        => cb.withCircuitBreaker( topicPastStat(topic) ) pipeTo sender
-    case TopicLiveStat(topic)        => cb.withCircuitBreaker( topicLiveStat(topic) ) pipeTo sender
-    case AllRoots                    => cb.withCircuitBreaker( allRoots() ) pipeTo sender()
+    case CreateTopic(topic)         => cb.withCircuitBreaker( persistTopic(topic) ) pipeTo sender
+    case DeleteTopic(topic)         => cb.withCircuitBreaker( deleteTopic(topic) ) pipeTo sender
+
+    case AllRoots                   => cb.withCircuitBreaker( allRoots() ) pipeTo sender()
+    case AllLeaves(replyTo)         => allLeaves(replyTo) 
     
-    case AllLeaves(replyTo)          => allLeaves(replyTo) 
-    case LookupTopic(topic)          => sender ! topicPathRef(topic)
-    case TopicProtocol.Propagation   => log.debug("message propagation reached Repo")
+    case LookupTopic(topic)         => sender ! topicPathRef(topic)
+    case TopicProtocol.Propagation  => log.debug("message propagation reached Repo")
   }
 
   def topicPathRef(topicPath: TopicPath) : TopicPathRef = {
@@ -136,28 +135,6 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
     f
   }
 
-  def topicPastStat(topicPath: TopicPath) : Future[List[TopicStatisticValue]] = {
-    val p = promise[List[TopicStatisticValue]]
-    val futurResult= p.future
-    val topicName = topicPath.prettyStr
-    lookUpTopicWithCache(topicPath) match {
-      case None => p.success(List.empty[TopicStatisticValue])
-      case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.PastStats).mapTo[List[TopicStatisticValue]])
-    }
-    futurResult
-  }
-
-  def topicLiveStat(topicPath: TopicPath) : Future[TopicStatisticValue] ={
-    val p = promise[TopicStatisticValue]
-    val futurResult= p.future
-    val topicName = topicPath.prettyStr
-    lookUpTopicWithCache(topicPath) match {
-      case None => p.failure { new TopicNotFoundException(topicName) with NoStackTrace }
-      case Some(topicRef) => p.completeWith((topicRef ? TopicStatProtocol.LiveStats).mapTo[TopicStatisticValue])
-    }
-    futurResult
-  } 
-
   def allLeaves(replyTo : ActorRef) {
     context.actorOf(HttpTopicViewStream.props(replyTo, rootTopics.values.toList))
   }
@@ -173,8 +150,6 @@ object TopicRepositoryProtocol {
   case class CreateTopic(topicName: TopicPath)
   case class DeleteTopic(topicName: TopicPath)
   case class LookupTopic(topicName: TopicPath)
-  case class TopicPastStat(topic: TopicPath)
-  case class TopicLiveStat(topic: TopicPath)
   case class AllLeaves(replyTo : ActorRef)
   case object AllRoots
 }
