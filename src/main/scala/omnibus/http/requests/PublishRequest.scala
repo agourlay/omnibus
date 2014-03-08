@@ -42,14 +42,10 @@ class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext
   override def receive = waitingLookup orElse handleTimeout
 
   def waitingAck : Receive = {
-    case true        => {
+    case TopicProtocol.MessagePublished        => {
       ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
       self ! PoisonPill
-    }  
-    case Failure(ex) => {
-      ctx.complete(ex)
-      self ! PoisonPill
-    }  
+    }
   }
 
   def waitingLookup : Receive = {

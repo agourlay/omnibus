@@ -58,7 +58,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   val receiveCommand: Receive = {
-    case PublishMessage(message)             => cb.withCircuitBreaker(publishMessage(message)) pipeTo sender
+    case PublishMessage(message)             => cb.withSyncCircuitBreaker(publishMessage(message, sender))
     case ForwardToSubscribers(message)       => sendToSubscribers(message)
     case Subscribe(subscriber)               => subscribe(subscriber)
     case Unsubscribe(subscriber)             => unsubscribe(subscriber)
@@ -160,8 +160,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     propagateToDirection(reactiveMessageToFW, PropagationDirection.DOWN)
   }
 
-  def publishMessage(message: String) : Future[Boolean]= {
-    val p = promise[Boolean]
+  def publishMessage(message: String, replyTo : ActorRef) = {
     // persist in topic state
     val seqNumber = lastSequenceNr + 1
     val event = Message(seqNumber, topicPath, message)
@@ -171,9 +170,8 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
       sendToSubscribers(evt.msg)
       // forward message to parent for ancestor visibility
       propagateToDirection(ForwardToSubscribers(evt.msg), PropagationDirection.UP)
-      p.success(true)
+      replyTo ! TopicProtocol.MessagePublished
     }
-    p.future
   }
 
   def sendToSubscribers(message: Message) = {
@@ -268,6 +266,7 @@ object TopicProtocol {
   case object Delete
   case object View
   case object PurgeTopicData
+  case object MessagePublished
 
   // ReactiveCmd operations
   case class Replay(subscriber: ActorRef) extends Operation
