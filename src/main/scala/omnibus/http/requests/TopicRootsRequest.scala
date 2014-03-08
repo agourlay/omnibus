@@ -19,7 +19,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 import DefaultJsonProtocol._
@@ -49,8 +48,8 @@ class TopicRootsRequest(ctx : RequestContext, topicRepo: ActorRef) extends RestR
   }
 
   def waitingTopicsView(expected : Integer) : Receive = {
-    case root : TopicView => {
-      roots += root
+    case rootView : TopicView => {
+      roots += rootView
       if (roots.size == expected){
         ctx.complete(roots)
         self ! PoisonPill

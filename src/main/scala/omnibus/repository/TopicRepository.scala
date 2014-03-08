@@ -116,7 +116,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   }
 
   def allRoots() : List[TopicPathRef] = {
-    rootTopics.values.toList.map( ref => TopicPathRef(TopicPath(ref), Some(ref)))
+    rootTopics.values.toList.map(TopicPathRef(_))
   }
 }
 

@@ -19,7 +19,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 import DefaultJsonProtocol._

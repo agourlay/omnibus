@@ -6,6 +6,10 @@ import omnibus.domain._
 
 case class TopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef])
 
+object TopicPathRef {
+	def apply(ref : ActorRef) : TopicPathRef = TopicPathRef(TopicPath(ref), Some(ref))
+}
+
 case class TopicPath(segments : List[String]) {
 	require(segments.size != 0 , s"Topic path is empty \n")
 	require(segments.size < 50 , s"Topic path is too long \n")
