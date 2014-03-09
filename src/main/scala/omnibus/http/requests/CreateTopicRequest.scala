@@ -29,6 +29,7 @@ import omnibus.http.streaming._
 import omnibus.configuration._
 import omnibus.domain._
 import omnibus.domain.topic._
+import omnibus.domain.topic.TopicProtocol._
 import omnibus.domain.subscriber._
 import omnibus.repository._
 
@@ -41,14 +42,10 @@ class CreateTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: 
   override def receive = waitingLookup orElse handleTimeout
 
   def waitingAck : Receive = {
-    case true        => {
+    case TopicCreated(topicRef) => {
       ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $prettyTopic created \n")
       self ! PoisonPill
-    }  
-    case Failure(ex) => {
-      ctx.complete(ex)
-      self ! PoisonPill
-    }  
+    } 
   }
 
   def waitingLookup : Receive = {

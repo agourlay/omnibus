@@ -62,7 +62,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     case ForwardToSubscribers(message)       => sendToSubscribers(message)
     case Subscribe(subscriber)               => subscribe(subscriber)
     case Unsubscribe(subscriber)             => unsubscribe(subscriber)
-    case CreateSubTopic(topics, promise)     => createSubTopic(topics, promise)
+    case CreateSubTopic(topics, replyTo)     => createSubTopic(topics, replyTo)
     case Terminated(refSub)                  => handleTerminated(refSub)
     case Delete                              => deleteTopic()
     case Leaves(replyTo)                     => leaves(replyTo)
@@ -206,21 +206,21 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     }
   }
 
-  def createSubTopic(topics: List[String], promise : Promise[Boolean]) = topics match {
-    case head :: tail => createTopicAndForward(head, tail, promise)
-    case _            => promise.success(true) ; log.debug("No more sub topic to create")
+  def createSubTopic(topics: List[String], replyTo : ActorRef) = topics match {
+    case head :: tail => createTopicAndForward(head, tail, replyTo)
+    case _            => replyTo ! TopicProtocol.TopicCreated(self)
   }
 
-  def createTopicAndForward(subTopic: String, topics: List[String], promise : Promise[Boolean]) = {
+  def createTopicAndForward(subTopic: String, topics: List[String], replyTo : ActorRef) = {
     log.debug(s"Create sub topic $subTopic and forward $topics")
     if (subTopics.contains(subTopic)) {
       log.debug(s"sub topic $subTopic already exists, forward to its sub topics")
-      subTopics(subTopic) ! TopicProtocol.CreateSubTopic(topics, promise)
+      subTopics(subTopic) ! TopicProtocol.CreateSubTopic(topics, replyTo)
     } else {
       val subTopicActor = context.actorOf(Topic.props(subTopic), subTopic)
       context.watch(subTopicActor)
       subTopics += (subTopic -> subTopicActor)
-      subTopicActor ! TopicProtocol.CreateSubTopic(topics, promise)
+      subTopicActor ! TopicProtocol.CreateSubTopic(topics, replyTo)
       statHolder ! TopicStatProtocol.SubTopicAdded     // report stats
     }
   }
@@ -260,8 +260,9 @@ object TopicProtocol {
   case class SetupReactiveMode(subscriber: ActorRef, cmd : ReactiveCmd) extends Operation
   case class Subscribe(subscriber: ActorRef) extends Operation
   case class Unsubscribe(subscriber: ActorRef) extends Operation
-  case class CreateSubTopic(topics: List[String], promise : Promise[Boolean])
+  case class CreateSubTopic(topics: List[String], replyTo : ActorRef)
   case class Leaves(replyTo : ActorRef)
+  case class TopicCreated(topicRef : ActorRef)
   case object SubscriberNumber
   case object Delete
   case object View

@@ -32,24 +32,20 @@ import omnibus.domain._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.repository._
+import omnibus.repository.TopicRepositoryProtocol._
 
 class DeleteTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
-
-  val prettyTopic = topicPath.prettyStr()
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
   override def receive = waitingLookup orElse handleTimeout
 
   def waitingAck : Receive = {
-    case true        => {
+    case TopicDeletedFromRepo(topicPath) => {
+      val prettyTopic = topicPath.prettyStr()
       ctx.complete(StatusCodes.Accepted, s"Topic $prettyTopic deleted\n")
       self ! PoisonPill
     } 
-    case Failure(ex) => {
-      ctx.complete(ex)
-      self ! PoisonPill
-    }  
   }
 
   def waitingLookup : Receive = {

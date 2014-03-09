@@ -41,46 +41,42 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
                                            .onHalfOpen(log.warning("CircuitBreaker is now half-open"))
   val receiveRecover: Receive = {
     case t: TopicRepoStateValue                     => {
-      createTopic(t.topicPath, promise[Boolean])
+      createTopic(t.topicPath, self) //ack on self but no used
       updateState(TopicRepoStateValue(t.seqNumber, t.topicPath))
     }  
     case SnapshotOffer(_, snapshot: TopicRepoState) => {
       state = snapshot
-      state.events foreach { t => createTopic(t.topicPath, promise[Boolean])}
+      state.events foreach { t => createTopic(t.topicPath, self)} //ack on self but no used
     }  
   }
 
   val receiveCommand: Receive = {
-    case CreateTopic(topic)         => cb.withCircuitBreaker( persistTopic(topic) ) pipeTo sender
-    case DeleteTopic(topic)         => cb.withCircuitBreaker( deleteTopic(topic) ) pipeTo sender
-
-    case AllRoots                   => sender ! allRoots()
+    case CreateTopic(topic)         => cb.withSyncCircuitBreaker( persistTopic(topic, sender) )
+    case DeleteTopic(topic)         => sender ! cb.withSyncCircuitBreaker( deleteTopic(topic) )
+    case AllRoots                   => sender ! cb.withSyncCircuitBreaker( allRoots() )
     case AllLeaves(replyTo)         => allLeaves(replyTo) 
-
     case LookupTopic(topic)         => lookUpTopic(topic) pipeTo sender()
     case TopicProtocol.Propagation  => log.debug("message propagation reached Repo")
   }
 
-  def persistTopic(topicPath: TopicPath) : Future[Boolean] = {
-    val p = promise[Boolean]
+  def persistTopic(topicPath: TopicPath, replyTo : ActorRef) = {
     persist(TopicRepoStateValue(lastSequenceNr + 1, topicPath)) { t =>
-      createTopic(t.topicPath, p)
+      createTopic(t.topicPath, replyTo)
       updateState(TopicRepoStateValue(lastSequenceNr, topicPath))
     }
-    p.future
   }  
 
-  def createTopic(topicPath: TopicPath, promise : Promise[Boolean]) = {
+  def createTopic(topicPath: TopicPath, replyTo : ActorRef) = {
     val topicsList = topicPath.segments
     val topicRoot = topicsList.head
     if (rootTopics.contains(topicRoot)) {
       log.debug(s"Root topic $topicRoot already exist, forward to sub topic")
-      rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail, promise)
+      rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail, replyTo)
     } else {
       log.debug(s"Creating new root topic $topicRoot")
       val newRootTopic = context.actorOf(Topic.props(topicRoot), topicRoot)
       rootTopics += (topicRoot -> newRootTopic)
-      newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail, promise)
+      newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail, replyTo)
     }
   }
 
@@ -93,22 +89,19 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
              .map{ optTopicRef => TopicPathRef(topicPath, optTopicRef) }
   }
 
-  def deleteTopic(topicPath: TopicPath) : Future[Boolean] = {
+  def deleteTopic(topicPath: TopicPath) : TopicDeletedFromRepo = {
     val topicName = topicPath.prettyStr
-    val p = promise[Boolean]
     log.debug(s"trying to delete topic $topicName")
     mostAskedTopic.remove(topicPath)
     if (rootTopics.contains(topicName)) rootTopics -= topicName
-    val delete = state.events.find(_.topicPath == topicPath)
-    delete match {
+    state.events.find(_.topicPath == topicPath) match {
       case None        => log.info(s"Cannot find topic in repo state")
       case Some(topic) => {
         deleteMessage(topic.seqNumber, true)
         state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
       }  
     }   
-    p.success(true)
-    p.future
+    TopicDeletedFromRepo(topicPath)
   }
 
   def allLeaves(replyTo : ActorRef) {
@@ -124,6 +117,7 @@ object TopicRepositoryProtocol {
   case class CreateTopic(topicName: TopicPath)
   case class DeleteTopic(topicName: TopicPath)
   case class LookupTopic(topicName: TopicPath)
+  case class TopicDeletedFromRepo(topicName: TopicPath)
   case class AllLeaves(replyTo : ActorRef)
   case object AllRoots
 }
