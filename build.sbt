@@ -70,6 +70,7 @@ libraryDependencies ++= {
       ,"org.scalacheck"        %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
       ,"org.scalatest"         %%  "scalatest"                      % scalaTestV   % "test"   withSources()
       ,"io.gatling.highcharts" %   "gatling-charts-highcharts"      % gatlingV     % "test"   withSources()
+      ,"org.iq80.leveldb"      %   "leveldb"                        % "0.7"  
   )
 }
 

@@ -10,7 +10,7 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>../logs/omnibus.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/omnibus.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <fileNamePattern>../logs/omnibus.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <pattern>%date{ISO8601} %-5level %logger{36} %X{akkaSource} - %msg%n</pattern>

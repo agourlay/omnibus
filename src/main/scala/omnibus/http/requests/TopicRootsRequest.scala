@@ -42,8 +42,13 @@ class TopicRootsRequest(ctx : RequestContext, topicRepo: ActorRef) extends RestR
 
   def waitingTopicsPathRef : Receive = {
     case rootsPath : List[TopicPathRef] => {
-      rootsPath.foreach (_.topicRef.get ! TopicProtocol.View)
-      context.become(waitingTopicsView(rootsPath.size) orElse handleTimeout)
+      if (!rootsPath.isEmpty){
+        rootsPath.foreach (_.topicRef.get ! TopicProtocol.View)
+        context.become(waitingTopicsView(rootsPath.size) orElse handleTimeout)
+        } else {
+          ctx.complete(roots)
+          self ! PoisonPill
+        }
     }  
   }
 
