@@ -66,5 +66,5 @@ class TopicViewRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: Ac
 
 object TopicViewRequest {
    def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[TopicViewRequest], topicPath, ctx, topicRepo)
+     = Props(classOf[TopicViewRequest], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

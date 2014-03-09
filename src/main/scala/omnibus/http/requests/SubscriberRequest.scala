@@ -48,5 +48,5 @@ class SubscriberRequest(subId : String, ctx : RequestContext, subRepo: ActorRef)
 
 object SubscriberRequest {
    def props(subId : String, ctx : RequestContext, subRepo: ActorRef) 
-     = Props(classOf[SubscriberRequest],subId, ctx, subRepo)
+     = Props(classOf[SubscriberRequest],subId, ctx, subRepo).withDispatcher("requests-dispatcher")
 }

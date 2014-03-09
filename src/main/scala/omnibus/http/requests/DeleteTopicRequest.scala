@@ -67,5 +67,5 @@ class DeleteTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: 
 
 object DeleteTopicRequest {
    def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[DeleteTopicRequest], topicPath, ctx, topicRepo)
+     = Props(classOf[DeleteTopicRequest], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

@@ -50,5 +50,5 @@ class HttpPastStatsRequest(ctx : RequestContext, httpStatService: ActorRef) exte
 
 object HttpPastStatsRequest {
    def props(ctx : RequestContext, httpStatService: ActorRef) 
-     = Props(classOf[HttpPastStatsRequest], ctx, httpStatService)
+     = Props(classOf[HttpPastStatsRequest], ctx, httpStatService).withDispatcher("requests-dispatcher")
 }

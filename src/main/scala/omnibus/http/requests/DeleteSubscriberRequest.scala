@@ -52,5 +52,5 @@ class DeleteSubscriberRequest(subId : String, ctx : RequestContext, subRepo: Act
 
 object DeleteSubscriberRequest {
    def props(subId : String, ctx : RequestContext, subRepo: ActorRef) 
-     = Props(classOf[DeleteSubscriberRequest],subId, ctx, subRepo)
+     = Props(classOf[DeleteSubscriberRequest],subId, ctx, subRepo).withDispatcher("requests-dispatcher")
 }

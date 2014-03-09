@@ -65,5 +65,5 @@ class TopicRootsRequest(ctx : RequestContext, topicRepo: ActorRef) extends RestR
 
 object TopicRootsRequest {
    def props(ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[TopicRootsRequest], ctx, topicRepo)
+     = Props(classOf[TopicRootsRequest], ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

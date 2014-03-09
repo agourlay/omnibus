@@ -67,5 +67,5 @@ class SubscribeRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: Strin
 
 object SubscribeRequest {
    def props(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx : RequestContext, subRepo : ActorRef, topicRepo: ActorRef) 
-     = Props(classOf[SubscribeRequest], topicPath, reactiveCmd, ip, ctx, subRepo , topicRepo)
+     = Props(classOf[SubscribeRequest], topicPath, reactiveCmd, ip, ctx, subRepo , topicRepo).withDispatcher("requests-dispatcher")
 }

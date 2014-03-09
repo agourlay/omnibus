@@ -48,5 +48,5 @@ class AllSubscribersRequest(ctx : RequestContext, subRepo: ActorRef) extends Res
 
 object AllSubscribersRequest {
    def props(ctx : RequestContext, subRepo: ActorRef) 
-     = Props(classOf[AllSubscribersRequest], ctx, subRepo)
+     = Props(classOf[AllSubscribersRequest], ctx, subRepo).withDispatcher("requests-dispatcher")
 }

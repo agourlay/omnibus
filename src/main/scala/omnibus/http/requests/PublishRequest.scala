@@ -65,5 +65,5 @@ class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext
 
 object PublishRequest {
    def props(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[PublishRequest], topicPath, message, ctx, topicRepo)
+     = Props(classOf[PublishRequest], topicPath, message, ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

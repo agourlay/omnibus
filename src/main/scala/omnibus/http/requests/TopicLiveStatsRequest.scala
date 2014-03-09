@@ -65,5 +65,5 @@ class TopicLiveStatsRequest(topicPath: TopicPath, ctx : RequestContext, topicRep
 
 object TopicLiveStatsRequest {
    def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[TopicLiveStatsRequest], topicPath, ctx, topicRepo)
+     = Props(classOf[TopicLiveStatsRequest], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
 }
