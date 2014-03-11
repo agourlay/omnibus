@@ -53,7 +53,6 @@ libraryDependencies ++= {
   val scalaCheckV = "1.11.3"
   val scalaTestV  = "2.1.0"
   val akkaCassanV = "0.2"
-  val gatlingV    = "2.0.0-SNAPSHOT"
   Seq(
        "io.spray"              %   "spray-can"                      % sprayV                  withSources() 
       ,"io.spray"              %   "spray-routing"                  % sprayV                  withSources()
@@ -69,8 +68,7 @@ libraryDependencies ++= {
       ,"org.specs2"            %%  "specs2-core"                    % specs2V      % "test"   withSources()
       ,"org.scalacheck"        %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
       ,"org.scalatest"         %%  "scalatest"                      % scalaTestV   % "test"   withSources()
-      ,"io.gatling.highcharts" %   "gatling-charts-highcharts"      % gatlingV     % "test"   withSources()
-      ,"org.iq80.leveldb"      %   "leveldb"                        % "0.7"  
+      ,"org.iq80.leveldb"      %   "leveldb"                        % "0.7"  // to remove with akka 2.3.1
   )
 }
 
