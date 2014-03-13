@@ -63,14 +63,14 @@ libraryDependencies ++= {
       ,"com.typesafe.akka"     %%  "akka-slf4j"                     % akkaV                   withSources()
       ,"com.typesafe.akka"     %%  "akka-persistence-experimental"  % akkaV                   withSources()
       ,"com.github.krasserm"   %%  "akka-persistence-cassandra"     % akkaCassanV             withSources()
-      ,"com.github.ddevore"    %%  "akka-persistence-mongo-casbah"   % akkaMongoV              withSources()
+      ,"com.github.ddevore"    %%  "akka-persistence-mongo-casbah"  % akkaMongoV              withSources()
       ,"ch.qos.logback"        %   "logback-classic"                % logbackV                withSources()
       ,"io.spray"              %   "spray-testkit"                  % sprayV       % "test"   withSources()
       ,"com.typesafe.akka"     %%  "akka-testkit"                   % akkaV        % "test"   withSources()
       ,"org.specs2"            %%  "specs2-core"                    % specs2V      % "test"   withSources()
       ,"org.scalacheck"        %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
       ,"org.scalatest"         %%  "scalatest"                      % scalaTestV   % "test"   withSources()
-      ,"org.iq80.leveldb"      %   "leveldb"                        % "0.7"  // to remove with akka 2.3.1
+      ,"org.iq80.leveldb"      %   "leveldb"                        % "0.7"        // to remove with akka 2.3.1
   )
 }
 

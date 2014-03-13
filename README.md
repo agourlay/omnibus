@@ -216,7 +216,7 @@ By default those events are persisted to a local LevelDB instance. The location 
 
 This configuration is fine for testing purpose, but for any serious business you should use an external database.
 
-So for Omnibus supports two databases through akka-persistence-plugin
+So far Omnibus only supports two databases through akka-persistence plugins.
 
 - [Cassandra](http://cassandra.apache.org/) see [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for complete configuration.
 
