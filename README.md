@@ -1,13 +1,14 @@
 Omnibus  [![Build Status](https://travis-ci.org/agourlay/omnibus.png?branch=master)](https://travis-ci.org/agourlay/omnibus)
 =========
 
-Omnibus is an HTTP-friendly reactive message bus which means :
+Omnibus is an HTTP-friendly persistent message bus which means :
 
  - Topic hierachies and subscriptions are managed via a rest API.
  - Updates are streamed by [Server-Sent-Event](http://www.html5rocks.com/en/tutorials/eventsource/basics/) which can be easily consumed by javascript frontends. 
  - With reactive modes it is possible to replay specific parts of the events.
  - Subscriptions can be composed via the url keyword `+`.
  - Most of the features can be accessed via the administration web interface.
+ - Message are persisted into Cassandra.
 
 **This is still a work in progress, any API is likely to change** 
 

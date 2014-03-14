@@ -12,7 +12,7 @@ organization := "com.agourlay"
 
 name := "omnibus"
 
-version := "0.0.1-SNAPSHOT"
+version := "0.1-SNAPSHOT"
 
 scalaVersion := "2.10.4-RC3"
 
