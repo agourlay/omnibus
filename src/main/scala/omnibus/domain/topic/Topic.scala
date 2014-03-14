@@ -162,9 +162,8 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
 
   def publishMessage(message: String, replyTo : ActorRef) = {
     // persist in topic state
-    val seqNumber = lastSequenceNr + 1
-    val event = Message(seqNumber, topicPath, message)
-    persist(MessageTopic(seqNumber, event)) { evt => 
+    val event = Message(lastSequenceNr + 1, topicPath, message)
+    persist(MessageTopic(event.id, event)) { evt => 
       updateState(evt) 
       // push to subscribers
       sendToSubscribers(evt.msg)
