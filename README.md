@@ -208,23 +208,13 @@ If you just want to get raw data about usage, omnibus exposes statistics concern
   - e.g  http://localhost:8080/stats/topics/animals/furry?mode=streaming
   - e.g  http://localhost:8080/stats/system?mode=streaming
 
-## Persistence
+## Persistence with Cassandra
 
-Omnibus persists events in order to be able to replay them later.
+Omnibus needs to persist events in order to be able to replay them later. 
 
-By default those events are persisted to a local LevelDB instance. The location of the LevelDB files is a directory named `/data` in the current working directory but it is possible to store events using an external database. 
+[Cassandra](http://cassandra.apache.org/) has been chosen as main database for its performance.
 
-This configuration is fine for testing purpose, but for any serious business you should use an external database.
-
-So far Omnibus only supports two databases through akka-persistence plugins.
-
-- [Cassandra](http://cassandra.apache.org/) see [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for complete configuration.
-
-- [MongoDb](https://www.mongodb.org/) see [here](https://github.com/ddevore/akka-persistence-mongo) for complete configuration.
-
-The retention time is configurable as well for all persistence solutions.
-
-If you need support for another database, please use this [issue] (https://github.com/agourlay/omnibus/issues/10) 
+See [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for complete configuration.
 
 ## Build and contribute
 

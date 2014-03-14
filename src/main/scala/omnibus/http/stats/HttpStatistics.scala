@@ -37,14 +37,11 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
                                          .onClose(log.warning("CircuitBreaker is now closed"))
                                          .onHalfOpen(log.warning("CircuitBreaker is now half-open"))
 
-  override def preStart() = {
-    system.scheduler.schedule(storageInterval, storageInterval, self, HttpStatisticsProtocol.StoringTick)
-    system.scheduler.schedule(retentionTime, retentionTime, self, HttpStatisticsProtocol.PurgeOldData)
-    system.scheduler.schedule( 1.millisecond, sampling){
-       context.actorSelection("/user/IO-HTTP/listener-0") ! Http.GetStats
-    }
-    log.debug(s"Creating system HttpStatistics holder")
-    super.preStart()
+  
+  system.scheduler.schedule(storageInterval, storageInterval, self, HttpStatisticsProtocol.StoringTick)
+  system.scheduler.schedule(retentionTime, retentionTime, self, HttpStatisticsProtocol.PurgeOldData)
+  system.scheduler.schedule(1.second, sampling){
+     context.actorSelection("/user/IO-HTTP/listener-0") ! Http.GetStats
   }
 
   val receiveRecover: Receive = {
