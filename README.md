@@ -14,7 +14,7 @@ Omnibus is an HTTP-friendly persistent message bus which means :
 
 Mainly a work in progress, any API is likely to change. 
 
-This is a ** beta**  quality software, don't use it for any serious operations.
+This is a ** beta **  quality software, don't use it for any serious operations.
 
 ## Getting started
 
