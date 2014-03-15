@@ -37,11 +37,13 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
                                          .onClose(log.warning("CircuitBreaker is now closed"))
                                          .onHalfOpen(log.warning("CircuitBreaker is now half-open"))
 
-  
-  system.scheduler.schedule(storageInterval, storageInterval, self, HttpStatisticsProtocol.StoringTick)
-  system.scheduler.schedule(retentionTime, retentionTime, self, HttpStatisticsProtocol.PurgeOldData)
-  system.scheduler.schedule(1.second, sampling){
-     context.actorSelection("/user/IO-HTTP/listener-0") ! Http.GetStats
+  override def preStart() = {
+    system.scheduler.schedule(storageInterval, storageInterval, self, HttpStatisticsProtocol.StoringTick)
+    system.scheduler.schedule(retentionTime, retentionTime, self, HttpStatisticsProtocol.PurgeOldData)
+    system.scheduler.schedule(1.second, sampling){
+      context.actorSelection("/user/IO-HTTP/listener-0") ! Http.GetStats
+    }
+    super.preStart()
   }
 
   val receiveRecover: Receive = {
@@ -50,11 +52,11 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
   }
 
   val receiveCommand : Receive = {
-    case stat :Stats         => lastKnownState = Some(stat)
-    case StoringTick         => storeStats()
-    case PastStats           => sender ! cb.withSyncCircuitBreaker(state.events.reverse)
-    case LiveStats           => sender ! liveStats()
-    case PurgeOldData        => purgeOldData()
+    case stat :Stats  => lastKnownState = Some(stat)
+    case StoringTick  => if (lastKnownState.isDefined) storeStats()
+    case PastStats    => sender ! cb.withSyncCircuitBreaker(state.events.reverse)
+    case LiveStats    => sender ! liveStats()
+    case PurgeOldData => purgeOldData()
   }
 
    def liveStats() : HttpStats = {

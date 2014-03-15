@@ -25,7 +25,6 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     val react = reactiveCmd.react
     log.debug(s"Creating sub on topics $prettyTopics with react $react")
 
-    // Death pact with channel! 
     context.watch(channel)
 
     // subscribe to every topic
@@ -45,6 +44,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     case StopSubscription           => stopSubscription()
     case RefreshTopics              => refreshTopics()
     case message: Message           => sendMessage(message)
+    case Terminated(ref)            => stopSubscription()
   }
 
   def stopSubscription() {
@@ -74,8 +74,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
 
   def ackSubscription(topicRef: ActorRef) = {
     topicListened += topicRef
-    pendingTopic -= topicRef
-    // Death pact with topic ! 
+    pendingTopic -= topicRef 
     context.watch(topicRef)
     log.debug(s"subscriber successfully subscribed to $topicRef")
     // we are successfully registered to the topic, let's use the reactive cm if not simple

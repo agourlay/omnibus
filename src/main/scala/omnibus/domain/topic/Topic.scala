@@ -53,7 +53,7 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
   }
 
   val receiveRecover: Receive = {
-    case m @ MessageTopic(_, msg)               => updateState(m)
+    case m @ MessageTopic(_, msg)               => updateState(m);
     case SnapshotOffer(_, snapshot: TopicState) => state = snapshot
   }
 
@@ -111,9 +111,11 @@ class Topic(val topic: String) extends EventsourcedProcessor with ActorLogging {
     if (!state.events.isEmpty){
       val lastIdSeen = state.events.head.seqNumber
       // erase all data from storage
-      deleteMessages(lastIdSeen, true)
+      deleteMessages(lastIdSeen)
+      deleteSnapshots(SnapshotSelectionCriteria.Latest)
+      state = TopicState()
     }
-    self ! PoisonPill
+    context stop self
   }
 
   def handlePropagation(operation: Operation, direction: PropagationDirection) = {
