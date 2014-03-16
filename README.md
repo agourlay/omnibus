@@ -12,11 +12,9 @@ Omnibus is an HTTP-friendly persistent message bus which means :
 
 ## Status
 
-Mainly a work in progress, any API is likely to change. 
+Omnibus is in **alpha** stage. It is under active development. Breaking changes could occur at any moment.
 
-This is a **beta**  quality software, don't use it for any serious operations.
-
-If you are still reading after this disclaimer, let's start!
+Still reading after this disclaimer? Let's start!
 
 ## Getting started
 
