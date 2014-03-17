@@ -8,7 +8,6 @@ import scala.language.postfixOps
 import omnibus.domain._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber.SubscriberProtocol._
-import omnibus.domain.subscriber.ReactiveMode._
 
 class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long)
     extends Actor with ActorLogging {

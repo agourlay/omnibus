@@ -1,19 +1,16 @@
 package omnibus.service
 
 import akka.actor._
-import akka.routing._
 import akka.io.IO
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 import spray.can.Http
 
 import omnibus.http._
-import omnibus.service._
 import omnibus.repository._
 import omnibus.configuration._
 import omnibus.http.stats._

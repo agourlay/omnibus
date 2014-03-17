@@ -6,7 +6,6 @@ import akka.pattern._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.collection.mutable.ListBuffer
 
 import spray.can.server.Stats
 import spray.can.Http

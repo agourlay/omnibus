@@ -4,12 +4,9 @@ import akka.actor._
 import akka.persistence._
 import akka.pattern.CircuitBreaker
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.collection.mutable.ListBuffer
 
 import omnibus.configuration._
-import omnibus.domain._
 import omnibus.domain.topic.TopicStatProtocol._
 
 class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor with ActorLogging {

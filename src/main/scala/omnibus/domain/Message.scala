@@ -1,6 +1,5 @@
 package omnibus.domain
 
-import spray.json._
 import spray.http._
 
 import omnibus.domain.topic.TopicPath

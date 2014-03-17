@@ -1,7 +1,6 @@
 package omnibus.domain.subscriber
 
 import akka.actor._
-import omnibus.domain._
 
 case class SubscriberView(ref : ActorRef
 	                    , id : String

@@ -4,11 +4,8 @@ import akka.actor._
 import akka.pattern._
 
 import scala.concurrent._
-import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.concurrent.Future
-import scala.concurrent.Promise._
-import scala.util._
 import scala.util.control.NoStackTrace
 
 import java.security.SecureRandom
@@ -28,7 +25,7 @@ class SubscriberRepository extends Actor with ActorLogging {
 
   var subs: Set[SubscriberView] = Set.empty[SubscriberView]  
 
-  val random :SecureRandom = new SecureRandom()
+  val random = new SecureRandom()
 
   def nextSubId = new BigInteger(130, random).toString(32)
 

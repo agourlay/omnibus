@@ -1,8 +1,5 @@
 package omnibus.domain.subscriber
 
-import spray.httpx.unmarshalling._
-import spray.http._
-
 import omnibus.domain.subscriber.ReactiveMode._
 
 case class ReactiveCmd(val react: ReactiveMode

@@ -2,7 +2,6 @@ package omnibus.http
 
 import spray.http._
 import spray.http.MediaTypes._
-import HttpHeaders._
 
 object CustomMediaType {
 	val HALType = register(

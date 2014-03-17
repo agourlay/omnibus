@@ -1,29 +1,16 @@
 package omnibus.domain.topic
 
 import akka.actor._
-import akka.pattern._
-import akka.persistence._
 
-import scala.concurrent.duration._
-import scala.concurrent._
-import scala.concurrent.Promise._
-import scala.language.postfixOps
-import scala.collection.mutable.ListBuffer
-
-import omnibus.configuration._
 import omnibus.domain._
 import omnibus.domain.PropagationDirection._
 import omnibus.domain.topic.TopicProtocol._
-import omnibus.domain.topic.TopicStatProtocol._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.ReactiveCmd
-import omnibus.domain.subscriber.ReactiveMode
 
 class Topic(val topic: String) extends Actor with ActorLogging {
 
-  implicit val system = context.system
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   def numEvents = 0L // TODO get from content
 

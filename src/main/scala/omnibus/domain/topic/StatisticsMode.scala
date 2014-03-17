@@ -2,7 +2,6 @@
 package omnibus.domain.topic
 
 import spray.httpx.unmarshalling._
-import spray.http._
 
 object StatisticsMode extends Enumeration {
   type StatisticsMode = Value
