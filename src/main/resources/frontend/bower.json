@@ -24,7 +24,7 @@
     "rickshaw" : "1.4.6",
     "font-awesome": "4.0.3",
     "d3" : "3.4.3",
-    "bacon" : "0.7.6"
+    "bacon" : "0.7.8"
   },
   "resolutions": {
     "jquery": "2.1"
