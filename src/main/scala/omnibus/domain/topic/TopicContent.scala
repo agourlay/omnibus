@@ -134,7 +134,6 @@ object TopicContentProtocol {
   case class ServeReactive(subscriber: ActorRef, cmd : ReactiveCmd) 
   case object DeleteContent
   case object PurgeTopicContent
-  case object MessagePublished
 }
 
 object TopicContent {  

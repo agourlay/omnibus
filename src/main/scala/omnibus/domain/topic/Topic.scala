@@ -36,7 +36,6 @@ class Topic(val topic: String) extends Actor with ActorLogging {
   val statisticsHolder = context.actorOf(TopicStatistics.props(self), "internal-topic-stats")
   val contentHolder = context.actorOf(TopicContent.props(topicPath), "internal-topic-content")
 
-
   def receive = {
     case PublishMessage(message)             => contentHolder ! TopicContentProtocol.Publish(message, sender)
     case ForwardToSubscribers(message)       => sendToSubscribers(message)
