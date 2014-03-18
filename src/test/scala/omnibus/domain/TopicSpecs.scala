@@ -19,8 +19,6 @@ import akka.testkit.TestKit
 import scala.concurrent.duration._
 import scala.collection.immutable
 
-
-
 import omnibus.domain.topic.Topic
 import omnibus.domain.topic.Topic._
 import omnibus.domain.topic._
@@ -31,37 +29,27 @@ import omnibus.domain.topic.TopicProtocol._
 
 For a topic :
 
-
-
 */
-class TestKitTopicSpec
-    extends TestKit(ActorSystem("TestKitTopicSpec",
-    	ConfigFactory.parseString(TestKitTopicSpec.config)))
-    with DefaultTimeout with ImplicitSender
-    with WordSpecLike with Matchers with BeforeAndAfterAll {
-    	   	import TestKitTopicSpec._
+class TestKitTopicSpec extends TestKit(ActorSystem("TestKitTopicSpec",	ConfigFactory.parseString(TestKitTopicSpec.config)))
+                       with DefaultTimeout with ImplicitSender
+                       with WordSpecLike with Matchers with BeforeAndAfterAll {
 
-    	val topicRepo = system.actorOf(RepoActor.props(self), "topic-repository")
-
-    
-
-    	"A publish message" should {
-    		"Response with the ack" in {
-    			within(5 seconds){
-    				topicRepo ! TopicProtocol.PublishMessage("Nananananana")
-    				expectMsg(TopicProtocol.MessagePublished)
-    			}
-    		}
-    	}
-
-
-
-    	override def afterAll {
-    		shutdown()
-    	}
-
-
-    }
+    import TestKitTopicSpec._
+ 
+    val topicRepo = system.actorOf(RepoActor.props(self), "topic-repository")
+ 
+	"A publish message" should {
+		"Response with the ack" in {
+			within(5 seconds){
+				topicRepo ! TopicProtocol.PublishMessage("Nananananana")
+				expectMsg(TopicProtocol.MessagePublished)
+			}
+		}
+	}
+	override def afterAll {
+		shutdown()
+	}
+}
 
 
 object TestKitTopicSpec {
@@ -127,9 +115,8 @@ akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
 
 
 	class RepoActor(senderReply : ActorRef) extends Actor {
-		 import omnibus.domain.topic.TopicProtocol._
+		import omnibus.domain.topic.TopicProtocol._
     	val topicRef = context.actorOf(Topic.props("batman"), "batman")
-
 
     	def receive = {
     		case msg : TopicProtocol.PublishMessage =>  topicRef ! msg
