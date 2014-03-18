@@ -1,12 +1,8 @@
 package omnibus.repository
 
 import akka.actor._
-import akka.pattern._
 
-import scala.concurrent._
 import scala.language.postfixOps
-import scala.concurrent.Future
-import scala.util.control.NoStackTrace
 
 import java.security.SecureRandom
 import java.math.BigInteger
@@ -31,9 +27,10 @@ class SubscriberRepository extends Actor with ActorLogging {
 
   def receive = {
     case CreateSub(topics, responder, reactiveCmd, http) => createSub(topics, responder, reactiveCmd, http)
-    case KillSub(id)                                     => killSub(id) pipeTo sender
+    case KillSub(id)                                     => killSub(id, sender)
     case AllSubs                                         => sender ! subs.toList
     case Terminated(refSub)                              => handleTerminated(refSub)
+    case SubById(id)                                     => sender ! SubLookup(subs.find(_.id == id))
   }
 
   def createSub(topics: Set[ActorRef], responder: ActorRef, reactiveCmd: ReactiveCmd, ip: String) = {
@@ -46,18 +43,15 @@ class SubscriberRepository extends Actor with ActorLogging {
     context.watch(newSub)
   }
 
-  def killSub(id : String) : Future[Boolean]  = {
-    val p = promise[Boolean]
-    val f = p.future
+  def killSub(id : String, replyTo : ActorRef) = {
     subs.find(_.id == id) match {
-      case None => p.failure {new SubscriberNotFoundException(id) with NoStackTrace }
+      case None => log.info(s"Cannot delete unknown subscriber $id")
       case Some (sub) =>  {
         sub.ref ! PoisonPill
         subs -= (sub)
-        p.success(true)
+        replyTo ! SubKilled(id)
       }  
     }
-    f
   }
 
   def handleTerminated(deadRef : ActorRef) = {
@@ -71,7 +65,9 @@ class SubscriberRepository extends Actor with ActorLogging {
 object SubscriberRepositoryProtocol {
   case class CreateSub(topics: Set[ActorRef], responder: ActorRef, reactiveCmd: ReactiveCmd, ip: String)
   case class KillSub(id : String)
+  case class SubKilled(id : String)
   case class SubById(id : String)
+  case class SubLookup(opt : Option[SubscriberView])
   case object AllSubs
 }
 

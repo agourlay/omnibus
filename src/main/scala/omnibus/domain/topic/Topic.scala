@@ -17,8 +17,8 @@ class Topic(val topic: String) extends Actor with ActorLogging {
   val creationDate = System.currentTimeMillis / 1000L
   val topicPath = TopicPath(self)
 
-  var subscribers: Set[ActorRef] = Set.empty[ActorRef]
-  var subTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
+  var subscribers = Set.empty[ActorRef]
+  var subTopics = Map.empty[String, ActorRef]
 
   val statisticsHolder = context.actorOf(TopicStatistics.props(self), "internal-topic-stats")
   val contentHolder = context.actorOf(TopicContent.props(topicPath), "internal-topic-content")

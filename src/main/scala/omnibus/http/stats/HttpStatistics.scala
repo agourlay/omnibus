@@ -2,7 +2,7 @@ package omnibus.http.stats
 
 import akka.actor._
 import akka.persistence._
-import akka.pattern._
+import akka.pattern.CircuitBreaker
 
 import scala.concurrent.duration._
 import scala.language.postfixOps

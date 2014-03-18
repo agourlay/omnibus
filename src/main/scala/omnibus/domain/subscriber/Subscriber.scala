@@ -15,9 +15,9 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   implicit val system = context.system
   implicit def executionContext = context.dispatcher
 
-  var pendingTopic: Set[ActorRef] = topics
-  var topicListened: Set[ActorRef] = Set.empty[ActorRef]
-  val topicsPath : Set[TopicPath] = topics.map(TopicPath(_))
+  var pendingTopic = topics
+  var topicListened = Set.empty[ActorRef]
+  val topicsPath = topics.map(TopicPath(_))
 
   override def preStart() = {
     val prettyTopics = TopicPath.prettySubscription(topics)

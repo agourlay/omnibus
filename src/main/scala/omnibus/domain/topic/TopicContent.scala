@@ -1,7 +1,7 @@
 package omnibus.domain.topic
 
 import akka.actor._
-import akka.pattern._
+import akka.pattern.CircuitBreaker
 import akka.persistence._
 
 import scala.language.postfixOps

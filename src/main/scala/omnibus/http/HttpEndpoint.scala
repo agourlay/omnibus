@@ -1,7 +1,7 @@
 package omnibus.http
 
-import akka.pattern._
 import akka.actor._
+import akka.pattern.CircuitBreakerOpenException
 
 import spray.util.LoggingContext
 import spray.routing._
@@ -41,13 +41,6 @@ class HttpEndpoint(httpStatService : ActorRef, topicRepo : ActorRef, subRepo : A
       requestUri { uri =>
         log.error("Request to {} could not be handled normally -> RestRequestTimeout", uri)
         log.error("RestRequestTimeout : {} ", e)
-        complete(StatusCodes.InternalServerError, "Something is taking longer than expected, retry later \n")
-      }
-
-    case e : AskTimeoutException  =>
-      requestUri { uri =>
-        log.error("Request to {} could not be handled normally -> AskTimeoutException", uri)
-        log.error("AskTimeoutException : {} ", e)
         complete(StatusCodes.InternalServerError, "Something is taking longer than expected, retry later \n")
       }
 
