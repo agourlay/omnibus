@@ -14,7 +14,7 @@ name := "omnibus"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.10.4-RC3"
+scalaVersion := "2.10.4"
 
 scalacOptions := Seq(
   "-unchecked",
