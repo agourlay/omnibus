@@ -51,7 +51,7 @@ libraryDependencies ++= {
   val logbackV    = "1.1.1"
   val specs2V     = "2.3.10"
   val scalaCheckV = "1.11.3"
-  val scalaTestV  = "2.1.1"
+  val scalaTestV  = "2.1.2"
   val akkaCassanV = "0.2"
   Seq(
        "io.spray"              %   "spray-can"                      % sprayV                  withSources() 
