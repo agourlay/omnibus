@@ -21,7 +21,7 @@ import omnibus.configuration._
 import omnibus.http.stats._
 import omnibus.core._
 
-object Boot extends App with BootedCore with CoreActors with Rest {
+object Boot extends App with BootedCore with CoreActors with Rest with Web{
 
   val log: Logger = LoggerFactory.getLogger("omnibus.boot")
   log.info("Booting Omnibus in standalone mode...")

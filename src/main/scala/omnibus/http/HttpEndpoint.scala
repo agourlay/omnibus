@@ -16,7 +16,6 @@ import omnibus.configuration._
 class HttpEndpoint(httpStatService : ActorRef, topicRepo : ActorRef, subRepo : ActorRef) extends HttpService with RestFailureHandling with Actor {
 
   implicit def actorRefFactory = context
-  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   val topicRoute = new TopicRoute(subRepo, topicRepo).route         // '/topics'
   val statsRoute = new StatsRoute(httpStatService, topicRepo).route // '/stats'
