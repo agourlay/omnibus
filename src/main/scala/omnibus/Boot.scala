@@ -21,25 +21,15 @@ import omnibus.configuration._
 import omnibus.http.stats._
 import omnibus.core._
 
-object Boot extends App with BootedCore with CoreActors {
+object Boot extends App with BootedCore with CoreActors with Rest {
 
   val log: Logger = LoggerFactory.getLogger("omnibus.boot")
   log.info("Booting Omnibus in standalone mode...")
   val externalConfPath = "../conf/omnibus.conf"
-  
+
   if (new File(externalConfPath).exists()){
   	System.setProperty("config.file", externalConfPath );
   	log.info(s"using external configuration file $externalConfPath")
   }
-  
-  implicit def executionContext = system.dispatcher
-
-  val httpPort = Settings(system).Http.Port
-
-  // HttpService actor exposing omnibus routes
-  val omnibusHttp = system.actorOf(HttpEndpoint.props(httpStatService, topicRepo, subRepo), "omnibus-http")
-
   log.info(s"Omnibus starting on port $httpPort ~~> ")
-
-  IO(Http) ! Http.Bind(omnibusHttp, "localhost", port = httpPort)
 }
