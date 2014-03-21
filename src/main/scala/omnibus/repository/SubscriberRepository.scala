@@ -13,7 +13,7 @@ import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.domain.subscriber.SubscriberView
 import omnibus.domain.topic.TopicPath
 import omnibus.repository.SubscriberRepositoryProtocol._
-import omnibus.http.streaming.HttpTopicSubscriber
+import omnibus.api.streaming.HttpTopicSubscriber
 
 class SubscriberRepository extends Actor with ActorLogging {
 

@@ -24,12 +24,6 @@ import omnibus.domain.topic.Topic._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicProtocol._
 
-/**
-* a Test to show some TestKit examples
-
-For a topic :
-
-*/
 class TestKitTopicSpec extends TestKit(ActorSystem("TestKitTopicSpec",	ConfigFactory.parseString(TestKitTopicSpec.config)))
                        with DefaultTimeout with ImplicitSender
                        with WordSpecLike with Matchers with BeforeAndAfterAll {
@@ -108,8 +102,6 @@ topics-dispatcher {
     throughput = 20
 }
 
-
-# Use in-memory journal : remove this line to use cassandra 
 akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
     """
 

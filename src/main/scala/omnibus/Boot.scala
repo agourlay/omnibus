@@ -15,10 +15,9 @@ import scala.language.postfixOps
 
 import spray.can.Http
 
-import omnibus.http._
+import omnibus.api._
 import omnibus.repository._
 import omnibus.configuration._
-import omnibus.http.stats._
 import omnibus.core._
 
 object Boot extends App with BootedCore with CoreActors with Rest with Web{

@@ -12,7 +12,7 @@ import spray.caching.{ LruCache, Cache }
 
 import omnibus.configuration._
 import omnibus.domain.topic._
-import omnibus.http.streaming.HttpTopicViewStream
+import omnibus.api.streaming.HttpTopicViewStream
 import omnibus.repository.TopicRepositoryProtocol._
 
 class TopicRepository extends EventsourcedProcessor with ActorLogging {

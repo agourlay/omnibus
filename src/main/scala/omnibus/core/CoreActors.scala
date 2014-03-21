@@ -2,10 +2,10 @@ package omnibus.core
 
 import akka.actor._
 
-import omnibus.http._
+import omnibus.api._
 import omnibus.repository._
 import omnibus.configuration._
-import omnibus.http.stats._
+import omnibus.api.stats._
 
 trait CoreActors {
   this: Core =>
