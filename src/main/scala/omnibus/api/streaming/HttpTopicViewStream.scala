@@ -7,7 +7,6 @@ import spray.http._
 import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 
-
 class HttpTopicViewStream(responder: ActorRef, roots: List[ActorRef]) extends StreamingResponse(responder) {
 
   implicit def executionContext = context.dispatcher

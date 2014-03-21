@@ -5,19 +5,12 @@ import org.slf4j.LoggerFactory
 
 import java.io.File
 
-import akka.actor._
-import akka.io.IO
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import scala.language.postfixOps
 
-import spray.can.Http
-
 import omnibus.api._
-import omnibus.repository._
-import omnibus.configuration._
 import omnibus.core._
 
 object Boot extends App with BootedCore with CoreActors with Rest with Web{
@@ -30,5 +23,6 @@ object Boot extends App with BootedCore with CoreActors with Rest with Web{
   	System.setProperty("config.file", externalConfPath );
   	log.info(s"using external configuration file $externalConfPath")
   }
+  
   log.info(s"Omnibus starting on port $httpPort ~~> ")
 }

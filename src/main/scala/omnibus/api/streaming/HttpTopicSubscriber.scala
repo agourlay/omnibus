@@ -5,7 +5,6 @@ import akka.actor._
 import omnibus.domain._
 import omnibus.domain.subscriber._
 
-
 class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) extends StreamingResponse(responder) {
 
   val react = cmd.react

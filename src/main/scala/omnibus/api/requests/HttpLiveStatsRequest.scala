@@ -2,7 +2,6 @@ package omnibus.api.request
 
 import akka.actor._
 
-import spray.json._
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
 

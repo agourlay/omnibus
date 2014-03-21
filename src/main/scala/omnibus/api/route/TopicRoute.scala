@@ -2,9 +2,7 @@ package omnibus.api.route
 
 import akka.actor._
 
-import spray.json._
 import spray.routing._
-import spray.http._
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

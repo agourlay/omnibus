@@ -1,6 +1,5 @@
 package omnibus.api.exceptions 
 
-import akka.actor._
 import akka.pattern.CircuitBreakerOpenException
 
 import spray.util.LoggingContext
@@ -10,7 +9,6 @@ import HttpHeaders._
 
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
-import omnibus.configuration._
 
 trait RestFailureHandling {
   this: HttpService =>

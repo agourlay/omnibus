@@ -5,8 +5,6 @@ import akka.actor._
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
 import spray.json._
-import spray.httpx.marshalling._
-import spray.http._
 
 import DefaultJsonProtocol._
 

@@ -1,19 +1,12 @@
 package omnibus.api.endpoint
 
 import akka.actor._
-import akka.pattern.CircuitBreakerOpenException
 
-import spray.util.LoggingContext
 import spray.routing._
-import spray.http._
-import HttpHeaders._
 
 import omnibus.core.CoreActors
 import omnibus.api.route._
 import omnibus.api.exceptions.RestFailureHandling
-import omnibus.domain.topic._
-import omnibus.domain.subscriber._
-import omnibus.configuration._
 
 class HttpEndpointActor(coreActors : CoreActors) extends HttpEndpoint with Actor {
 

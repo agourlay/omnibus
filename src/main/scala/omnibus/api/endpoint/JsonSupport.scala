@@ -1,14 +1,6 @@
 package omnibus.api.endpoint
 
-import java.util.Date
-import java.text.SimpleDateFormat
-import java.text.ParseException
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration._
-
 import spray.json._
-import spray.http.Uri
 import DefaultJsonProtocol._
 
 import omnibus.domain._
