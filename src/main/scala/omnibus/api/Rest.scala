@@ -10,9 +10,6 @@ import omnibus.core.{CoreActors, Core}
 trait Rest {
   this: CoreActors with Core =>
 
-  implicit def executionContext = system.dispatcher
-
-  // HttpService actor exposing omnibus routes
   val rootService = system.actorOf(HttpEndpointActor.props(this), "omnibus-http")  
 }
 

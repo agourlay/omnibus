@@ -1,4 +1,4 @@
-package omnibus.repository
+package omnibus.domain.subscriber
 
 import akka.actor._
 
@@ -7,17 +7,11 @@ import scala.language.postfixOps
 import java.security.SecureRandom
 import java.math.BigInteger
 
-import omnibus.domain.subscriber._
-import omnibus.domain.subscriber.Subscriber
-import omnibus.domain.subscriber.ReactiveCmd
-import omnibus.domain.subscriber.SubscriberView
 import omnibus.domain.topic.TopicPath
-import omnibus.repository.SubscriberRepositoryProtocol._
+import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.api.streaming.HttpTopicSubscriber
 
 class SubscriberRepository extends Actor with ActorLogging {
-
-  implicit def executionContext = context.dispatcher
 
   var subs: Set[SubscriberView] = Set.empty[SubscriberView]  
 

@@ -6,7 +6,7 @@ import spray.routing._
 
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
-import omnibus.repository._
+import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 
 class SubscribeRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx : RequestContext
                      , subRepo : ActorRef, topicRepo: ActorRef) extends RestRequest(ctx) {

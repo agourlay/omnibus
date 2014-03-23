@@ -1,4 +1,4 @@
-package omnibus.domain
+package omnibus.domain.message
 
 import spray.http._
 

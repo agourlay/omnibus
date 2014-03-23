@@ -7,7 +7,7 @@ import spray.routing._
 
 import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.subscriber._
-import omnibus.repository._
+import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 
 class SubscriberRequest(subId : String, ctx : RequestContext, subRepo: ActorRef) extends RestRequest(ctx) {
 

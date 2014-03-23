@@ -1,6 +1,7 @@
 package omnibus.core
 
-import omnibus.repository._
+import omnibus.domain.topic.TopicRepository
+import omnibus.domain.subscriber.SubscriberRepository
 import omnibus.api.stats._
 
 trait CoreActors {

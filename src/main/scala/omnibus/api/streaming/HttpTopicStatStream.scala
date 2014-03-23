@@ -9,15 +9,14 @@ import scala.language.postfixOps
 
 import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
-import omnibus.repository._
+import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.configuration._
 
 class HttpTopicStatStream(topicPath : TopicPath, ctx : RequestContext, topicRepo : ActorRef) extends StreamingResponse(ctx.responder) {
 
   implicit def executionContext = context.dispatcher
-  implicit def system = context.system
 
-  val sampling = Settings(system).Statistics.Sampling
+  val sampling = Settings(context.system).Statistics.Sampling
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 

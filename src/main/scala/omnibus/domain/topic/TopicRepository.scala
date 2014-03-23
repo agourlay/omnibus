@@ -1,4 +1,4 @@
-package omnibus.repository
+package omnibus.domain.topic
 
 import akka.actor._
 import akka.pattern._
@@ -13,7 +13,7 @@ import spray.caching.{ LruCache, Cache }
 import omnibus.configuration._
 import omnibus.domain.topic._
 import omnibus.api.streaming.HttpTopicViewStream
-import omnibus.repository.TopicRepositoryProtocol._
+import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class TopicRepository extends EventsourcedProcessor with ActorLogging {
 

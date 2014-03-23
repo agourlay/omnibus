@@ -18,7 +18,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
   implicit val system = context.system
   implicit def executionContext = context.dispatcher
   
-  val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
+  val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
   val storageInterval = Settings(system).Statistics.StorageInterval
   val retentionTime = Settings(system).Statistics.RetentionTime
   val sampling = Settings(system).Statistics.Sampling

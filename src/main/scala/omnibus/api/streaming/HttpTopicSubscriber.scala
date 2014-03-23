@@ -3,11 +3,13 @@ package omnibus.api.streaming
 import akka.actor._
 
 import omnibus.domain._
+import omnibus.domain.message._
 import omnibus.domain.subscriber._
 
 class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) extends StreamingResponse(responder) {
 
   val react = cmd.react
+  
   override def startText = s"~~> Streaming updates on topics $topicsPath with react $react\n\n"
 
   override def receive = ({

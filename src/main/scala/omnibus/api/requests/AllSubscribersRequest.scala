@@ -10,7 +10,7 @@ import DefaultJsonProtocol._
 
 import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.subscriber._
-import omnibus.repository._
+import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 
 class AllSubscribersRequest(ctx : RequestContext, subRepo: ActorRef) extends RestRequest(ctx) {
 

@@ -8,6 +8,7 @@ import scala.language.postfixOps
 
 import omnibus.configuration._
 import omnibus.domain._
+import omnibus.domain.message._
 import omnibus.domain.topic.TopicContentProtocol._
 import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.domain.subscriber.ReactiveMode

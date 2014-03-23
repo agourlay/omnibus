@@ -10,8 +10,7 @@ import DefaultJsonProtocol._
 
 import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
-
-import omnibus.repository._
+import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class TopicPastStatsRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 

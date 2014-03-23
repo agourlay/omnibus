@@ -1,6 +1,7 @@
 package omnibus.domain.topic
 
 import omnibus.domain._
+import omnibus.domain.message._
 
 case class TopicStatisticValue(seqNumber : Long
 					               		 , topic: String

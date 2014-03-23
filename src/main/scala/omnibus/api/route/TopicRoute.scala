@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 
 import omnibus.domain.subscriber._
 import omnibus.domain.topic._
-import omnibus.repository._
+import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.api.request._
 
 class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: ActorContext) extends Directives {

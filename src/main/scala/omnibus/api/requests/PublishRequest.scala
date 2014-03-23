@@ -6,7 +6,7 @@ import spray.routing._
 import spray.http._
 
 import omnibus.domain.topic._
-import omnibus.repository._
+import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 

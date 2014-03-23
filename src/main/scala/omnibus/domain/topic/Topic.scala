@@ -3,14 +3,13 @@ package omnibus.domain.topic
 import akka.actor._
 
 import omnibus.domain._
-import omnibus.domain.PropagationDirection._
+import omnibus.domain.message._
+import omnibus.domain.message.PropagationDirection._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.ReactiveCmd
 
 class Topic(val topic: String) extends Actor with ActorLogging {
-
-  implicit def executionContext = context.dispatcher
 
   def numEvents = 0L // TODO get from content
 
@@ -89,6 +88,7 @@ class Topic(val topic: String) extends Actor with ActorLogging {
     // forward message to parent for ancestor visibility
     propagateToDirection(ForwardToSubscribers(message), PropagationDirection.UP)
     replyTo ! TopicProtocol.MessagePublished
+    numEvents + 1
   }
 
   def sendToSubscribers(message: Message) = {

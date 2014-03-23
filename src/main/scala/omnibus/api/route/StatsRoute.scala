@@ -14,8 +14,6 @@ import omnibus.api.request._
 
 class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef)(implicit context: ActorContext) extends Directives {
 
-  implicit def executionContext = context.dispatcher
-
   val log: Logger = LoggerFactory.getLogger("omnibus.route.stat")
 
   val route =

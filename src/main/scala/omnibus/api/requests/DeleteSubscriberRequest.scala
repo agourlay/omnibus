@@ -5,8 +5,7 @@ import akka.actor._
 import spray.routing._
 import spray.http._
 
-import omnibus.repository._
-import omnibus.repository.SubscriberRepositoryProtocol._
+import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.subscriber._
 
 class DeleteSubscriberRequest(subId : String, ctx : RequestContext, subRepo: ActorRef) extends RestRequest(ctx) {

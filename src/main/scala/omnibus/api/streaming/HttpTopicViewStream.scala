@@ -8,9 +8,6 @@ import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 
 class HttpTopicViewStream(responder: ActorRef, roots: List[ActorRef]) extends StreamingResponse(responder) {
-
-  implicit def executionContext = context.dispatcher
-  implicit def system = context.system
   
   override def startText = s"~~> Streaming topic view\n"
 

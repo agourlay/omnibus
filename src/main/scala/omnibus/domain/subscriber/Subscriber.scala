@@ -7,6 +7,7 @@ import scala.language.postfixOps
 
 import omnibus.domain._
 import omnibus.domain.topic._
+import omnibus.domain.message._
 import omnibus.domain.subscriber.SubscriberProtocol._
 
 class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long)
