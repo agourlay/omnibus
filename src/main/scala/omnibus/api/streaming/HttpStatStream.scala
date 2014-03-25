@@ -11,7 +11,6 @@ import omnibus.api.stats._
 import omnibus.configuration._
 import omnibus.api.streaming.HttpStatStreamProtocol._
 
-
 class HttpStatStream(responder: ActorRef, statsRepo : ActorRef) extends StreamingResponse(responder) {
 
   implicit def executionContext = context.dispatcher
