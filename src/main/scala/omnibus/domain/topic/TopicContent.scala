@@ -19,9 +19,8 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
-  var state = TopicState()
-  def updateState(msg: MessageTopic): Unit = {state = state.update(msg)}
-  def numEvents = state.size
+  // TODO
+  def numEvents = 0L
 
   val retentionTime = Settings(system).Topic.RetentionTime
 
@@ -37,95 +36,43 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
     super.preStart()
   }
 
-  val receiveRecover: Receive = {
-    case m @ MessageTopic(_, msg)               => updateState(m);
-    case SnapshotOffer(_, snapshot: TopicState) => state = snapshot
+  val receiveRecover: Receive = { 
+    case _  => log.debug("no recovery write only model")
   }
 
   val receiveCommand: Receive = {
     case Publish(message,replyTo)  => cb.withSyncCircuitBreaker(publishMessage(message, replyTo))
     case DeleteContent             => deleteTopicContent()
     case PurgeTopicContent         => purgeOldContent()
-    case ServeReactive(sub, cmd)   => reactiveCmd(sub, cmd)
+    case FwProcessorId(replyTo)    => replyTo ! TopicContentProtocol.ProcessorId(processorId)
   }
 
+  // TODO
   def purgeOldContent() {
-    val timeLimit = System.currentTimeMillis - retentionTime.toMillis
-    val limitEvt = state.events.find(_.msg.timestamp < timeLimit)
-    limitEvt match {
-      case None      =>  log.debug(s"Nothing to purge yet in topic")
-      case Some(evt) =>  {
-        deleteMessages(evt.seqNumber, true)
-        state = TopicState(state.events.filterNot(_.msg.timestamp < timeLimit))
-      }
-    }                   
+    val timeLimit = System.currentTimeMillis - retentionTime.toMillis                  
   } 
 
   def deleteTopicContent() {
-    if (!state.events.isEmpty){
-      val lastIdSeen = state.events.head.seqNumber
+    if (lastSequenceNr != 0){
       // erase all data from storage
-      deleteMessages(lastIdSeen)
+      deleteMessages(lastSequenceNr)
       deleteSnapshots(SnapshotSelectionCriteria.Latest)
-      state = TopicState()
     }
     context stop self
-  }
-
-  def reactiveCmd(refSub: ActorRef, cmd : ReactiveCmd) = {
-    cmd.react match {
-      case ReactiveMode.REPLAY     => serveMessagesReplay(refSub)
-      case ReactiveMode.LAST       => serveLastMessage(refSub)
-      case ReactiveMode.SINCE_ID   => serveMessagesSinceID(refSub, cmd.since.get)
-      case ReactiveMode.SINCE_TS   => serveMessagesSinceTS(refSub, cmd.since.get)
-      case ReactiveMode.BETWEEN_ID => serveMessagesBetweenID(refSub, cmd.since.get, cmd.to.get)
-      case ReactiveMode.BETWEEN_TS => serveMessagesBetweenTS(refSub, cmd.since.get, cmd.to.get)
-      case ReactiveMode.SIMPLE     => log.debug("simple subscription")
-    }
   }
 
   def publishMessage(message: String, replyTo : ActorRef) = {
     // persist in topic state
     val event = Message(lastSequenceNr + 1, topicPath, message)
-    persist(MessageTopic(event.id, event)) { evt => 
-      updateState(evt)
-      context.parent ! TopicContentProtocol.Saved(evt.msg, replyTo)
-    }
-  }
-
-  def serveMessagesReplay(refSub: ActorRef) = {
-    if (state.events.nonEmpty) state.events.reverse.foreach { evt => refSub ! evt.msg }
-  }  
-
-  def serveLastMessage(refSub: ActorRef) = {
-    if (state.events.nonEmpty) refSub ! state.events.head.msg
-  }  
-
-  def serveMessagesSinceID(refSub: ActorRef, eventID: Long) = {
-    state.events.reverse.filter(_.msg.id > eventID)
-                        .foreach { evt => refSub ! evt.msg }
-  }
-
-  def serveMessagesSinceTS(refSub: ActorRef, timestamp: Long) = {
-    state.events.reverse.filter(_.msg.timestamp > timestamp)
-                        .foreach { evt => refSub ! evt.msg }
-  }
-
-  def serveMessagesBetweenID(refSub: ActorRef, startId: Long, endId: Long) = {
-    state.events.reverse.filter(evt => evt.msg.id >= startId && evt.msg.id <= endId)
-                        .foreach { evt => refSub ! evt.msg }
-  }
-
-  def serveMessagesBetweenTS(refSub: ActorRef, startTs: Long, endTs: Long) = {
-    state.events.reverse.filter(evt => evt.msg.timestamp >= startTs && evt.msg.timestamp <= endTs)
-                        .foreach { evt => refSub ! evt.msg }
+    persist(event) { evt => context.parent ! TopicContentProtocol.Saved(evt, replyTo) }
   }
 }
 
 object TopicContentProtocol {
   case class Publish(message: String, replyTo : ActorRef)
   case class Saved(message: Message, replyTo : ActorRef)
-  case class ServeReactive(subscriber: ActorRef, cmd : ReactiveCmd) 
+  case class FwProcessorId(subscriber: ActorRef) 
+  case class ProcessorId(processorId: String) 
   case object DeleteContent
   case object PurgeTopicContent
 }

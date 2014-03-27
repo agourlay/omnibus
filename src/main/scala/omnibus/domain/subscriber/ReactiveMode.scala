@@ -8,7 +8,6 @@ object ReactiveMode extends Enumeration {
   type ReactiveMode = Value
 
   val SIMPLE = Value("simple") // following events
-  val LAST = Value("last") // last event and the following events
   val REPLAY = Value("replay") // all the past events and the following events
   val SINCE_ID = Value("since-id") // all the events since a given event-id  
   val SINCE_TS = Value("since-ts") // all the events since a given timestamp  

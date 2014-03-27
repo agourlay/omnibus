@@ -7,7 +7,6 @@ case class ReactiveCmd(val react: ReactiveMode
                      , val to: Option[Long]){
   require( react match {
     case SIMPLE     => true
-    case LAST       => true
     case REPLAY     => true
     case SINCE_ID   => since.nonEmpty
     case SINCE_TS   => since.nonEmpty

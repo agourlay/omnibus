@@ -9,6 +9,7 @@ import omnibus.domain._
 import omnibus.domain.topic._
 import omnibus.domain.message._
 import omnibus.domain.subscriber.SubscriberProtocol._
+import omnibus.domain.topic.TopicContentProtocol._
 
 class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long)
     extends Actor with ActorLogging {
@@ -39,29 +40,22 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   }
 
   def receive = {
-    case AcknowledgeSub(topicRef)   => ackSubscription(topicRef)
-    case AcknowledgeUnsub(topicRef) => topicListened -= topicRef
-    case StopSubscription           => stopSubscription()
-    case RefreshTopics              => refreshTopics()
-    case message: Message           => sendMessage(message)
-    case Terminated(ref)            => stopSubscription()
+    case AcknowledgeSub(topicRef)                      => ackSubscription(topicRef)
+    case AcknowledgeUnsub(topicRef)                    => topicListened -= topicRef
+    case StopSubscription                              => stopSubscription()
+    case RefreshTopics                                 => refreshTopics()
+    case message: Message                              => channel ! message
+    case Terminated(ref)                               => stopSubscription()
+    case TopicContentProtocol.ProcessorId(processorId) => setupSubscription(processorId)
+  }
+
+  def setupSubscription(processorId : String) {
+    context.actorOf(Subscription.props(processorId, reactiveCmd))
   }
 
   def stopSubscription() {
     log.debug(s"End of subscriber $self")
     self ! PoisonPill
-  }
-
-  def filterAccordingReactMode(msg: Message) = reactiveCmd.react match {
-    case ReactiveMode.BETWEEN_ID => msg.id >= reactiveCmd.since.get && msg.id <= reactiveCmd.to.get
-    case ReactiveMode.BETWEEN_TS => msg.timestamp >= reactiveCmd.since.get && msg.timestamp <= reactiveCmd.to.get
-    case _ => true
-  }
-
-  def sendMessage(msg: Message) = {
-    if (filterAccordingReactMode(msg)) {
-      channel ! msg
-    }
   }
 
   def refreshTopics() {
@@ -77,17 +71,15 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     pendingTopic -= topicRef 
     context.watch(topicRef)
     log.debug(s"subscriber successfully subscribed to $topicRef")
-    // we are successfully registered to the topic, let's use the reactive cm if not simple
-    reactiveCmd.react match {
-      case ReactiveMode.SIMPLE => log.debug("no reactive mode for simple")
-      case _                   => topicRef ! TopicProtocol.SetupReactiveMode(self, reactiveCmd)
-    }
+    // retrieve all children processor id
+    topicRef ! TopicProtocol.CascadeProcessorId(self)
   }
 }
 
 object SubscriberProtocol {
   case class AcknowledgeSub(topic: ActorRef)
   case class AcknowledgeUnsub(topic: ActorRef)
+  case class Subscription(topicId : String)
   case object StopSubscription
   case object RefreshTopics
 }

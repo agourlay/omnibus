@@ -16,14 +16,6 @@ case class TopicStatisticState(events: List[TopicStatisticValue] = Nil) {
   override def toString: String = events.reverse.toString
 }
 
-case class MessageTopic(seqNumber : Long, msg : Message)
-
-case class TopicState(events: List[MessageTopic] = Nil) {
-  def update(msg: MessageTopic) = copy(msg :: events)
-  def size = events.length
-  override def toString: String = events.reverse.toString
-}
-
 case class TopicRepoStateValue(seqNumber : Long, topicPath :TopicPath)
 
 case class TopicRepoState(events: List[TopicRepoStateValue] = Nil) {

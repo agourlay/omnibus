@@ -24,7 +24,6 @@ class Topic(val topic: String) extends Actor with ActorLogging {
 
   def receive = {
     case PublishMessage(message)             => contentHolder ! TopicContentProtocol.Publish(message, sender)
-    case ForwardToSubscribers(message)       => sendToSubscribers(message)
     case Subscribe(subscriber)               => subscribe(subscriber)
     case Unsubscribe(subscriber)             => unsubscribe(subscriber)
     case CreateSubTopic(topics, replyTo)     => createSubTopic(topics, replyTo)
@@ -32,7 +31,8 @@ class Topic(val topic: String) extends Actor with ActorLogging {
     case Delete                              => deleteTopic()
     case Leaves(replyTo)                     => leaves(replyTo)
     case View                                => sender ! view()
-    case SetupReactiveMode(refSub, reactCmd) => setupReactiveMode(refSub, reactCmd)
+    case CascadeProcessorId(replyTo)         => cascadeProcessorId(replyTo)
+    case ProcessorId(replyTo)                => contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
     case Propagation(operation, direction)   => handlePropagation(operation, direction)
 
     case TopicContentProtocol.Saved(msg,replyTo) => messageSaved(msg, replyTo)
@@ -76,24 +76,15 @@ class Topic(val topic: String) extends Actor with ActorLogging {
     subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.Propagation(operation, PropagationDirection.DOWN) }
   }
 
-  def setupReactiveMode(refSub: ActorRef, cmd : ReactiveCmd) = {
-    // forward reactive command to children
-    propagateToDirection(SetupReactiveMode(refSub, cmd), PropagationDirection.DOWN)
-    // send reactive command to content actor.
-    contentHolder ! TopicContentProtocol.ServeReactive(refSub, cmd)
+  def cascadeProcessorId(replyTo: ActorRef) = {
+    propagateToDirection(ProcessorId(replyTo), PropagationDirection.DOWN)
+    contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
   }
 
   def messageSaved(message: Message, replyTo : ActorRef) = {
-    sendToSubscribers(message)
-    // forward message to parent for ancestor visibility
-    propagateToDirection(ForwardToSubscribers(message), PropagationDirection.UP)
     replyTo ! TopicProtocol.MessagePublished
+    statisticsHolder ! TopicStatProtocol.MessageReceived
     numEvents + 1
-  }
-
-  def sendToSubscribers(message: Message) = {
-    subscribers.foreach { actorRef => actorRef ! message }  // push to subscribers
-    statisticsHolder ! TopicStatProtocol.MessageReceived  // report stats
   }
 
   def subscribe(subscriber: ActorRef) = {
@@ -145,13 +136,14 @@ class Topic(val topic: String) extends Actor with ActorLogging {
 
 object TopicProtocol {
   case class PublishMessage(message: String) extends Operation
-  case class ForwardToSubscribers(message: Message) extends Operation
   case class SetupReactiveMode(subscriber: ActorRef, cmd : ReactiveCmd) extends Operation
   case class Subscribe(subscriber: ActorRef) extends Operation
   case class Unsubscribe(subscriber: ActorRef) extends Operation
+  case class ProcessorId(replyTo: ActorRef) extends Operation
   case class CreateSubTopic(topics: List[String], replyTo : ActorRef)
   case class Leaves(replyTo : ActorRef)
   case class TopicCreated(topicRef : ActorRef)
+  case class CascadeProcessorId(subscriber: ActorRef)
   case object SubscriberNumber
   case object Delete
   case object View

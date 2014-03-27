@@ -131,9 +131,6 @@ The supported modes are:
 
 - `simple`   : classic subscription (default one if not specified)
 
-- `last`     : get last message on a topic and the following events
-  - e.g http://localhost:8080/streams/topics/stock/nasdaq?react=last
-
 - `replay`   : get all past messages on topic and the following events
   - e.g http://localhost:8080/streams/topics/customer/order?react=replay
 
