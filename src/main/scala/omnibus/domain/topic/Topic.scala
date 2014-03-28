@@ -34,9 +34,8 @@ class Topic(val topic: String) extends Actor with ActorLogging {
     case CascadeProcessorId(replyTo)         => cascadeProcessorId(replyTo)
     case ProcessorId(replyTo)                => contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
     case Propagation(operation, direction)   => handlePropagation(operation, direction)
-
-    case TopicContentProtocol.Saved(msg,replyTo) => messageSaved(msg, replyTo)
-
+    case NewTopicDownTheTree(newTopic)       => notifySubscribersOnNewTopic(newTopic)
+    case TopicContentProtocol.Saved(replyTo) => messageSaved(replyTo)
     case m @ TopicStatProtocol.PastStats     => statisticsHolder forward m
     case m @ TopicStatProtocol.LiveStats     => statisticsHolder forward m
   }
@@ -81,7 +80,7 @@ class Topic(val topic: String) extends Actor with ActorLogging {
     contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
   }
 
-  def messageSaved(message: Message, replyTo : ActorRef) = {
+  def messageSaved(replyTo : ActorRef) = {
     replyTo ! TopicProtocol.MessagePublished
     statisticsHolder ! TopicStatProtocol.MessageReceived
     numEvents + 1
@@ -116,7 +115,22 @@ class Topic(val topic: String) extends Actor with ActorLogging {
 
   def createSubTopic(topics: List[String], replyTo : ActorRef) = topics match {
     case head :: tail => createTopicAndForward(head, tail, replyTo)
-    case _            => replyTo ! TopicProtocol.TopicCreated(self)
+    case _            => onTopicCreation(replyTo)
+  }
+
+  def onTopicCreation(replyTo: ActorRef) = {
+    // notify author
+    replyTo ! TopicProtocol.TopicCreated(self)
+    // notify subs by sending new processorId
+    subscribers.foreach { self ! TopicProtocol.ProcessorId(_) }
+    // forward info to parents
+    propagateToDirection(NewTopicDownTheTree(self), PropagationDirection.UP)
+  }
+
+  def notifySubscribersOnNewTopic(newTopicRef : ActorRef) = sendToSubscribers(TopicProtocol.TopicCreated(newTopicRef))
+
+  def sendToSubscribers(stuff: Any) = {
+    subscribers.foreach { actorRef => actorRef ! stuff }
   }
 
   def createTopicAndForward(subTopic: String, topics: List[String], replyTo : ActorRef) = {
@@ -144,6 +158,7 @@ object TopicProtocol {
   case class Leaves(replyTo : ActorRef)
   case class TopicCreated(topicRef : ActorRef)
   case class CascadeProcessorId(subscriber: ActorRef)
+  case class NewTopicDownTheTree(topicRef : ActorRef) extends Operation
   case object SubscriberNumber
   case object Delete
   case object View

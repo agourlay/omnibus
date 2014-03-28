@@ -32,7 +32,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     for (topic <- topics) { topic ! TopicProtocol.Subscribe(self) }
 
     // schedule pending retry every minute
-    system.scheduler.schedule(1 minute, 1 minute, self, SubscriberProtocol.RefreshTopics)
+    system.scheduler.schedule(1 minute, 1 minute, self, SubscriberProtocol.RetryPending)
   }
 
   override def postStop() = {
@@ -43,10 +43,15 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     case AcknowledgeSub(topicRef)                      => ackSubscription(topicRef)
     case AcknowledgeUnsub(topicRef)                    => topicListened -= topicRef
     case StopSubscription                              => stopSubscription()
-    case RefreshTopics                                 => refreshTopics()
+    case RetryPending                                  => retryPending()
     case message: Message                              => channel ! message
     case Terminated(ref)                               => stopSubscription()
     case TopicContentProtocol.ProcessorId(processorId) => setupSubscription(processorId)
+    case TopicProtocol.TopicCreated(newTopicRef)       => topicCreatedWithinSub(newTopicRef)
+  }
+
+  def topicCreatedWithinSub(newTopicRef : ActorRef) {
+    newTopicRef ! TopicProtocol.ProcessorId(self)
   }
 
   def setupSubscription(processorId : String) {
@@ -58,10 +63,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     self ! PoisonPill
   }
 
-  def refreshTopics() {
-    log.debug(s"Refresh sub in $topicListened")
-    for (topic <- topicListened) { topic ! TopicProtocol.Subscribe(self) }
-
+  def retryPending() {
     log.debug(s"Retry pending sub in $pendingTopic")
     for (topic <- pendingTopic) { topic ! TopicProtocol.Subscribe(self) }
   }
@@ -81,7 +83,7 @@ object SubscriberProtocol {
   case class AcknowledgeUnsub(topic: ActorRef)
   case class Subscription(topicId : String)
   case object StopSubscription
-  case object RefreshTopics
+  case object RetryPending
 }
 
 object Subscriber {

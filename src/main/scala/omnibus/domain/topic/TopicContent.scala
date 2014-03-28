@@ -64,13 +64,13 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
   def publishMessage(message: String, replyTo : ActorRef) = {
     // persist in topic state
     val event = Message(lastSequenceNr + 1, topicPath, message)
-    persist(event) { evt => context.parent ! TopicContentProtocol.Saved(evt, replyTo) }
+    persist(event) { evt => context.parent ! TopicContentProtocol.Saved(replyTo) }
   }
 }
 
 object TopicContentProtocol {
   case class Publish(message: String, replyTo : ActorRef)
-  case class Saved(message: Message, replyTo : ActorRef)
+  case class Saved(replyTo : ActorRef)
   case class FwProcessorId(subscriber: ActorRef) 
   case class ProcessorId(processorId: String) 
   case object DeleteContent
