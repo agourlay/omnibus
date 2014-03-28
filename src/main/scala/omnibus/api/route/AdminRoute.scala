@@ -39,7 +39,7 @@ class AdminRoute(topicRepo : ActorRef, subRepo : ActorRef) (implicit context: Ac
               context.actorOf(SubscriberRequest.props(sub, ctx, subRepo)) 
             } ~ 
             delete { ctx =>
-              context.actorOf(DeleteSubscriberRequest.props(sub, ctx, topicRepo)) 
+              context.actorOf(DeleteSubscriberRequest.props(sub, ctx, subRepo)) 
             }
           }   
         }  

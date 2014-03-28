@@ -27,13 +27,14 @@ class SubscriberRepository extends Actor with ActorLogging {
     case SubById(id)                                     => sender ! SubLookup(subs.find(_.id == id))
   }
 
-  def createSub(topics: Set[ActorRef], responder: ActorRef, reactiveCmd: ReactiveCmd, ip: String) = {
+  def createSub(topics: Set[ActorRef], responder: ActorRef, cmd: ReactiveCmd, ip: String) = {
     log.debug("Creating sub on topics " + topics)
     // HttpSubscriber will proxify the responder
     val prettyTopics = TopicPath.prettySubscription(topics)     
-    val httpSub = context.actorOf(HttpTopicSubscriber.props(responder, reactiveCmd, prettyTopics))
-    val newSub = context.actorOf(Subscriber.props(httpSub, topics, reactiveCmd))
-    subs += (SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr(_)).mkString("+"), ip))
+    val httpSub = context.actorOf(HttpTopicSubscriber.props(responder, cmd, prettyTopics))
+    val newSub = context.actorOf(Subscriber.props(httpSub, topics, cmd))
+    val newView = SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr(_)).mkString("+"), ip, cmd.react.toString)
+    subs += newView
     context.watch(newSub)
   }
 

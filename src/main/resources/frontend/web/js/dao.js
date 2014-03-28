@@ -146,6 +146,7 @@ App.Dao = Em.Object.create({
         model.set('topic', sub.topic);
         model.set('id', sub.id);
         model.set('ip', sub.ip);
+        model.set('mode', sub.mode);
         model.set('creationDate', sub.creationDate);
         return model;
     },
