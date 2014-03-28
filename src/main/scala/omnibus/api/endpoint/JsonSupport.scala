@@ -3,7 +3,6 @@ package omnibus.api.endpoint
 import spray.json._
 import DefaultJsonProtocol._
 
-import omnibus.domain._
 import omnibus.domain.message._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._

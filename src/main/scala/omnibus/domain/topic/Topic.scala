@@ -2,7 +2,6 @@ package omnibus.domain.topic
 
 import akka.actor._
 
-import omnibus.domain._
 import omnibus.domain.message._
 import omnibus.domain.message.PropagationDirection._
 import omnibus.domain.topic.TopicProtocol._
