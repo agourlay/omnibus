@@ -11,15 +11,16 @@ import DefaultJsonProtocol._
 
 import omnibus.api.endpoint.JsonSupport._
 import omnibus.api.stats._
+import omnibus.api.stats.HttpStatisticsProtocol._
 
 class HttpPastStatsRequest(ctx : RequestContext, httpStatService: ActorRef) extends RestRequest(ctx) {
 
-  httpStatService ! HttpStatisticsProtocol.PastStats
+  httpStatService ! PastStats
 
   override def receive = waitingHttpPastStats orElse handleTimeout
 
   def waitingHttpPastStats : Receive = {
-    case stats : List[HttpStats]  => {
+    case Stats(stats) => {
       ctx.complete (stats)
       self ! PoisonPill
     }

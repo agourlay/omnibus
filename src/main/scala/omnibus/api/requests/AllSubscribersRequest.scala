@@ -19,7 +19,7 @@ class AllSubscribersRequest(ctx : RequestContext, subRepo: ActorRef) extends Res
   override def receive = waitingLookup orElse handleTimeout
 
   def waitingLookup : Receive = {
-    case subs : List[SubscriberView] => {
+    case Subscribers(subs) => {
       ctx.complete(subs)
       self ! PoisonPill
     }  

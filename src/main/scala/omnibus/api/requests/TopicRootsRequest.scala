@@ -21,7 +21,7 @@ class TopicRootsRequest(ctx : RequestContext, topicRepo: ActorRef) extends RestR
   var roots : Set[TopicView] = Set.empty[TopicView]
 
   def waitingTopicsPathRef : Receive = {
-    case rootsPath : List[TopicPathRef] => {
+    case Roots(rootsPath) => {
       if (!rootsPath.isEmpty){
         rootsPath.foreach (_.topicRef.get ! TopicProtocol.View)
         context.become(waitingTopicsView(rootsPath.size) orElse handleTimeout)

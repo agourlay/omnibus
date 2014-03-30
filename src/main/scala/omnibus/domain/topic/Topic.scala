@@ -10,7 +10,7 @@ import omnibus.domain.subscriber.ReactiveCmd
 
 class Topic(val topic: String) extends Actor with ActorLogging {
 
-  def numEvents = 0L // TODO get from content
+  var numEvents = 0L
 
   val creationDate = System.currentTimeMillis / 1000L
   val topicPath = TopicPath(self)
@@ -82,7 +82,7 @@ class Topic(val topic: String) extends Actor with ActorLogging {
   def messageSaved(replyTo : ActorRef) = {
     replyTo ! TopicProtocol.MessagePublished
     statisticsHolder ! TopicStatProtocol.MessageReceived
-    numEvents + 1
+    numEvents += 1
   }
 
   def subscribe(subscriber: ActorRef) = {

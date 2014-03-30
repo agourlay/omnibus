@@ -22,7 +22,7 @@ class SubscriberRepository extends Actor with ActorLogging {
   def receive = {
     case CreateSub(topics, responder, reactiveCmd, http) => createSub(topics, responder, reactiveCmd, http)
     case KillSub(id)                                     => killSub(id, sender)
-    case AllSubs                                         => sender ! subs.toList
+    case AllSubs                                         => sender ! Subscribers(subs.toList)
     case Terminated(refSub)                              => handleTerminated(refSub)
     case SubById(id)                                     => sender ! SubLookup(subs.find(_.id == id))
   }
@@ -63,6 +63,7 @@ object SubscriberRepositoryProtocol {
   case class SubKilled(id : String)
   case class SubById(id : String)
   case class SubLookup(opt : Option[SubscriberView])
+  case class Subscribers(subs : List[SubscriberView])
   case object AllSubs
 }
 

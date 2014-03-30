@@ -16,9 +16,6 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
-  // TODO
-  def numEvents = 0L
-
   val retentionTime = Settings(system).Topic.RetentionTime
 
   val cb = new CircuitBreaker(system.scheduler,

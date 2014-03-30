@@ -103,8 +103,9 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
     context.actorOf(HttpTopicViewStream.props(replyTo, rootTopics.values.toList))
   }
 
-  def allRoots() : List[TopicPathRef] = {
-    rootTopics.values.toList.map(TopicPathRef(_))
+  def allRoots() = {
+    val roots = rootTopics.values.toList.map(TopicPathRef(_))
+    Roots(roots)
   }
 }
 
@@ -114,6 +115,7 @@ object TopicRepositoryProtocol {
   case class LookupTopic(topicName: TopicPath)
   case class TopicDeletedFromRepo(topicName: TopicPath)
   case class AllLeaves(replyTo : ActorRef)
+  case class Roots(refs: List[TopicPathRef])
   case object AllRoots
 }
 

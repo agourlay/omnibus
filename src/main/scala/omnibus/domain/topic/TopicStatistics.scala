@@ -25,9 +25,9 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
   def updateState(msg: TopicStatisticValue): Unit = {state = state.update(msg)}
   def numEvents = state.size
 
-  var messageReceived : Long = 0
-  var subscribersNumber: Long = 0
-  var subTopicsNumber : Long = 0
+  var messageReceived = 0L
+  var subscribersNumber = 0L
+  var subTopicsNumber = 0L
 
   var lastMeasureMillis = System.currentTimeMillis
 
@@ -67,7 +67,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
     case ResetCounter        => resetCounter()
   }
 
-   def liveStats() : TopicStatisticValue = {
+  def liveStats() : TopicStatisticValue = {
     val seqNumber = lastSequenceNr + 1
     val intervalInSec : Double = (System.currentTimeMillis - lastMeasureMillis)  / 1000d
     val throughputPerSec = calculateThroughput(intervalInSec, messageReceived)

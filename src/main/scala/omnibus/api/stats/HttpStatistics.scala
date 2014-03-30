@@ -53,7 +53,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
   val receiveCommand : Receive = {
     case stat :Stats  => lastKnownState = Some(stat)
     case StoringTick  => if (lastKnownState.isDefined) storeStats()
-    case PastStats    => sender ! cb.withSyncCircuitBreaker(state.events.reverse)
+    case PastStats    => sender ! cb.withSyncCircuitBreaker(HttpStatisticsProtocol.Stats(state.events.reverse))
     case LiveStats    => sender ! liveStats()
     case PurgeOldData => purgeOldData()
   }
@@ -82,6 +82,7 @@ class HttpStatistics extends EventsourcedProcessor with ActorLogging {
 }
 
 object HttpStatisticsProtocol {
+  case class Stats(stats : List[HttpStats])
   case object StoringTick
   case object PastStats
   case object LiveStats
