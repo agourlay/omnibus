@@ -220,7 +220,7 @@ See [here](https://github.com/krasserm/akka-persistence-cassandra#configuration)
 
 ## Integration with ElasticSearch
 
-It is possible to index to content of topics into ElasticSearch.
+It is possible to index the content of topics into ElasticSearch.
 
 ``` 
 omnibus {
@@ -231,6 +231,8 @@ omnibus {
     }
 }
 ```
+
+**finish doc**
 
 ## Build and contribute
 
