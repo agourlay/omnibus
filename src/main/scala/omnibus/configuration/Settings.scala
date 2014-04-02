@@ -20,6 +20,11 @@ class Settings(config: Config, extendedSystem: ExtendedActorSystem) extends Exte
     val RetentionTime = FiniteDuration(config.getDuration("omnibus.topic.retentionTime", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
   }
 
+  object Indexer {
+    val Enable = config.getBoolean("omnibus.indexer.enable")
+    val Host = config.getString("omnibus.indexer.host")
+  }
+
   object Timeout {
   	val Ask = FiniteDuration(config.getDuration("omnibus.timeout.ask", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
   }

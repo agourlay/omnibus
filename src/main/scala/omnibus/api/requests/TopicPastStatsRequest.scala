@@ -11,6 +11,7 @@ import DefaultJsonProtocol._
 import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
+import omnibus.domain.topic.TopicStatProtocol._
 
 class TopicPastStatsRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
@@ -19,7 +20,7 @@ class TopicPastStatsRequest(topicPath: TopicPath, ctx : RequestContext, topicRep
   override def receive = waitingLookup orElse handleTimeout
 
   def waitingTopicLiveStats : Receive = {
-    case tsl : List[TopicStatisticValue]  => {
+    case TopicStats(tsl) => {
       ctx.complete (tsl)
       self ! PoisonPill
     }

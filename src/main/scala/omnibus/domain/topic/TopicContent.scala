@@ -58,7 +58,10 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
   def publishMessage(message: String, replyTo : ActorRef) = {
     // persist in topic state
     val event = Message(lastSequenceNr + 1, topicPath, message)
-    persist(event) { evt => context.parent ! TopicContentProtocol.Saved(replyTo) }
+    persist(event) { evt => 
+      context.parent ! TopicContentProtocol.Saved(replyTo)
+      system.eventStream.publish(event)
+    }
   }
 }
 

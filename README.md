@@ -218,6 +218,20 @@ Omnibus needs to persist events in order to be able to replay them later.
 
 See [here](https://github.com/krasserm/akka-persistence-cassandra#configuration) for complete configuration.
 
+## Integration with ElasticSearch
+
+It is possible to index to content of topics into ElasticSearch.
+
+``` 
+omnibus {
+    indexer {
+        enable = true
+        host = "127.0.0.1"
+        exclude-topics = ["admin","secret/topic"]
+    }
+}
+```
+
 ## Build and contribute
 
 Build the project with sbt, I personnaly like `~re-start` to restart the application automatically when a file system change occurs.

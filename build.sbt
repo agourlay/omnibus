@@ -53,21 +53,23 @@ libraryDependencies ++= {
   val scalaCheckV = "1.11.3"
   val scalaTestV  = "2.1.2"
   val akkaCassanV = "0.2"
+  val elastic4sV  = "1.1.0.0"
   Seq(
-       "io.spray"              %   "spray-can"                      % sprayV                  withSources() 
-      ,"io.spray"              %   "spray-routing"                  % sprayV                  withSources()
-      ,"io.spray"              %   "spray-caching"                  % sprayV                  withSources()
-      ,"io.spray"              %%  "spray-json"                     % sprayJsonV              withSources()
-      ,"com.typesafe.akka"     %%  "akka-actor"                     % akkaV                   withSources()
-      ,"com.typesafe.akka"     %%  "akka-slf4j"                     % akkaV                   withSources()
-      ,"com.typesafe.akka"     %%  "akka-persistence-experimental"  % akkaV                   withSources()
-      ,"com.github.krasserm"   %%  "akka-persistence-cassandra"     % akkaCassanV             withSources()
-      ,"ch.qos.logback"        %   "logback-classic"                % logbackV                withSources()
-      ,"io.spray"              %   "spray-testkit"                  % sprayV       % "test"   withSources()
-      ,"com.typesafe.akka"     %%  "akka-testkit"                   % akkaV        % "test"   withSources()
-      ,"org.specs2"            %%  "specs2-core"                    % specs2V      % "test"   withSources()
-      ,"org.scalacheck"        %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
-      ,"org.scalatest"         %%  "scalatest"                      % scalaTestV   % "test"   withSources()
+       "io.spray"               %   "spray-can"                      % sprayV                  withSources() 
+      ,"io.spray"               %   "spray-routing"                  % sprayV                  withSources()
+      ,"io.spray"               %   "spray-caching"                  % sprayV                  withSources()
+      ,"io.spray"               %%  "spray-json"                     % sprayJsonV              withSources()
+      ,"com.typesafe.akka"      %%  "akka-actor"                     % akkaV                   withSources()
+      ,"com.typesafe.akka"      %%  "akka-slf4j"                     % akkaV                   withSources()
+      ,"com.typesafe.akka"      %%  "akka-persistence-experimental"  % akkaV                   withSources()
+      ,"com.github.krasserm"    %%  "akka-persistence-cassandra"     % akkaCassanV             withSources()
+      ,"com.sksamuel.elastic4s" %%  "elastic4s"                      % elastic4sV              withSources()
+      ,"ch.qos.logback"         %   "logback-classic"                % logbackV                withSources()
+      ,"io.spray"               %   "spray-testkit"                  % sprayV       % "test"   withSources()
+      ,"com.typesafe.akka"      %%  "akka-testkit"                   % akkaV        % "test"   withSources()
+      ,"org.specs2"             %%  "specs2-core"                    % specs2V      % "test"   withSources()
+      ,"org.scalacheck"         %%  "scalacheck"                     % scalaCheckV  % "test"   withSources()
+      ,"org.scalatest"          %%  "scalatest"                      % scalaTestV   % "test"   withSources()
   )
 }
 

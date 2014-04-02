@@ -61,7 +61,7 @@ class TopicStatistics(val topicRef : ActorRef) extends EventsourcedProcessor wit
     case SubTopicRemoved     => subTopicsNumber -= 1  ; toStore = true
 
     case StoringTick         => storeStats()
-    case PastStats           => sender ! cb.withSyncCircuitBreaker(state.events.reverse)
+    case PastStats           => sender ! cb.withSyncCircuitBreaker(TopicStats(state.events.reverse))
     case LiveStats           => sender ! liveStats()
     case PurgeOldData        => purgeOldData()
     case ResetCounter        => resetCounter()
@@ -118,6 +118,7 @@ object TopicStatProtocol {
   case object PastStats
   case object LiveStats
   case object PurgeOldData
+  case class TopicStats(stats : List[TopicStatisticValue])
 }
 
 object TopicStatistics {
