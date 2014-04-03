@@ -18,5 +18,5 @@ trait Web {
 
   val httpPort = Settings(system).Http.Port
 
-  IO(Http)(system) ! Http.Bind(rootService, "localhost", port = 8080)
+  IO(Http)(system) ! Http.Bind(rootService, "localhost", port = httpPort)
 }
