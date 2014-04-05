@@ -60,7 +60,6 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
     val event = Message(lastSequenceNr + 1, topicPath, message)
     persist(event) { evt => 
       context.parent ! TopicContentProtocol.Saved(replyTo)
-      system.eventStream.publish(event)
     }
   }
 }
