@@ -17,9 +17,9 @@ class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging w
 
   lazy val prettyPath = TopicPath.prettyStr(topicRef)
 
-  var messageReceived = metrics.meter(s"$prettyPath-meter-messageReceived")
-  val subscribersNumber = metrics.counter(s"$prettyPath-subscribersNumber")
-  val subTopicsNumber = metrics.counter(s"$prettyPath-subTopicsNumber")
+  var messageReceived = metrics.meter(s"$prettyPath.messageReceived")
+  val subscribersNumber = metrics.counter(s"$prettyPath.subscribersNumber")
+  val subTopicsNumber = metrics.counter(s"$prettyPath.subTopicsNumber")
 
   log.debug(s"Creating new TopicStats for $prettyPath")
 
