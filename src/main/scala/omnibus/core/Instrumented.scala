@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit
 import java.net.InetSocketAddress
 
 import com.codahale.metrics._
+import com.codahale.metrics.jvm._
+import com.codahale.metrics.health.HealthCheckRegistry
 import com.codahale.metrics.graphite._
 
 import nl.grons.metrics.scala._
@@ -14,10 +16,12 @@ import omnibus.configuration._
 
 object OmnibusRegistry {
   val metricRegistry = new MetricRegistry()
+  val healthCheckRegistry = new HealthCheckRegistry()
 }
 
-trait Instrumented extends InstrumentedBuilder {
+trait Instrumented extends InstrumentedBuilder with CheckedBuilder {
   val metricRegistry = OmnibusRegistry.metricRegistry
+  val registry = OmnibusRegistry.healthCheckRegistry
 }
 
 trait InstrumentedActor extends ReceiveTimerActor 
@@ -29,8 +33,11 @@ class MetricsReporter extends Actor with ActorLogging with Instrumented {
 
 	val system = context.system
 
-	val jmxReporter = JmxReporter.forRegistry(metricRegistry).build()
-  jmxReporter.start()
+  metricRegistry.registerAll(new GarbageCollectorMetricSet())
+  metricRegistry.registerAll(new MemoryUsageGaugeSet())
+  metricRegistry.registerAll(new ThreadStatesGaugeSet())
+
+	JmxReporter.forRegistry(metricRegistry).build().start()
 
   log.info(s"Starting MetricsReporter to JMX")
 
@@ -44,8 +51,8 @@ class MetricsReporter extends Actor with ActorLogging with Instrumented {
                                            .convertRatesTo(TimeUnit.SECONDS)
                                            .convertDurationsTo(TimeUnit.MILLISECONDS)
                                            .filter(MetricFilter.ALL)
-  
                                            .build(graphite)
+
     graphiteReporter.start(1, TimeUnit.MINUTES)
   } 
 

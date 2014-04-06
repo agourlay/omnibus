@@ -54,7 +54,7 @@ libraryDependencies ++= {
   val scalaTestV       = "2.1.3"
   val akkaCassanV      = "0.2"
   val scalaMetricsV    = "3.0.5_a2.3"
-  val graphiteMetricsV = "3.0.2"
+  val metricsV         = "3.0.2"
   Seq(
        "io.spray"               %   "spray-can"                      % sprayV                  withSources() 
       ,"io.spray"               %   "spray-routing"                  % sprayV                  withSources()
@@ -65,7 +65,8 @@ libraryDependencies ++= {
       ,"com.typesafe.akka"      %%  "akka-persistence-experimental"  % akkaV                   withSources()
       ,"com.github.krasserm"    %%  "akka-persistence-cassandra"     % akkaCassanV             withSources()
       ,"nl.grons"               %%  "metrics-scala"                  % scalaMetricsV           withSources()
-      ,"com.codahale.metrics"   %   "metrics-graphite"               % graphiteMetricsV        withSources()
+      ,"com.codahale.metrics"   %   "metrics-graphite"               % metricsV                withSources()
+      ,"com.codahale.metrics"   %   "metrics-jvm"                    % metricsV                withSources()
       ,"ch.qos.logback"         %   "logback-classic"                % logbackV                withSources()
       ,"io.spray"               %   "spray-testkit"                  % sprayV       % "test"   withSources()
       ,"com.typesafe.akka"      %%  "akka-testkit"                   % akkaV        % "test"   withSources()
