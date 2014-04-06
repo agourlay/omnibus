@@ -36,10 +36,6 @@ omnibus {
     topic {
         retentionTime = "3 days"
     }
-    statistics{
-        storageInterval = "60 seconds"
-        retentionTime = "3 days"
-    }
 }
 ```
 
@@ -196,19 +192,25 @@ And here some realtime stats about a topic
 
 ## Monitoring
 
-If you just want to get raw data about usage, omnibus exposes statistics concerning all topics and the system itself following three modes.
+Omnibus can be configured to report its usage statistics to a Graphite instance.
+
+```
+graphite {
+  enable = false
+  host = "graphite.example.com:2003"
+}
+```
+
+If you don't want to use Graphite, you can query manually statistics concerning all topics and the system itself following two modes.
 
 - `live` : get the current statistics. (default mode)
   - e.g  http://localhost:8080/stats/topics/animals/furry/
   - e.g  http://localhost:8080/stats/system
 
-- `history` : get all statistics history available. (you can configure retention time)
-  - e.g  http://localhost:8080/stats/topics/animals/furry/?mode=history
-  - e.g  http://localhost:8080/stats/system?mode=history
-
 - `streaming` : continous data stream of statistics in realtime
   - e.g  http://localhost:8080/stats/topics/animals/furry?mode=streaming
   - e.g  http://localhost:8080/stats/system?mode=streaming
+
 
 ## Persistence with Cassandra
 

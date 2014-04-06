@@ -10,6 +10,7 @@ import scala.language.postfixOps
 
 import spray.caching.{ LruCache, Cache }
 
+import omnibus.core.InstrumentedActor
 import omnibus.configuration._
 import omnibus.domain.topic._
 import omnibus.api.streaming.HttpTopicViewStream
@@ -120,5 +121,7 @@ object TopicRepositoryProtocol {
 }
 
 object TopicRepository {
-  def props = Props(classOf[TopicRepository]).withDispatcher("topics-dispatcher")
+  def props = Props(classOf[InstrumentedTopicRepo]).withDispatcher("topics-dispatcher")
 }
+
+class InstrumentedTopicRepo extends TopicRepository with InstrumentedActor

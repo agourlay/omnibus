@@ -5,6 +5,7 @@ import akka.actor._
 import spray.routing._
 import spray.http._
 
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 import omnibus.api.endpoint.JsonSupport._
@@ -15,8 +16,6 @@ import omnibus.configuration._
 class HttpTopicStatStream(topicPath : TopicPath, ctx : RequestContext, topicRepo : ActorRef) extends StreamingResponse(ctx.responder) {
 
   implicit def executionContext = context.dispatcher
-
-  val sampling = Settings(context.system).Statistics.Sampling
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
@@ -30,7 +29,9 @@ class HttpTopicStatStream(topicPath : TopicPath, ctx : RequestContext, topicRepo
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(topicRef) => {
-      context.system.scheduler.schedule(sampling, sampling){ topicRef ! TopicStatProtocol.LiveStats }
+      context.system.scheduler.schedule(1.second, 1.second){ 
+        topicRef ! TopicStatProtocol.LiveStats 
+      }
       context.become(handleStream orElse  super.receive)
     }
     case None      => {

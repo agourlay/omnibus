@@ -5,8 +5,3 @@ App.TopicStat = Em.Object.extend({
     subTopicsNumber : 0,
     timestamp : 0
 });
-
-App.TopicStatContainer = Em.Object.extend({
-    topic : null,
-    stats : []
-});

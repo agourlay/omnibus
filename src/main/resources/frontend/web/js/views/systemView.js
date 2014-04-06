@@ -44,19 +44,9 @@ App.SystemView = Em.View.extend({
     didInsertElement: function() {
         var view = this;
         var seriesData = [ [], [], [] ];
-
-        if (view.get('content').length > 0 ){
-            $.each( view.get('content'), function(i, systemStat){
-                var xTime = systemStat.timestamp;
-                seriesData[0].push({x: xTime, y: systemStat.openRequests});
-                seriesData[1].push({x: xTime, y: systemStat.openConnections}); 
-                seriesData[2].push({x: xTime, y: systemStat.requestTimeouts});      
-            });
-        } else {
-            seriesData.forEach(function(series) {
-                series.push( {x: moment().unix(), y: NaN} );
-            });
-        }
+        seriesData.forEach(function(series) {
+            series.push( {x: moment().unix(), y: NaN} );
+        });
         
         var palette = new Rickshaw.Color.Palette( { scheme: 'munin' } );
         var graph = new Rickshaw.Graph( {

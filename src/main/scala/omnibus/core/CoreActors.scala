@@ -12,4 +12,6 @@ trait CoreActors {
   val subRepo = system.actorOf(SubscriberRepository.props, "subscriber-repository")
 
   val httpStatService = system.actorOf(HttpStatistics.props, "http-stat-service")
+
+  val metricsReporter = system.actorOf(MetricsReporter.props, "metrics-reporter")
 }

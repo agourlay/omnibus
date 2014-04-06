@@ -24,7 +24,6 @@ class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef)(implicit cont
             log.debug(s"Sending system stats with $mode")
               mode match {
                 case StatisticsMode.LIVE      => context.actorOf(HttpLiveStatsRequest.props(ctx,httpStatService))
-                case StatisticsMode.HISTORY   => context.actorOf(HttpPastStatsRequest.props(ctx,httpStatService))
                 case StatisticsMode.STREAMING => context.actorOf(HttpStatStream.props(ctx.responder, httpStatService))
               }
             }
@@ -37,7 +36,6 @@ class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef)(implicit cont
                 log.debug(s"Sending stats from topic $prettyTopic with $mode")
                 mode match {
                   case StatisticsMode.LIVE      => context.actorOf(TopicLiveStatsRequest.props(topicPath, ctx, topicRepo))
-                  case StatisticsMode.HISTORY   => context.actorOf(TopicPastStatsRequest.props(topicPath, ctx, topicRepo))
                   case StatisticsMode.STREAMING => context.actorOf(HttpTopicStatStream.props(topicPath, ctx, topicRepo))
                 }    
               }

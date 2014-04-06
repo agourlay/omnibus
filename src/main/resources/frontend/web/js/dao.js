@@ -76,21 +76,6 @@ App.Dao = Em.Object.create({
         }).then(function (data) {return dao.createSystemModel(data)});
     },
 
-    systemStats : function() {
-        var dao = this;
-        return this.getJSON("stats/system?mode=history")
-                    .then(function (stats) {
-                        var systemStatsModel = Ember.A([]);
-                        $.each( stats, function(i, stat){
-                            var model = dao.createSystemModel(stat)
-                            systemStatsModel.pushObject(model);        
-                        });
-                        return systemStatsModel;
-                    }, function(error) { 
-                        return Ember.A([]);
-                    });
-    }, 
-
     subscribers : function() {
         var dao = this;
         return $.ajax({
@@ -107,28 +92,6 @@ App.Dao = Em.Object.create({
             });
             return subsModel;
         });
-    },      
-
-    topicStats : function(topicName)  {
-        var dao = this;
-        return this.getJSON("stats/topics/"+topicName+"?mode=history")
-                    .then(function (topicStats) {
-                        var container = App.TopicStatContainer.create();
-                        var topicStatsModel = Ember.A([]);
-                        $.each( topicStats, function(i, topicStat){
-                            var model = dao.createTopicStatModel(topicStat);
-                            topicStatsModel.pushObject(model);        
-                        });
-                        container.set("topic", topicName);
-                        container.set("stats", topicStatsModel); 
-                        return container
-                    }, function(error) { 
-                        var container = App.TopicStatContainer.create();
-                        container.set("topic", topicName);
-                        container.set("stats", Ember.A([]));
-                        console.log(container) ;
-                        return container ;
-                    });
     },
    
     createTopicStatModel : function(topicStat) {
