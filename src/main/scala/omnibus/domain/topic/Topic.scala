@@ -2,13 +2,14 @@ package omnibus.domain.topic
 
 import akka.actor._
 
+import omnibus.core.InstrumentedActor
 import omnibus.domain.message._
 import omnibus.domain.message.PropagationDirection._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.ReactiveCmd
 
-class Topic(val topic: String) extends Actor with ActorLogging {
+class Topic(val topic: String) extends Actor with ActorLogging{
 
   var numEvents = 0L
 
@@ -35,7 +36,6 @@ class Topic(val topic: String) extends Actor with ActorLogging {
     case Propagation(operation, direction)   => handlePropagation(operation, direction)
     case NewTopicDownTheTree(newTopic)       => notifySubscribersOnNewTopic(newTopic)
     case TopicContentProtocol.Saved(replyTo) => messageSaved(replyTo)
-    case m @ TopicStatProtocol.PastStats     => statisticsHolder forward m
     case m @ TopicStatProtocol.LiveStats     => statisticsHolder forward m
   }
 
@@ -169,5 +169,7 @@ object TopicProtocol {
 }
 
 object Topic {  
-  def props(topic: String) = Props(classOf[Topic], topic).withDispatcher("topics-dispatcher")
+  def props(topic: String) = Props(classOf[InstrumentedTopic], topic).withDispatcher("topics-dispatcher")
 }
+
+class InstrumentedTopic(topic: String) extends Topic(topic) with InstrumentedActor

@@ -5,6 +5,7 @@ import akka.actor._
 import spray.routing._
 
 import omnibus.core.CoreActors
+import omnibus.core.InstrumentedActor
 import omnibus.api.route._
 import omnibus.api.exceptions.RestFailureHandling
 
@@ -12,10 +13,9 @@ class HttpEndpointActor(coreActors : CoreActors) extends HttpEndpoint with Actor
 
   implicit def actorRefFactory = context    
   def receive = runRoute(routes(coreActors))
-
 }
 
-trait HttpEndpoint extends HttpService with RestFailureHandling{
+trait HttpEndpoint extends HttpService with RestFailureHandling {
  
    def routes(coreActors : CoreActors ) (implicit context: ActorContext) = {
    	  val subRepo = coreActors.subRepo
@@ -32,5 +32,7 @@ trait HttpEndpoint extends HttpService with RestFailureHandling{
 }
 
 object HttpEndpointActor {
-	def props(coreActors : CoreActors) = Props(classOf[HttpEndpointActor], coreActors)
+	def props(coreActors : CoreActors) = Props(classOf[InstrumentedEndPoint], coreActors)
 }
+
+class InstrumentedEndPoint(coreActors : CoreActors) extends HttpEndpointActor(coreActors) with InstrumentedActor

@@ -1,6 +1,7 @@
 package omnibus.configuration
 
 import java.util.concurrent.TimeUnit
+
 import scala.concurrent.duration.FiniteDuration
 import com.typesafe.config.Config
 import akka.actor._
@@ -20,19 +21,14 @@ class Settings(config: Config, extendedSystem: ExtendedActorSystem) extends Exte
     val RetentionTime = FiniteDuration(config.getDuration("omnibus.topic.retentionTime", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
   }
 
-  object Indexer {
-    val Enable = config.getBoolean("omnibus.indexer.enable")
-    val Host = config.getString("omnibus.indexer.host")
-  }
-
   object Timeout {
   	val Ask = FiniteDuration(config.getDuration("omnibus.timeout.ask", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
   }
 
-  object Statistics {
-    val StorageInterval = FiniteDuration(config.getDuration("omnibus.statistics.storageInterval", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
-    val RetentionTime = FiniteDuration(config.getDuration("omnibus.statistics.retentionTime", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
-    val Sampling = FiniteDuration(config.getDuration("omnibus.statistics.sampling", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
+  object Graphite {
+    val Enable = config.getBoolean("omnibus.graphite.enable")
+    val Host = config.getString("omnibus.graphite.host")
+    val Prefix = config.getString("omnibus.graphite.prefix")
   }
 }
 

@@ -7,6 +7,7 @@ import scala.language.postfixOps
 import java.security.SecureRandom
 import java.math.BigInteger
 
+import omnibus.core.InstrumentedActor
 import omnibus.domain.topic.TopicPath
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.api.streaming.HttpTopicSubscriber
@@ -68,5 +69,7 @@ object SubscriberRepositoryProtocol {
 }
 
 object SubscriberRepository {
-	def props = Props(classOf[SubscriberRepository]).withDispatcher("subscribers-dispatcher")
+	def props = Props(classOf[InstrumentedSubRepo]).withDispatcher("subscribers-dispatcher")
 }
+
+class InstrumentedSubRepo extends SubscriberRepository with InstrumentedActor

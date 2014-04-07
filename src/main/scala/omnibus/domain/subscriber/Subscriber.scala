@@ -5,6 +5,7 @@ import akka.actor._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
+import omnibus.core.InstrumentedActor
 import omnibus.domain.topic._
 import omnibus.domain.message._
 import omnibus.domain.subscriber.SubscriberProtocol._
@@ -86,5 +87,8 @@ object SubscriberProtocol {
 
 object Subscriber {
   def props(channel: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd) 
-    = Props(classOf[Subscriber], channel, topics, reactiveCmd, System.currentTimeMillis / 1000).withDispatcher("subscribers-dispatcher")
+    = Props(classOf[InstrumentedSubscriber], channel, topics, reactiveCmd, System.currentTimeMillis / 1000).withDispatcher("subscribers-dispatcher")
 }
+
+class InstrumentedSubscriber(channel: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd, timestamp: Long) 
+      extends Subscriber( channel, topics, reactiveCmd, timestamp) with InstrumentedActor

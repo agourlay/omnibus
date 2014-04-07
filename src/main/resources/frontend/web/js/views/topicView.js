@@ -30,18 +30,9 @@ App.TopicView = Em.View.extend({
     didInsertElement: function() {
         var view = this;
         var seriesData = [ [], [], [] ];
-        if (view.get('content') != undefined && view.get('content').get('stats').length > 0 ){
-            $.each( view.get('content').get('stats'), function(i, topicStat){
-                var xTime = topicStat.timestamp;
-                seriesData[0].push({x: xTime, y: topicStat.throughputPerSec});
-                seriesData[1].push({x: xTime, y: topicStat.subscribersNumber});
-                seriesData[2].push({x: xTime, y: topicStat.subTopicsNumber});       
-            });
-        } else {
-            seriesData.forEach(function(series) {
-                series.push( {x: moment().unix(), y: NaN} );
-            });
-        }
+        seriesData.forEach(function(series) {
+            series.push( {x: moment().unix(), y: NaN} );
+        });
         
         var palette = new Rickshaw.Color.Palette( { scheme: 'munin' } );
         var graph = new Rickshaw.Graph( {

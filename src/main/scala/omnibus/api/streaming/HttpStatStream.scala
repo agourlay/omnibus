@@ -4,6 +4,7 @@ import akka.actor._
 
 import spray.http._
 
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 import omnibus.api.endpoint.JsonSupport._
@@ -15,15 +16,12 @@ class HttpStatStream(responder: ActorRef, statsRepo : ActorRef) extends Streamin
 
   implicit def executionContext = context.dispatcher
   implicit def system = context.system
-
-  implicit val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
-  val sampling = Settings(system).Statistics.Sampling
   
   override def startText = s"~~> Streaming http statistics\n"
 
   override def preStart() = {
     super.preStart()
-    context.system.scheduler.schedule(sampling, sampling, self, HttpStatStreamProtocol.RequestHttpStats)
+    context.system.scheduler.schedule(1.second, 1.second, self, HttpStatStreamProtocol.RequestHttpStats)
   }
 
   override def receive = ({
