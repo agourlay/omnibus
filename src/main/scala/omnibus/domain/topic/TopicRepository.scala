@@ -10,18 +10,23 @@ import scala.language.postfixOps
 
 import spray.caching.{ LruCache, Cache }
 
+import omnibus.core.Instrumented
 import omnibus.core.InstrumentedActor
 import omnibus.configuration._
 import omnibus.domain.topic._
 import omnibus.api.streaming.HttpTopicViewStream
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class TopicRepository extends EventsourcedProcessor with ActorLogging {
+class TopicRepository extends EventsourcedProcessor with ActorLogging with Instrumented {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
 
   var rootTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
+
+  val rootTopicsNumber = metrics.counter("topicRootNumber")
+  val topicsNumber = metrics.counter("topicNumber")
+  var lookupMeter = metrics.meter("lookupMeter")
 
   var state = TopicRepoState()
   def updateState(msg: TopicRepoStateValue): Unit = {state = state.update(msg)} 
@@ -65,11 +70,13 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   def createTopic(topicPath: TopicPath, replyTo : ActorRef) = {
     val topicsList = topicPath.segments
     val topicRoot = topicsList.head
+    topicsNumber += 1
     if (rootTopics.contains(topicRoot)) {
       log.debug(s"Root topic $topicRoot already exist, forward to sub topic")
       rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail, replyTo)
     } else {
       log.debug(s"Creating new root topic $topicRoot")
+      rootTopicsNumber += 1
       val newRootTopic = context.actorOf(Topic.props(topicRoot), topicRoot)
       rootTopics += (topicRoot -> newRootTopic)
       newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail, replyTo)
@@ -77,6 +84,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
   }
 
   def lookUpTopic(topicPath: TopicPath): Future[TopicPathRef] = {
+    lookupMeter.mark() 
     val topic = topicPath.prettyStr
     log.debug(s"Lookup in cache for topic $topic")
     val futureOpt: Future[ActorRef] = mostAskedTopic(topicPath) { context.actorSelection(topic).resolveOne }
@@ -89,10 +97,14 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging {
     val topicName = topicPath.prettyStr
     log.debug(s"trying to delete topic $topicName")
     mostAskedTopic.remove(topicPath)
-    if (rootTopics.contains(topicName)) rootTopics -= topicName
+    if (rootTopics.contains(topicName)) {
+      rootTopics -= topicName
+      rootTopicsNumber -= 1
+    }
     state.events.find(_.topicPath == topicPath) match {
       case None        => log.info(s"Cannot find topic in repo state")
       case Some(topic) => {
+        topicsNumber -= 1
         deleteMessage(topic.seqNumber, true)
         state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
       }  

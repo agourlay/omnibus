@@ -32,10 +32,7 @@ class TopicStatistics(val topicRef : ActorRef) extends Actor with ActorLogging w
     case LiveStats         => sender ! liveStats()
   }
 
-  def liveStats() = {
-    val currentStat = TopicStatisticValue(prettyPath, throughput, subscribersNumber.count, subTopicsNumber.count)
-    currentStat
-  }
+  def liveStats() = TopicStatisticValue(prettyPath, throughput, subscribersNumber.count, subTopicsNumber.count)
 
   def throughput = Math.round(messageReceived.oneMinuteRate*100.0)/100.0
 }

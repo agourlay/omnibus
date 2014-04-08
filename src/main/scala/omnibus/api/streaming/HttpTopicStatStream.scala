@@ -32,7 +32,7 @@ class HttpTopicStatStream(topicPath : TopicPath, ctx : RequestContext, topicRepo
       context.system.scheduler.schedule(1.second, 1.second){ 
         topicRef ! TopicStatProtocol.LiveStats 
       }
-      context.become(handleStream orElse  super.receive)
+      context.become(handleStream orElse super.receive)
     }
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))

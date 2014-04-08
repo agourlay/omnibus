@@ -6,11 +6,15 @@ import spray.http._
 import HttpHeaders._
 import spray.can.Http
 
+import omnibus.core.Instrumented
 import omnibus.api.endpoint.CustomMediaType
 
-class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging {
+class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented{
 
   def startText = "Generic streaming...\n"
+
+  metrics.meter("start").mark()
+  val endMeter = metrics.meter("end")
 
   lazy val responseStart = HttpResponse(
  		entity  = HttpEntity(CustomMediaType.EventStreamType, startText),
@@ -24,6 +28,7 @@ class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging {
 
   override def postStop() = {
     responder ! ChunkedMessageEnd
+    endMeter.mark()
   }
   
   def receive = {   

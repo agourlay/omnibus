@@ -17,7 +17,7 @@ object CustomMediaType {
 	    MediaType.custom(
 	    	mainType = "text",
 	    	subType = "event-stream",
-	    	compressible = false,
+	    	compressible = true,
 	    	binary = false
 	    )
 	)

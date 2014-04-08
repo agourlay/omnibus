@@ -7,12 +7,13 @@ import scala.language.postfixOps
 import java.security.SecureRandom
 import java.math.BigInteger
 
+import omnibus.core.Instrumented
 import omnibus.core.InstrumentedActor
 import omnibus.domain.topic.TopicPath
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.api.streaming.HttpTopicSubscriber
 
-class SubscriberRepository extends Actor with ActorLogging {
+class SubscriberRepository extends Actor with ActorLogging with Instrumented {
 
   var subs: Set[SubscriberView] = Set.empty[SubscriberView]  
 
@@ -20,12 +21,20 @@ class SubscriberRepository extends Actor with ActorLogging {
 
   def nextSubId = new BigInteger(130, random).toString(32)
 
+  val subNumber = metrics.counter("subNumber")
+  var lookupMeter = metrics.meter("lookupMeter")
+
   def receive = {
     case CreateSub(topics, responder, reactiveCmd, http) => createSub(topics, responder, reactiveCmd, http)
     case KillSub(id)                                     => killSub(id, sender)
     case AllSubs                                         => sender ! Subscribers(subs.toList)
     case Terminated(refSub)                              => handleTerminated(refSub)
-    case SubById(id)                                     => sender ! SubLookup(subs.find(_.id == id))
+    case SubById(id)                                     => sender ! subLookup(id)
+  }
+
+  def subLookup(id : String) = {
+    lookupMeter.mark()
+    SubLookup(subs.find(_.id == id))
   }
 
   def createSub(topics: Set[ActorRef], responder: ActorRef, cmd: ReactiveCmd, ip: String) = {
@@ -36,6 +45,7 @@ class SubscriberRepository extends Actor with ActorLogging {
     val newSub = context.actorOf(Subscriber.props(httpSub, topics, cmd))
     val newView = SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr(_)).mkString("+"), ip, cmd.react.toString)
     subs += newView
+    subNumber += 1
     context.watch(newSub)
   }
 
@@ -45,6 +55,7 @@ class SubscriberRepository extends Actor with ActorLogging {
       case Some (sub) =>  {
         sub.ref ! PoisonPill
         subs -= (sub)
+        subNumber -= 1
         replyTo ! SubKilled(id)
       }  
     }
