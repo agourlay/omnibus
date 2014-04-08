@@ -2,6 +2,7 @@ package omnibus.domain.topic
 
 import akka.actor._
 
+import omnibus.core.Instrumented
 import omnibus.core.InstrumentedActor
 import omnibus.domain.message._
 import omnibus.domain.message.PropagationDirection._
@@ -9,17 +10,21 @@ import omnibus.domain.topic.TopicProtocol._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.ReactiveCmd
 
-class Topic(val topic: String) extends Actor with ActorLogging{
+class Topic(val topic: String) extends Actor with ActorLogging with Instrumented {
 
   var numEvents = 0L
 
   val creationDate = System.currentTimeMillis / 1000L
   val topicPath = TopicPath(self)
+  val prettyPath = TopicPath.prettyStr(self)
 
   var subscribers = Set.empty[ActorRef]
   var subTopics = Map.empty[String, ActorRef]
 
-  val statisticsHolder = context.actorOf(TopicStatistics.props(self), "internal-topic-stats")
+  var messageReceived = metrics.meter(s"$prettyPath.messageReceived")
+  val subscribersNumber = metrics.counter(s"$prettyPath.subscribersNumber")
+  val subTopicsNumber = metrics.counter(s"$prettyPath.subTopicsNumber")
+
   val contentHolder = context.actorOf(TopicContent.props(topicPath), "internal-topic-content")
 
   def receive = {
@@ -36,14 +41,13 @@ class Topic(val topic: String) extends Actor with ActorLogging{
     case Propagation(operation, direction)   => handlePropagation(operation, direction)
     case NewTopicDownTheTree(newTopic)       => notifySubscribersOnNewTopic(newTopic)
     case TopicContentProtocol.Saved(replyTo) => messageSaved(replyTo)
-    case m @ TopicStatProtocol.LiveStats     => statisticsHolder forward m
   }
 
-  def view() : TopicView = {
-    val prettyPath = TopicPath.prettyStr(self)
+  def view() = {
     val subTopicNumber = subTopics.size
     val prettyChildren = subTopics.values.map(TopicPath.prettyStr(_)).toSeq
-    TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents, creationDate)
+    val throughput = Math.round(messageReceived.oneMinuteRate*100.0)/100.0
+    TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents, throughput, creationDate)
   }
 
   def leaves(replyTo : ActorRef) {
@@ -81,7 +85,7 @@ class Topic(val topic: String) extends Actor with ActorLogging{
 
   def messageSaved(replyTo : ActorRef) = {
     replyTo ! TopicProtocol.MessagePublished
-    statisticsHolder ! TopicStatProtocol.MessageReceived
+    messageReceived.mark()
     numEvents += 1
   }
 
@@ -90,7 +94,7 @@ class Topic(val topic: String) extends Actor with ActorLogging{
       context.watch(subscriber)
       subscribers += subscriber
       subscriber ! SubscriberProtocol.AcknowledgeSub(self)
-      statisticsHolder ! TopicStatProtocol.SubscriberAdded       // report stats
+      subscribersNumber += 1
     }
   }
 
@@ -98,7 +102,7 @@ class Topic(val topic: String) extends Actor with ActorLogging{
     context.unwatch(subscriber)
     subscribers -= subscriber
     subscriber ! SubscriberProtocol.AcknowledgeUnsub(self)
-    statisticsHolder ! TopicStatProtocol.SubscriberRemoved    // report stats
+    subscribersNumber -= 1
   }
 
   // It is either a subtopic or a subscriber
@@ -107,6 +111,7 @@ class Topic(val topic: String) extends Actor with ActorLogging{
     if (subTopics.values.toSeq.contains(ref)) {
       val key = subTopics.find(_._2 == ref).get._1
       subTopics -= (key)
+      subTopicsNumber -= 1
     } else {
       unsubscribe(ref)
     }
@@ -128,9 +133,7 @@ class Topic(val topic: String) extends Actor with ActorLogging{
 
   def notifySubscribersOnNewTopic(newTopicRef : ActorRef) = sendToSubscribers(TopicProtocol.TopicCreated(newTopicRef))
 
-  def sendToSubscribers(stuff: Any) = {
-    subscribers.foreach { actorRef => actorRef ! stuff }
-  }
+  def sendToSubscribers(stuff: Any) = subscribers.foreach { actorRef => actorRef ! stuff }
 
   def createTopicAndForward(subTopic: String, topics: List[String], replyTo : ActorRef) = {
     log.debug(s"Create sub topic $subTopic and forward $topics")
@@ -142,7 +145,7 @@ class Topic(val topic: String) extends Actor with ActorLogging{
       context.watch(subTopicActor)
       subTopics += (subTopic -> subTopicActor)
       subTopicActor ! TopicProtocol.CreateSubTopic(topics, replyTo)
-      statisticsHolder ! TopicStatProtocol.SubTopicAdded     // report stats
+      subTopicsNumber += 1
     }
   }
 }

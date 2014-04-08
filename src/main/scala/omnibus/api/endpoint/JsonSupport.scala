@@ -31,20 +31,7 @@ object JsonSupport {
 
     // we don't need to deserialize the SubscriberView
     def read(json: JsValue): SubscriberView = ???
-  }  
-
-  implicit val formatTopicStats = new RootJsonFormat[TopicStatisticValue] {
-    def write(obj: TopicStatisticValue): JsValue = JsObject(
-      "topic"              -> JsString(obj.topic),
-      "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
-      "subscribersNumber"  -> JsNumber(obj.subscribersNumber),
-      "throughputPerSec"   -> JsNumber(obj.throughputPerSec),
-      "timestamp"          -> JsNumber(obj.timestamp)
-    )
-
-    // we don't need to deserialize the TopicStatisticValue
-    def read(json: JsValue): TopicStatisticValue = ???
-  }  
+  }
 
   implicit val formatTopicView = new RootJsonFormat[TopicView] {
     def write(obj: TopicView): JsValue = JsObject(
@@ -52,8 +39,9 @@ object JsonSupport {
       "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
       "subscribersNumber"  -> JsNumber(obj.subscribersNumber),
       "eventsNumber"       -> JsNumber(obj.numEvents),
+      "throughputPerSec"   -> JsNumber(obj.throughputPerSec),
       "creationDate"       -> JsNumber(obj.creationDate),
-      "viewDate"           -> JsNumber(obj.viewDate),  
+      "timestamp"           -> JsNumber(obj.timestamp),  
       "_embedded"          -> JsObject("children" -> JsArray(
         obj.children.map( child => JsObject( child.split("/").last ->  JsObject("href" -> JsString("/topics/"+child)))).toList
         )

@@ -25,10 +25,10 @@ class TopicRootsRequest(ctx : RequestContext, topicRepo: ActorRef) extends RestR
       if (!rootsPath.isEmpty){
         rootsPath.foreach (_.topicRef.get ! TopicProtocol.View)
         context.become(waitingTopicsView(rootsPath.size) orElse handleTimeout)
-        } else {
-          ctx.complete(roots)
-          self ! PoisonPill
-        }
+      } else {
+        ctx.complete(roots)
+        self ! PoisonPill
+      }
     }  
   }
 

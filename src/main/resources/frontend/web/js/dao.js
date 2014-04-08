@@ -93,16 +93,6 @@ App.Dao = Em.Object.create({
             return subsModel;
         });
     },
-   
-    createTopicStatModel : function(topicStat) {
-        var model = App.TopicStat.create();
-        model.set('topic', topicStat.topic);
-        model.set('throughputPerSec', topicStat.throughputPerSec);
-        model.set('subscribersNumber', topicStat.subscribersNumber);
-        model.set('subTopicsNumber', topicStat.subTopicsNumber);
-        model.set('timestamp', topicStat.timestamp);
-        return model;
-    },
 
     createSubscriberModel : function(sub) {
         var model = App.Subscriber.create();
@@ -162,7 +152,9 @@ App.Dao = Em.Object.create({
         model.set("name", topic.topic.join().replace(/,/g,"/"));
         model.set("eventsNumber", topic.eventsNumber);
         model.set("subscribersNumber", topic.subscribersNumber);
+        model.set('throughputPerSec', topic.throughputPerSec);
         model.set("creationDate", topic.creationDate);
+        model.set("timestamp", topic.timestamp);
         model.set("subTopics", topic._embedded.children.map(function(obj){ 
             return model.get("name") + "/" +Object.keys(obj); 
         }))

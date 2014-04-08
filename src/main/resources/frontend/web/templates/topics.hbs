@@ -17,6 +17,7 @@
 	        <th><i class="fa fa-tags"></i> Topic</th>
 	        <th><i class="fa fa-users"></i> Subscriber</th>
 	        <th>Event</th>
+	        <th><i class="fa fa-dashboard"></i> Throughput</th>
 	        <th>Subtopic</th>
 	        <th>Created</th>
 	        <th>Delete</th>
@@ -43,6 +44,7 @@
 			    </td>
 			    <td>{{view.topic.subscribersNumber}}</td>
 			    <td>{{view.topic.eventsNumber}}</td>
+			    <td>{{view.topic.throughputPerSec}} msg / sec</td>
 			    <td>{{view.topic.subTopicsNumber}}</td>
 			    <td>{{view.topic.prettyCreationDate}}</td>
 			    <td>

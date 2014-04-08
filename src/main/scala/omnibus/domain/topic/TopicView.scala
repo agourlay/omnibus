@@ -5,5 +5,6 @@ case class TopicView(topic:String
 	               , children : Seq[String]
 	               , subscribersNumber : Long
 	               , numEvents : Long
+	               , throughputPerSec : Double
 	               , creationDate : Long
-	               , viewDate: Long = System.currentTimeMillis / 1000)
+	               , timestamp : Long = System.currentTimeMillis / 1000)

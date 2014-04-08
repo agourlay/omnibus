@@ -3,7 +3,9 @@ App.Topic = Em.Object.extend({
     subTopics: [],
     subscribersNumber : null,
     eventsNumber : null,
+    throughputPerSec : null,
     creationDate: null,
+    timestamp : 0,
     
     subTopicsNumber: function(){
         return this.subTopics.length ;

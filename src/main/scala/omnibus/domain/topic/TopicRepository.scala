@@ -14,7 +14,7 @@ import omnibus.core.Instrumented
 import omnibus.core.InstrumentedActor
 import omnibus.configuration._
 import omnibus.domain.topic._
-import omnibus.api.streaming.HttpTopicViewStream
+import omnibus.api.streaming.HttpTopicLeavesStream
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class TopicRepository extends EventsourcedProcessor with ActorLogging with Instrumented {
@@ -113,7 +113,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
   }
 
   def allLeaves(replyTo : ActorRef) {
-    context.actorOf(HttpTopicViewStream.props(replyTo, rootTopics.values.toList))
+    context.actorOf(HttpTopicLeavesStream.props(replyTo, rootTopics.values.toList))
   }
 
   def allRoots() = {
