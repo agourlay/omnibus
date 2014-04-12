@@ -22,25 +22,25 @@ class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef)(implicit cont
         path("system") {
           get { ctx =>
             log.debug(s"Sending system stats with $mode")
+            mode match {
+              case StatisticsMode.LIVE      => context.actorOf(HttpLiveStatsRequest.props(ctx,httpStatService))
+              case StatisticsMode.STREAMING => context.actorOf(HttpStatStream.props(ctx.responder, httpStatService))
+            }
+          }
+        } ~
+        path("topics" / Rest) { topic =>
+          validate(!topic.isEmpty, "topic name cannot be empty \n") {
+            val topicPath = TopicPath(topic)
+            val prettyTopic = topicPath.prettyStr()
+            get { ctx =>
+              log.debug(s"Sending stats from topic $prettyTopic with $mode")
               mode match {
-                case StatisticsMode.LIVE      => context.actorOf(HttpLiveStatsRequest.props(ctx,httpStatService))
-                case StatisticsMode.STREAMING => context.actorOf(HttpStatStream.props(ctx.responder, httpStatService))
-              }
+                case StatisticsMode.LIVE      => context.actorOf(TopicViewRequest.props(topicPath, ctx, topicRepo))
+                case StatisticsMode.STREAMING => context.actorOf(HttpTopicViewStream.props(topicPath, ctx, topicRepo))
+              }    
             }
-          } ~
-          path("topics" / Rest) { topic =>
-            validate(!topic.isEmpty, "topic name cannot be empty \n") {
-              val topicPath = TopicPath(topic)
-              val prettyTopic = topicPath.prettyStr()
-              get { ctx =>
-                log.debug(s"Sending stats from topic $prettyTopic with $mode")
-                mode match {
-                  case StatisticsMode.LIVE      => context.actorOf(TopicViewRequest.props(topicPath, ctx, topicRepo))
-                  case StatisticsMode.STREAMING => context.actorOf(HttpTopicViewStream.props(topicPath, ctx, topicRepo))
-                }    
-              }
-            }
-          }  
-        }
+          }
+        }  
       }
-    }    
+    }
+  }    
