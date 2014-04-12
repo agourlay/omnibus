@@ -30,6 +30,10 @@ class Settings(config: Config, extendedSystem: ExtendedActorSystem) extends Exte
     val Host = config.getString("omnibus.graphite.host")
     val Prefix = config.getString("omnibus.graphite.prefix")
   }
+
+  object Cluster {
+    val SeedNodes = config.getStringList("omnibus.cluster.nodes")
+  }
 }
 
 object Settings extends ExtensionId[Settings] with ExtensionIdProvider {

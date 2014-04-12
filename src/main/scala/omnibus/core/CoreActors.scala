@@ -14,4 +14,6 @@ trait CoreActors {
   val httpStatService = system.actorOf(HttpStatistics.props, "http-stat-service")
 
   val metricsReporter = system.actorOf(MetricsReporter.props, "metrics-reporter")
+
+  val clusterListener = system.actorOf(ClusterListener.props, "cluster-listener")
 }

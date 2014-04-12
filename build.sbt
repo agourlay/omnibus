@@ -62,6 +62,8 @@ libraryDependencies ++= {
       ,"io.spray"               %%  "spray-json"                     % sprayJsonV              withSources()
       ,"com.typesafe.akka"      %%  "akka-actor"                     % akkaV                   withSources()
       ,"com.typesafe.akka"      %%  "akka-slf4j"                     % akkaV                   withSources()
+      ,"com.typesafe.akka"      %%  "akka-cluster"                   % akkaV                   withSources()
+      ,"com.typesafe.akka"      %%  "akka-contrib"                   % akkaV                   withSources()
       ,"com.typesafe.akka"      %%  "akka-persistence-experimental"  % akkaV                   withSources()
       ,"com.github.krasserm"    %%  "akka-persistence-cassandra"     % akkaCassanV             withSources()
       ,"nl.grons"               %%  "metrics-scala"                  % scalaMetricsV           withSources()
