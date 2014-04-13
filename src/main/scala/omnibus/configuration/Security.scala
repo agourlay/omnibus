@@ -11,7 +11,7 @@ object Security {
   	
   	Future {
     	if (userPass.exists(up => up.user == Settings(system).Admin.Name && up.pass == Settings(system).Admin.Password))
-      		Some(Settings(system).Admin.Name)
+      	Some(Settings(system).Admin.Name)
     	else None
   	}
   }
