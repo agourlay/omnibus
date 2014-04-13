@@ -25,6 +25,10 @@ scalacOptions := Seq(
   "-language:_",
   "-feature")
 
+javaOptions := Seq(
+  "-Djava.library.path=./src/main/resources/sigar",
+  "-Xms128m", "-Xmx1024m")
+
 mappings in Universal += {
   file("src/main/resources/application.conf") -> "conf/omnibus.conf"
 }
@@ -45,16 +49,17 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val akkaV            = "2.3.2"
-  val sprayV           = "1.3.1"
-  val sprayJsonV       = "1.2.6"
-  val logbackV         = "1.1.2"
-  val specs2V          = "2.3.11"
-  val scalaCheckV      = "1.11.3"
-  val scalaTestV       = "2.1.3"
-  val akkaCassanV      = "0.2"
-  val scalaMetricsV    = "3.0.5_a2.3"
-  val metricsV         = "3.0.2"
+  val akkaV         = "2.3.2"
+  val sprayV        = "1.3.1"
+  val sprayJsonV    = "1.2.6"
+  val logbackV      = "1.1.2"
+  val specs2V       = "2.3.11"
+  val scalaCheckV   = "1.11.3"
+  val scalaTestV    = "2.1.3"
+  val akkaCassanV   = "0.2"
+  val scalaMetricsV = "3.0.5_a2.3"
+  val metricsV      = "3.0.2"
+  val sigarV        = "1.6.4"
   Seq(
        "io.spray"               %   "spray-can"                      % sprayV                  withSources() 
       ,"io.spray"               %   "spray-routing"                  % sprayV                  withSources()
@@ -70,6 +75,7 @@ libraryDependencies ++= {
       ,"com.codahale.metrics"   %   "metrics-graphite"               % metricsV                withSources()
       ,"com.codahale.metrics"   %   "metrics-jvm"                    % metricsV                withSources()
       ,"ch.qos.logback"         %   "logback-classic"                % logbackV                withSources()
+      ,"org.fusesource"         %   "sigar"                          % sigarV                  withSources()
       ,"io.spray"               %   "spray-testkit"                  % sprayV       % "test"   withSources()
       ,"com.typesafe.akka"      %%  "akka-testkit"                   % akkaV        % "test"   withSources()
       ,"org.specs2"             %%  "specs2-core"                    % specs2V      % "test"   withSources()
