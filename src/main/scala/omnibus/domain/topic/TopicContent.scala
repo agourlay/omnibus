@@ -38,12 +38,13 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
     case Publish(message,replyTo)  => cb.withSyncCircuitBreaker(publishMessage(message, replyTo))
     case DeleteContent             => deleteTopicContent()
     case PurgeTopicContent         => purgeOldContent()
+    case PurgeFrom(id)             => deleteMessages(id, true)
     case FwProcessorId(replyTo)    => replyTo ! TopicContentProtocol.ProcessorId(processorId)
   }
 
-  // TODO
   def purgeOldContent() {
-    val timeLimit = System.currentTimeMillis - retentionTime.toMillis                  
+    val timeLimit = System.currentTimeMillis - retentionTime.toMillis
+    context.actorOf(TopicPurgerHelper.props(processorId, timeLimit), "purger-helper")                  
   } 
 
   def deleteTopicContent() {
@@ -69,6 +70,7 @@ object TopicContentProtocol {
   case class Saved(replyTo : ActorRef)
   case class FwProcessorId(subscriber: ActorRef) 
   case class ProcessorId(processorId: String) 
+  case class PurgeFrom(id : Long)
   case object DeleteContent
   case object PurgeTopicContent
 }
