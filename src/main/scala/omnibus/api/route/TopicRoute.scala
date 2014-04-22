@@ -4,12 +4,9 @@ import akka.actor._
 
 import spray.routing._
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import scala.concurrent.duration._
 
-import omnibus.domain.subscriber._
+import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.domain.topic._
 import omnibus.api.request._
 
@@ -17,25 +14,23 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
 
   implicit def executionContext = context.dispatcher
 
-  val log: Logger = LoggerFactory.getLogger("omnibus.route.topic")
-
   val route =
     path("topics") {
       get { ctx =>
-        context.actorOf(TopicRootsRequest.props(ctx, topicRepo))
+        context.actorOf(TopicRoots.props(ctx, topicRepo))
       }
     } ~
     path("topics" / Rest) { topic =>
       validate(!topic.isEmpty, "topic name cannot be empty \n") {  
         val topicPath = TopicPath(topic)
         get { ctx =>
-          context.actorOf(TopicViewRequest.props(topicPath, ctx, topicRepo)) 
+          context.actorOf(ViewTopic.props(topicPath, ctx, topicRepo)) 
         } ~
         post { ctx => 
-          context.actorOf(CreateTopicRequest.props(topicPath, ctx, topicRepo)) 
+          context.actorOf(CreateTopic.props(topicPath, ctx, topicRepo)) 
         } ~
         entity(as[String]) { message =>
-          put { ctx => context.actorOf(PublishRequest.props(topicPath, message, ctx, topicRepo)) }
+          put { ctx => context.actorOf(Publish.props(topicPath, message, ctx, topicRepo)) }
         }
       }  
     } ~ 
@@ -45,7 +40,7 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
           parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveCmd) { reactiveCmd =>
             clientIP { ip =>
               get { ctx =>
-                context.actorOf(SubscribeRequest.props(TopicPath(topic), reactiveCmd, ip.toOption.get.toString, ctx, subRepo, topicRepo))
+                context.actorOf(Subscribe.props(TopicPath(topic), reactiveCmd, ip.toOption.get.toString, ctx, subRepo, topicRepo))
               }
             }
           }

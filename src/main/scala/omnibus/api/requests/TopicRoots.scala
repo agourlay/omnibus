@@ -12,22 +12,22 @@ import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class TopicRootsRequest(ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
+class TopicRoots(ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
   topicRepo ! TopicRepositoryProtocol.AllRoots
 
   override def receive = waitingTopicsPathRef orElse handleTimeout
 
-  var roots : Set[TopicView] = Set.empty[TopicView]
+  var roots = Set.empty[TopicView]
 
   def waitingTopicsPathRef : Receive = {
     case Roots(rootsPath) => {
-      if (!rootsPath.isEmpty){
-        rootsPath.foreach (_.topicRef.get ! TopicProtocol.View)
-        context.become(waitingTopicsView(rootsPath.size) orElse handleTimeout)
-      } else {
+      if (rootsPath.isEmpty){
         ctx.complete(roots)
         self ! PoisonPill
+      } else {
+        rootsPath.foreach (_.topicRef.get ! TopicProtocol.View)
+        context.become(waitingTopicsView(rootsPath.size) orElse handleTimeout)
       }
     }  
   }
@@ -43,7 +43,7 @@ class TopicRootsRequest(ctx : RequestContext, topicRepo: ActorRef) extends RestR
   }
 }
 
-object TopicRootsRequest {
+object TopicRoots {
    def props(ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[TopicRootsRequest], ctx, topicRepo).withDispatcher("requests-dispatcher")
+     = Props(classOf[TopicRoots], ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

@@ -7,15 +7,15 @@ import scala.language.postfixOps
 import java.security.SecureRandom
 import java.math.BigInteger
 
-import omnibus.core.Instrumented
-import omnibus.core.InstrumentedActor
+import omnibus.metrics.Instrumented
+import omnibus.metrics.InstrumentedActor
 import omnibus.domain.topic.TopicPath
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.api.streaming.HttpTopicSubscriber
 
 class SubscriberRepository extends Actor with ActorLogging with Instrumented {
 
-  var subs: Set[SubscriberView] = Set.empty[SubscriberView]  
+  var subs = Set.empty[SubscriberView]  
 
   val random = new SecureRandom()
 

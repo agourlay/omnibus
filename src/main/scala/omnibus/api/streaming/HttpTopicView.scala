@@ -14,13 +14,11 @@ import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.configuration._
 
-class HttpTopicViewStream(topicPath : TopicPath, ctx : RequestContext, topicRepo : ActorRef) extends StreamingResponse(ctx.responder) {
+class HttpTopicView(topicPath : TopicPath, ctx : RequestContext, topicRepo : ActorRef) extends StreamingResponse(ctx.responder) {
 
   implicit def executionContext = context.dispatcher
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
-
-  override def startText = s"~~> Streaming topic statistics\n"
 
   override def receive = waitingLookup orElse super.receive
 
@@ -30,9 +28,7 @@ class HttpTopicViewStream(topicPath : TopicPath, ctx : RequestContext, topicRepo
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(topicRef) => {
-      context.system.scheduler.schedule(1.second, 1.second){ 
-        topicRef ! View 
-      }
+      context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
       context.become(handleStream orElse super.receive)
     }
     case None      => {
@@ -46,11 +42,11 @@ class HttpTopicViewStream(topicPath : TopicPath, ctx : RequestContext, topicRepo
   }
 }
 
-object HttpTopicStatStreamProtocol {
+object HttpTopicStatProtocol {
   object RequestTopicStats
 }
 
-object HttpTopicViewStream {
+object HttpTopicView {
   def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef)
-    = Props(classOf[HttpTopicViewStream], topicPath, ctx, topicRepo).withDispatcher("streaming-dispatcher")
+    = Props(classOf[HttpTopicView], topicPath, ctx, topicRepo).withDispatcher("streaming-dispatcher")
 }

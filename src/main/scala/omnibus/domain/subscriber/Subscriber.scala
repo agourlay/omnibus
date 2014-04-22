@@ -5,15 +5,13 @@ import akka.actor._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-import omnibus.core.InstrumentedActor
+import omnibus.metrics.InstrumentedActor
 import omnibus.domain.topic._
 import omnibus.domain.message._
 import omnibus.domain.subscriber.SubscriberProtocol._
 
-class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long)
-    extends Actor with ActorLogging {
+class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long) extends Actor with ActorLogging {
 
-  implicit val system = context.system
   implicit def executionContext = context.dispatcher
 
   var pendingTopic = topics
@@ -31,12 +29,10 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     for (topic <- topics) { topic ! TopicProtocol.Subscribe(self) }
 
     // schedule pending retry every minute
-    system.scheduler.schedule(1 minute, 1 minute, self, SubscriberProtocol.RetryPending)
+    context.system.scheduler.schedule(1 minute, 1 minute, self, SubscriberProtocol.RetryPending)
   }
 
-  override def postStop() = {
-    channel ! PoisonPill
-  }
+  override def postStop() = channel ! PoisonPill
 
   def receive = {
     case AcknowledgeSub(topicRef)                      => ackSubscription(topicRef)

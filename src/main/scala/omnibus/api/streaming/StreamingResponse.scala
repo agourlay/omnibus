@@ -6,18 +6,16 @@ import spray.http._
 import HttpHeaders._
 import spray.can.Http
 
-import omnibus.core.Instrumented
+import omnibus.metrics.Instrumented
 import omnibus.api.endpoint.CustomMediaType
 
-class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented{
-
-  def startText = "Generic streaming...\n"
+class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented {
 
   metrics.meter("start").mark()
   val endMeter = metrics.meter("end")
 
   lazy val responseStart = HttpResponse(
- 		entity  = HttpEntity(CustomMediaType.EventStreamType, startText),
+ 		entity  = HttpEntity(CustomMediaType.EventStreamType, "Omnibus streaming..."),
   	headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
   )
 

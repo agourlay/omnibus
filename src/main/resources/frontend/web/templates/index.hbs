@@ -2,29 +2,6 @@
 
 <div class="pure-u-1-4 summary-box">
     <div class="pure-u-1 summary-box-title">	
-       Network
-    </div>
-    <ul class="summary-box-content">
-        <li><i class="fa fa-clock-o"></i> System uptime : 
-            <span id="uptime">{{view.content.system.uptime}}</span>
-        </li>
-        <li class="warning">
-           <i class="fa fa-exclamation-triangle"></i> Requests timed out : 
-           <span id="requestTimeouts">{{view.content.system.requestTimeouts}}</span>
-        </li>
-        <li>Total requests : {{view.content.system.totalRequests}}</li>
-        <li>Max opened requests : {{view.content.system.maxOpenRequests}}</li>
-        <li>Opened requests : {{view.content.system.openRequests}}</li>
-       
-        <li>Total connections : {{view.content.system.totalConnections}}</li>
-        <li>Max opened connections : {{view.content.system.maxOpenConnections}}</li>
-        <li>Opened connections : {{view.content.system.openConnections}}</li>
-       
-    </ul>
-</div>
-
-<div class="pure-u-1-4 summary-box">
-    <div class="pure-u-1 summary-box-title">	
         Root topics
     </div>
     <ul class="summary-box-content">
@@ -46,5 +23,28 @@
         {{else}}
             No subscriptions
         {{/each}}
+    </ul>
+</div>
+
+<div class="pure-u-1-4 summary-box">
+    <div class="pure-u-1 summary-box-title">    
+       Health check
+    </div>
+    <ul class="summary-box-content">
+        <li><i class="fa fa-clock-o"></i> System uptime : 
+            <span id="uptime">{{view.content.system.uptime}}</span>
+        </li>
+        <li class="warning">
+           <i class="fa fa-exclamation-triangle"></i> Requests timed out : 
+           <span id="requestTimeouts">{{view.content.system.requestTimeouts}}</span>
+        </li>
+        <li>Total requests : {{view.content.system.totalRequests}}</li>
+        <li>Max opened requests : {{view.content.system.maxOpenRequests}}</li>
+        <li>Opened requests : {{view.content.system.openRequests}}</li>
+       
+        <li>Total connections : {{view.content.system.totalConnections}}</li>
+        <li>Max opened connections : {{view.content.system.maxOpenConnections}}</li>
+        <li>Opened connections : {{view.content.system.openConnections}}</li>
+       
     </ul>
 </div>

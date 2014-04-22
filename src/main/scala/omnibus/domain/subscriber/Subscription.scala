@@ -18,12 +18,12 @@ class Subscription(val topicId : String, val cmd: ReactiveCmd) extends View with
 
   	def reactiveFilter(msg: Message) = {
 	    cmd.react match {
-	      case ReactiveMode.REPLAY     => true
-	      case ReactiveMode.SIMPLE     => msg.timestamp >= created // FIXME recovery cannot be skipped for views :(
-	      case ReactiveMode.SINCE_ID   => msg.id > cmd.since.get
-	      case ReactiveMode.SINCE_TS   => msg.timestamp > cmd.since.get
-	      case ReactiveMode.BETWEEN_ID => msg.id >= cmd.since.get && msg.id <= cmd.to.get
-	      case ReactiveMode.BETWEEN_TS => msg.timestamp >= cmd.since.get && msg.timestamp <= cmd.to.get
+		    case ReactiveMode.REPLAY     => true
+		    case ReactiveMode.SIMPLE     => msg.timestamp >= created // FIXME recovery should be skipped for simple views :(
+		    case ReactiveMode.SINCE_ID   => msg.id > cmd.since.get
+		    case ReactiveMode.SINCE_TS   => msg.timestamp > cmd.since.get
+		    case ReactiveMode.BETWEEN_ID => msg.id >= cmd.since.get && msg.id <= cmd.to.get
+		    case ReactiveMode.BETWEEN_TS => msg.timestamp >= cmd.since.get && msg.timestamp <= cmd.to.get
 	    }
   	}
 }

@@ -8,18 +8,18 @@ import spray.http._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class DeleteTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
+class Publish(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
   override def receive = waitingLookup orElse handleTimeout
 
   def waitingAck : Receive = {
-    case TopicDeletedFromRepo(topicPath) => {
+    case TopicProtocol.MessagePublished  => {
       val prettyTopic = topicPath.prettyStr()
-      ctx.complete(StatusCodes.Accepted, s"Topic $prettyTopic deleted\n")
+      ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
       self ! PoisonPill
-    } 
+    }
   }
 
   def waitingLookup : Receive = {
@@ -28,8 +28,7 @@ class DeleteTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: 
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(ref) => {
-      ref ! TopicProtocol.Delete
-      topicRepo ! TopicRepositoryProtocol.DeleteTopic(topicPath)
+      ref ! TopicProtocol.PublishMessage(message)
       context.become(waitingAck orElse handleTimeout)
     }
     case None      => {
@@ -39,7 +38,7 @@ class DeleteTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: 
   }
 }
 
-object DeleteTopicRequest {
-   def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[DeleteTopicRequest], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
+object Publish {
+   def props(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) 
+     = Props(classOf[Publish], topicPath, message, ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

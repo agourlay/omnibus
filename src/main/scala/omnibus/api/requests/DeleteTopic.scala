@@ -2,29 +2,24 @@ package omnibus.api.request
 
 import akka.actor._
 
-import spray.httpx.SprayJsonSupport._
 import spray.routing._
-import spray.json._
+import spray.http._
 
-import DefaultJsonProtocol._
-
-import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class TopicViewRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
-
-  val prettyTopic = topicPath.prettyStr()
+class DeleteTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
   override def receive = waitingLookup orElse handleTimeout
 
-  def waitingTopicView : Receive = {
-    case tv : TopicView  => {
-      ctx.complete (tv)
+  def waitingAck : Receive = {
+    case TopicDeletedFromRepo(topicPath) => {
+      val prettyTopic = topicPath.prettyStr()
+      ctx.complete(StatusCodes.Accepted, s"Topic $prettyTopic deleted\n")
       self ! PoisonPill
-    }
+    } 
   }
 
   def waitingLookup : Receive = {
@@ -33,8 +28,9 @@ class TopicViewRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: Ac
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(ref) => {
-      ref ! TopicProtocol.View
-      context.become(waitingTopicView orElse handleTimeout)
+      ref ! TopicProtocol.Delete
+      topicRepo ! TopicRepositoryProtocol.DeleteTopic(topicPath)
+      context.become(waitingAck orElse handleTimeout)
     }
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
@@ -43,7 +39,7 @@ class TopicViewRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: Ac
   }
 }
 
-object TopicViewRequest {
+object DeleteTopic {
    def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[TopicViewRequest], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
+     = Props(classOf[DeleteTopic], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

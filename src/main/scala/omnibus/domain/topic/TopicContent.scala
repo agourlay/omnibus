@@ -1,29 +1,21 @@
 package omnibus.domain.topic
 
 import akka.actor._
-import akka.pattern.CircuitBreaker
 import akka.persistence._
 
 import scala.language.postfixOps
 
-import omnibus.configuration._
+import omnibus.configuration.Settings
 import omnibus.domain.message._
 import omnibus.domain.topic.TopicContentProtocol._
 
 class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with ActorLogging {
 
-  implicit val system = context.system
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
+  val system = context.system
 
+  val timeout = akka.util.Timeout(Settings(context.system).Timeout)
   val retentionTime = Settings(system).Topic.RetentionTime
-
-  val cb = new CircuitBreaker(system.scheduler,
-      maxFailures = 5,
-      callTimeout = timeout.duration,
-      resetTimeout = timeout.duration * 10).onOpen(log.warning("CircuitBreaker is now open"))
-                                           .onClose(log.warning("CircuitBreaker is now closed"))
-                                           .onHalfOpen(log.warning("CircuitBreaker is now half-open"))
 
   override def preStart() = {
     system.scheduler.schedule(retentionTime, retentionTime, self, TopicContentProtocol.PurgeTopicContent)
@@ -35,7 +27,7 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
   }
 
   val receiveCommand: Receive = {
-    case Publish(message,replyTo)  => cb.withSyncCircuitBreaker(publishMessage(message, replyTo))
+    case Publish(message,replyTo)  => publishMessage(message, replyTo)
     case DeleteContent             => deleteTopicContent()
     case PurgeTopicContent         => purgeOldContent()
     case PurgeFrom(id)             => deleteMessages(id, true)
@@ -57,7 +49,6 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
   }
 
   def publishMessage(message: String, replyTo : ActorRef) = {
-    // persist in topic state
     val event = Message(lastSequenceNr + 1, topicPath, message)
     persist(event) { evt => 
       context.parent ! TopicContentProtocol.Saved(replyTo)

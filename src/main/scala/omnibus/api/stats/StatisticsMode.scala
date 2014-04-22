@@ -1,5 +1,4 @@
-
-package omnibus.domain.topic
+package omnibus.api.stats
 
 import spray.httpx.unmarshalling._
 
@@ -7,7 +6,6 @@ object StatisticsMode extends Enumeration {
   type StatisticsMode = Value
 
   val LIVE = Value("live") 
-  val HISTORY = Value("history") 
   val STREAMING = Value("streaming") 
 
   implicit val string2StatisticsMode = new FromStringDeserializer[StatisticsMode] {

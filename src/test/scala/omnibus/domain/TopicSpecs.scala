@@ -1,4 +1,3 @@
-//TopicSpecs.scala
 package omnibus.test.domain
 
 import scala.util.Random

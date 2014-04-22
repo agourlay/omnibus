@@ -11,7 +11,7 @@ import omnibus.api.stats.HttpStats
 object JsonSupport {
 
   implicit val formatTopicPath = new RootJsonFormat[TopicPath] {
-    def write(obj: TopicPath): JsValue = JsObject(
+    def write(obj: TopicPath) = JsObject(
       "topicPath"           -> JsString(obj.prettyStr())
     )
     // we don't need to deserialize the TopicPath
@@ -21,7 +21,7 @@ object JsonSupport {
   implicit val formatMessage = jsonFormat4(Message)
 
   implicit val formatSubView = new RootJsonFormat[SubscriberView] {
-    def write(obj: SubscriberView): JsValue = JsObject(
+    def write(obj: SubscriberView) = JsObject(
       "topic"        -> JsString(obj.topic),
       "id"           -> JsString(obj.id),
       "ip"           -> JsString(obj.ip),
@@ -34,14 +34,14 @@ object JsonSupport {
   }
 
   implicit val formatTopicView = new RootJsonFormat[TopicView] {
-    def write(obj: TopicView): JsValue = JsObject(
+    def write(obj: TopicView) = JsObject(
       "topic"              -> JsArray(obj.topic.split("/").map(JsString(_)).toList),
       "subTopicsNumber"    -> JsNumber(obj.subTopicsNumber),
       "subscribersNumber"  -> JsNumber(obj.subscribersNumber),
       "eventsNumber"       -> JsNumber(obj.numEvents),
       "throughputPerSec"   -> JsNumber(obj.throughputPerSec),
       "creationDate"       -> JsNumber(obj.creationDate),
-      "timestamp"           -> JsNumber(obj.timestamp),  
+      "timestamp"          -> JsNumber(obj.timestamp),  
       "_embedded"          -> JsObject("children" -> JsArray(
         obj.children.map( child => JsObject( child.split("/").last ->  JsObject("href" -> JsString("/topics/"+child)))).toList
         )
@@ -58,7 +58,7 @@ object JsonSupport {
   }  
 
   implicit val formatHttpServerStats = new RootJsonFormat[HttpStats] {
-    def write(obj: HttpStats): JsValue = JsObject(
+    def write(obj: HttpStats) = JsObject(
       "uptimeInMilli"      -> JsNumber(obj.uptimeInMilli),
       "totalRequests"      -> JsNumber(obj.totalRequests),
       "openRequests"       -> JsNumber(obj.openRequests),

@@ -14,7 +14,7 @@ App.SystemView = Em.View.extend({
     requestTimeouts : 0,
     uptime : 0,
 
-     listenStats : function(series, graph) {   
+    listenStats : function(series, graph) {   
      	var view = this;
         App.Dao.get("eventBus").onValue(function(stats) {
             var totalRequests = stats.totalRequests;

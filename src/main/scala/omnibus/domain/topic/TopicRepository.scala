@@ -10,23 +10,26 @@ import scala.language.postfixOps
 
 import spray.caching.{ LruCache, Cache }
 
-import omnibus.core.Instrumented
-import omnibus.core.InstrumentedActor
-import omnibus.configuration._
+import omnibus.metrics.{Instrumented, InstrumentedActor}
+import omnibus.configuration.Settings
 import omnibus.domain.topic._
-import omnibus.api.streaming.HttpTopicLeavesStream
+import omnibus.api.streaming.HttpTopicLeaves
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class TopicRepository extends EventsourcedProcessor with ActorLogging with Instrumented {
 
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout.Ask)
+  implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout)
 
-  var rootTopics: Map[String, ActorRef] = Map.empty[String, ActorRef]
+  var rootTopics = Map.empty[String, ActorRef]
 
   val rootTopicsNumber = metrics.counter("topicRootNumber")
   val topicsNumber = metrics.counter("topicNumber")
-  var lookupMeter = metrics.meter("lookupMeter")
+  val lookupMeter = metrics.meter("topicLookup")
+
+  val openCbMeter = metrics.meter("circuitBreaker.open")
+  val closeCbMeter = metrics.meter("circuitBreaker.close")
+  val halfCbMeter = metrics.meter("circuitBreaker.half")
 
   var state = TopicRepoState()
   def updateState(msg: TopicRepoStateValue): Unit = {state = state.update(msg)} 
@@ -37,9 +40,25 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
   val cb = new CircuitBreaker(context.system.scheduler,
       maxFailures = 5,
       callTimeout = timeout.duration,
-      resetTimeout = timeout.duration * 10).onOpen(log.warning("CircuitBreaker is now open"))
-                                           .onClose(log.warning("CircuitBreaker is now closed"))
-                                           .onHalfOpen(log.warning("CircuitBreaker is now half-open"))
+      resetTimeout = timeout.duration * 10).onOpen(circuitBreakerOpen())
+                                           .onClose(circuitBreakerClose())
+                                           .onHalfOpen(circuitBreakerHalf())
+  
+  def circuitBreakerOpen() {
+    openCbMeter.mark()
+    log.warning("CircuitBreaker is now open")
+  }
+
+  def circuitBreakerClose() {
+    closeCbMeter.mark()
+    log.warning("CircuitBreaker is now closed")
+  }
+
+  def circuitBreakerHalf() {
+    halfCbMeter.mark()
+    log.warning("CircuitBreaker is now half-open")
+  }
+
   val receiveRecover: Receive = {
     case t: TopicRepoStateValue                     => {
       createTopic(t.topicPath, self) //ack on self but no used
@@ -83,6 +102,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
     }
   }
 
+  //FIXME this is somewhat scary...
   def lookUpTopic(topicPath: TopicPath): Future[TopicPathRef] = {
     lookupMeter.mark() 
     val topic = topicPath.prettyStr
@@ -93,7 +113,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
              .map{ optTopicRef => TopicPathRef(topicPath, optTopicRef) }
   }
 
-  def deleteTopic(topicPath: TopicPath) : TopicDeletedFromRepo = {
+  def deleteTopic(topicPath: TopicPath) = {
     val topicName = topicPath.prettyStr
     log.debug(s"trying to delete topic $topicName")
     mostAskedTopic.remove(topicPath)
@@ -113,7 +133,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
   }
 
   def allLeaves(replyTo : ActorRef) {
-    context.actorOf(HttpTopicLeavesStream.props(replyTo, rootTopics.values.toList))
+    context.actorOf(HttpTopicLeaves.props(replyTo, rootTopics.values.toList))
   }
 
   def allRoots() = {

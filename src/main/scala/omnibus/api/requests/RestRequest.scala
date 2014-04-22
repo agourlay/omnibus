@@ -4,7 +4,7 @@ import akka.actor._
 
 import spray.routing._
 
-import omnibus.core.Instrumented
+import omnibus.metrics.Instrumented
 import omnibus.configuration._
 import omnibus.api.exceptions.RestRequestTimeoutException
 import omnibus.api.request.RestRequestProtocol._
@@ -13,7 +13,7 @@ abstract class RestRequest(ctx : RequestContext) extends Actor with ActorLogging
 
   implicit def system = context.system
   implicit def executionContext = context.dispatcher
-  implicit val timeout = akka.util.Timeout(Settings(system).Timeout.Ask)
+  implicit val timeout = akka.util.Timeout(Settings(system).Timeout)
 
   system.scheduler.scheduleOnce(timeout.duration, self, RestRequestProtocol.RequestTimeout)
 

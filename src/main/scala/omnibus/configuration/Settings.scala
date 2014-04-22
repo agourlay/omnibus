@@ -8,6 +8,8 @@ import akka.actor._
 
 class Settings(config: Config, extendedSystem: ExtendedActorSystem) extends Extension {
 
+  val Timeout = FiniteDuration(config.getDuration("omnibus.timeout", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
+
   object Http {
     val Port = config.getInt("omnibus.http.port")
   }
@@ -21,13 +23,10 @@ class Settings(config: Config, extendedSystem: ExtendedActorSystem) extends Exte
     val RetentionTime = FiniteDuration(config.getDuration("omnibus.topic.retentionTime", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
   }
 
-  object Timeout {
-  	val Ask = FiniteDuration(config.getDuration("omnibus.timeout.ask", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS)
-  }
-
   object Graphite {
     val Enable = config.getBoolean("omnibus.graphite.enable")
     val Host = config.getString("omnibus.graphite.host")
+    val Port = config.getInt("omnibus.graphite.port")
     val Prefix = config.getString("omnibus.graphite.prefix")
   }
 }

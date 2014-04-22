@@ -35,7 +35,6 @@ class TopicPurgerHelper(val topicId : String, val timeLimit : Long) extends View
 		}
 		self ! PoisonPill
   	}
-
 }
 
 object TopicPurgerHelper {  

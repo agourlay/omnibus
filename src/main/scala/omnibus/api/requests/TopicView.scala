@@ -2,23 +2,25 @@ package omnibus.api.request
 
 import akka.actor._
 
+import spray.httpx.SprayJsonSupport._
 import spray.routing._
-import spray.http._
+import spray.json._
 
+import DefaultJsonProtocol._
+
+import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
-
-  val prettyTopic = topicPath.prettyStr()
-
+class ViewTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
+  
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
   override def receive = waitingLookup orElse handleTimeout
 
-  def waitingAck : Receive = {
-    case TopicProtocol.MessagePublished  => {
-      ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
+  def waitingTopicView : Receive = {
+    case tv : TopicView  => {
+      ctx.complete (tv)
       self ! PoisonPill
     }
   }
@@ -29,8 +31,8 @@ class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(ref) => {
-      ref ! TopicProtocol.PublishMessage(message)
-      context.become(waitingAck orElse handleTimeout)
+      ref ! TopicProtocol.View
+      context.become(waitingTopicView orElse handleTimeout)
     }
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
@@ -39,7 +41,7 @@ class PublishRequest(topicPath: TopicPath, message: String, ctx : RequestContext
   }
 }
 
-object PublishRequest {
-   def props(topicPath: TopicPath, message: String, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[PublishRequest], topicPath, message, ctx, topicRepo).withDispatcher("requests-dispatcher")
+object ViewTopic {
+   def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
+     = Props(classOf[ViewTopic], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

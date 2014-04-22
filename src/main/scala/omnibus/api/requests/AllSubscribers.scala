@@ -12,7 +12,7 @@ import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 
-class AllSubscribersRequest(ctx : RequestContext, subRepo: ActorRef) extends RestRequest(ctx) {
+class AllSubscribers(ctx : RequestContext, subRepo: ActorRef) extends RestRequest(ctx) {
 
   subRepo ! SubscriberRepositoryProtocol.AllSubs
 
@@ -26,7 +26,7 @@ class AllSubscribersRequest(ctx : RequestContext, subRepo: ActorRef) extends Res
   }
 }
 
-object AllSubscribersRequest {
+object AllSubscribers {
    def props(ctx : RequestContext, subRepo: ActorRef) 
-     = Props(classOf[AllSubscribersRequest], ctx, subRepo).withDispatcher("requests-dispatcher")
+     = Props(classOf[AllSubscribers], ctx, subRepo).withDispatcher("requests-dispatcher")
 }

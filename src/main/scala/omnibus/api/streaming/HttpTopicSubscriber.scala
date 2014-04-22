@@ -8,12 +8,8 @@ import omnibus.domain.subscriber._
 
 class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) extends StreamingResponse(responder) {
 
-  val react = cmd.react
-  
-  override def startText = s"~~> Streaming updates on topics $topicsPath with react $react\n\n"
-
   override def receive = ({
-    case message: Message => responder ! MessageObj.toMessageChunk(message) 
+    case msg: Message => responder ! MessageObj.toMessageChunk(msg) 
   }: Receive) orElse super.receive
 }
 

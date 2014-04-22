@@ -8,11 +8,10 @@ import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 
-class SubscribeRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx : RequestContext
-                     , subRepo : ActorRef, topicRepo: ActorRef) extends RestRequest(ctx) {
+class Subscribe(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx : RequestContext, subRepo : ActorRef, topicRepo: ActorRef) extends RestRequest(ctx) {
   
-  var pending: Set[TopicPath] = Set.empty[TopicPath] 
-  var ack: Set[ActorRef] = Set.empty[ActorRef]
+  var pending = Set.empty[TopicPath] 
+  var ack = Set.empty[ActorRef]
 
   val topics = TopicPath.multi(topicPath.prettyStr)
   topics foreach { topic =>
@@ -41,7 +40,7 @@ class SubscribeRequest(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: Strin
   }
 }
 
-object SubscribeRequest {
+object Subscribe {
    def props(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx : RequestContext, subRepo : ActorRef, topicRepo: ActorRef) 
-     = Props(classOf[SubscribeRequest], topicPath, reactiveCmd, ip, ctx, subRepo , topicRepo).withDispatcher("requests-dispatcher")
+     = Props(classOf[Subscribe], topicPath, reactiveCmd, ip, ctx, subRepo , topicRepo).withDispatcher("requests-dispatcher")
 }

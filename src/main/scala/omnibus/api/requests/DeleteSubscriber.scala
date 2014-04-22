@@ -8,7 +8,7 @@ import spray.http._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.subscriber._
 
-class DeleteSubscriberRequest(subId : String, ctx : RequestContext, subRepo: ActorRef) extends RestRequest(ctx) {
+class DeleteSubscriber(subId : String, ctx : RequestContext, subRepo: ActorRef) extends RestRequest(ctx) {
 
   subRepo ! SubscriberRepositoryProtocol.SubById(subId)
 
@@ -18,23 +18,25 @@ class DeleteSubscriberRequest(subId : String, ctx : RequestContext, subRepo: Act
     case SubLookup(optView) => handleLookup(optView)
   }
 
-  def handleLookup(optView : Option[SubscriberView]) = optView match {
+  def handleLookup(optView : Option[SubscriberView]) = {
+    optView match {
       case None => ctx.complete(new SubscriberNotFoundException(subId))
       case Some(subView) => {
         subRepo ! SubscriberRepositoryProtocol.KillSub(subId)
         context.become(waitingAck orElse handleTimeout)
-      }  
+      }
+    }    
   }
 
   def waitingAck : Receive = {
     case SubKilled(_) => {
-     ctx.complete(StatusCodes.Accepted, s"Subscriber $subId deleted\n")
+      ctx.complete(StatusCodes.Accepted, s"Subscriber $subId deleted\n")
       self ! PoisonPill
     }
   }
 }
 
-object DeleteSubscriberRequest {
+object DeleteSubscriber {
    def props(subId : String, ctx : RequestContext, subRepo: ActorRef) 
-     = Props(classOf[DeleteSubscriberRequest],subId, ctx, subRepo).withDispatcher("requests-dispatcher")
+     = Props(classOf[DeleteSubscriber],subId, ctx, subRepo).withDispatcher("requests-dispatcher")
 }

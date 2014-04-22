@@ -23,7 +23,7 @@ class HttpStatistics extends Actor with ActorLogging {
     }
   }
 
-  def receive : Receive = {
+  def receive = {
     case stat :Stats  => lastKnownState = Some(stat)
     case LiveStats    => sender ! liveStats()
   }

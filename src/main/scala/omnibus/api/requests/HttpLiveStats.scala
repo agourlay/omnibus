@@ -8,7 +8,7 @@ import spray.routing._
 import omnibus.api.endpoint.JsonSupport._
 import omnibus.api.stats._
 
-class HttpLiveStatsRequest(ctx : RequestContext, httpStatService: ActorRef) extends RestRequest(ctx) {
+class HttpLiveStats(ctx : RequestContext, httpStatService: ActorRef) extends RestRequest(ctx) {
 
   httpStatService ! HttpStatisticsProtocol.LiveStats
 
@@ -22,7 +22,7 @@ class HttpLiveStatsRequest(ctx : RequestContext, httpStatService: ActorRef) exte
   }
 }
 
-object HttpLiveStatsRequest {
+object HttpLiveStats{
    def props(ctx : RequestContext, httpStatService: ActorRef) 
-     = Props(classOf[HttpLiveStatsRequest], ctx, httpStatService).withDispatcher("requests-dispatcher")
+     = Props(classOf[HttpLiveStats], ctx, httpStatService).withDispatcher("requests-dispatcher")
 }

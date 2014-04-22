@@ -2,8 +2,7 @@ package omnibus.domain.topic
 
 import akka.actor._
 
-import omnibus.core.Instrumented
-import omnibus.core.InstrumentedActor
+import omnibus.metrics.Instrumented
 import omnibus.domain.message._
 import omnibus.domain.message.PropagationDirection._
 import omnibus.domain.topic.TopicProtocol._
@@ -172,7 +171,5 @@ object TopicProtocol {
 }
 
 object Topic {  
-  def props(topic: String) = Props(classOf[InstrumentedTopic], topic).withDispatcher("topics-dispatcher")
+  def props(topic: String) = Props(classOf[Topic], topic).withDispatcher("topics-dispatcher")
 }
-
-class InstrumentedTopic(topic: String) extends Topic(topic) with InstrumentedActor

@@ -64,7 +64,7 @@ module.exports = function(grunt) {
         files: {
           "web/dist/css/omnibus.min.css" : [
             "web/css/layout.css"
-            ]
+          ]
         } 
       }   
     },
@@ -97,6 +97,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task(s).
-  grunt.registerTask('default', ['emberTemplates','concat','uglify','cssmin','copy' ]);
+  grunt.registerTask('default', ['emberTemplates','concat','uglify','cssmin','copy']);
 
 };

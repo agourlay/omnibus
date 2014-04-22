@@ -14,9 +14,7 @@ import omnibus.domain.topic._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class CreateTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
-
-  val prettyTopic = topicPath.prettyStr()
+class CreateTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
@@ -24,6 +22,7 @@ class CreateTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: 
 
   def waitingAck : Receive = {
     case TopicCreated(topicRef) => {
+      val prettyTopic = topicPath.prettyStr()
       ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $prettyTopic created \n")
       self ! PoisonPill
     } 
@@ -45,7 +44,7 @@ class CreateTopicRequest(topicPath: TopicPath, ctx : RequestContext, topicRepo: 
   }
 }
 
-object CreateTopicRequest {
+object CreateTopic {
    def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[CreateTopicRequest], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
+     = Props(classOf[CreateTopic], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
 }
