@@ -15,6 +15,7 @@ object OmnibusRegistry {
 trait Instrumented extends InstrumentedBuilder with CheckedBuilder {
   val metricRegistry = OmnibusRegistry.metricRegistry
   val registry = OmnibusRegistry.healthCheckRegistry
+  override lazy val metricBaseName = MetricName(getClass)
 }
 
 trait InstrumentedActor extends ReceiveTimerActor with ReceiveExceptionMeterActor with Instrumented
