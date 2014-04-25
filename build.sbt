@@ -14,7 +14,7 @@ name := "omnibus"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.0"
 
 scalacOptions := Seq(
   "-unchecked",
@@ -46,19 +46,19 @@ resolvers ++= Seq(
 
 libraryDependencies ++= {
   val akkaV         = "2.3.2"
-  val sprayV        = "1.3.1"
+  val sprayV        = "1.3.1-20140423"
   val sprayJsonV    = "1.2.6"
   val logbackV      = "1.1.2"
   val specs2V       = "2.3.11"
   val scalaCheckV   = "1.11.3"
   val scalaTestV    = "2.1.3"
-  val akkaCassanV   = "0.2"
-  val scalaMetricsV = "3.1.0_a2.3"
+  val akkaCassanV   = "0.2.1"
+  val scalaMetricsV = "3.1.1.1_a2.3"
   val metricsV      = "3.0.2"
   Seq(
-     "io.spray"             %  "spray-can"                     % sprayV               withSources() 
-    ,"io.spray"             %  "spray-routing"                 % sprayV               withSources()
-    ,"io.spray"             %  "spray-caching"                 % sprayV               withSources()
+     "io.spray"             %% "spray-can"                     % sprayV               withSources() 
+    ,"io.spray"             %% "spray-routing"                 % sprayV               withSources()
+    ,"io.spray"             %% "spray-caching"                 % sprayV               withSources()
     ,"io.spray"             %% "spray-json"                    % sprayJsonV           withSources()
     ,"com.typesafe.akka"    %% "akka-actor"                    % akkaV                withSources()
     ,"com.typesafe.akka"    %% "akka-slf4j"                    % akkaV                withSources()
@@ -67,7 +67,7 @@ libraryDependencies ++= {
     ,"nl.grons"             %% "metrics-scala"                 % scalaMetricsV        withSources()
     ,"com.codahale.metrics" %  "metrics-graphite"              % metricsV             withSources()
     ,"ch.qos.logback"       %  "logback-classic"               % logbackV             withSources()
-    ,"io.spray"             %  "spray-testkit"                 % sprayV      % "test" withSources()
+    ,"io.spray"             %% "spray-testkit"                 % sprayV      % "test" withSources()
     ,"com.typesafe.akka"    %% "akka-testkit"                  % akkaV       % "test" withSources()
     ,"org.specs2"           %% "specs2-core"                   % specs2V     % "test" withSources()
     ,"org.scalacheck"       %% "scalacheck"                    % scalaCheckV % "test" withSources()
