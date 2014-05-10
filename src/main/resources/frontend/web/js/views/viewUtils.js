@@ -1,5 +1,5 @@
 function calculateFitWidth ()  {
-    return $(window).width() - $("#chart").offset().left - 70;
+    return $(window).width() - $("#chart").offset().left - 80;
 }
 
 function calculateFitHeight () {
@@ -7,12 +7,12 @@ function calculateFitHeight () {
 }
 
 function graphExtensions(graph) {
-   graph.render();
+    graph.render();
 
     var preview = new Rickshaw.Graph.RangeSlider.Preview( {
         graph: graph,
         element: document.getElementById('preview'),
-    });    
+    });
 
     var previewXAxis = new Rickshaw.Graph.Axis.Time({
         graph: preview.previews[0],
