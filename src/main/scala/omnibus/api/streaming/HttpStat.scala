@@ -16,12 +16,16 @@ class HttpStat(responder: ActorRef, statsRepo : ActorRef) extends StreamingRespo
 
   implicit def executionContext = context.dispatcher
 
-  context.system.scheduler.schedule(1.second, 1.second, self, HttpStatProtocol.RequestHttpStats)
+  val statScheduler = context.system.scheduler.schedule(1.second, 1.second, self, HttpStatProtocol.RequestHttpStats)
 
   override def receive = ({
     case RequestHttpStats => statsRepo ! HttpStatisticsProtocol.LiveStats
     case stat : HttpStats => responder ! MessageChunk("data: "+ formatHttpServerStats.write(stat) +"\n\n")
   }: Receive) orElse super.receive
+
+  override def postStop() = {
+    statScheduler.cancel()
+  } 
 }
 
 object HttpStatProtocol {

@@ -18,4 +18,6 @@ trait Instrumented extends InstrumentedBuilder with CheckedBuilder {
   override lazy val metricBaseName = MetricName(getClass)
 }
 
-trait InstrumentedActor extends ReceiveTimerActor with ReceiveExceptionMeterActor with Instrumented
+trait InstrumentedActor extends ReceiveTimerActor with ReceiveExceptionMeterActor with Instrumented {
+   override lazy val metricBaseName = MetricName("instrumentedActor")
+}

@@ -18,6 +18,8 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   var topicListened = Set.empty[ActorRef]
   val topicsPath = topics.map(TopicPath(_))
 
+  var pendingScheduler : Cancellable = _
+
   override def preStart() = {
     val prettyTopics = TopicPath.prettySubscription(topics)
     val react = reactiveCmd.react
@@ -29,10 +31,13 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     for (topic <- topics) { topic ! TopicProtocol.Subscribe(self) }
 
     // schedule pending retry every minute
-    context.system.scheduler.schedule(1 minute, 1 minute, self, SubscriberProtocol.RetryPending)
+    pendingScheduler = context.system.scheduler.schedule(1 minute, 1 minute, self, SubscriberProtocol.RetryPending)
   }
 
-  override def postStop() = channel ! PoisonPill
+  override def postStop() = {
+    channel ! PoisonPill
+    pendingScheduler.cancel()
+  }  
 
   def receive = {
     case AcknowledgeSub(topicRef)                      => ackSubscription(topicRef)

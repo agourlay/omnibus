@@ -20,13 +20,17 @@ class TopicPurgerHelper(val topicId : String, val timeLimit : Long) extends View
 
 	val replyDelay = 30 seconds
 
-	system.scheduler.schedule(replyDelay, replyDelay, self, Reply)
+	val replyScheduler = system.scheduler.schedule(replyDelay, replyDelay, self, Reply)
 
 	def receive = {
     	case Persistent(payload, _) => self ! payload
   		case msg : Message          => if (msg.timestamp < timeLimit) lastMatchingId = Some(msg.id)
   		case Reply                  => replyToParent()
   	}
+
+  	override def postStop() = {
+    	replyScheduler.cancel()
+    }  
 
   	def replyToParent() = {
 		lastMatchingId match {

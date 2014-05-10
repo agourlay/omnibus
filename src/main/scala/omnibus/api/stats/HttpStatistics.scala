@@ -16,12 +16,17 @@ class HttpStatistics extends Actor with ActorLogging {
   implicit def executionContext = context.dispatcher
 
   var lastKnownState : Option[Stats] = None
+  var statScheduler : Cancellable = _
  
   override def preStart() = {
-    system.scheduler.schedule(1.second, 1.second){
+    statScheduler = system.scheduler.schedule(1.second, 1.second){
       context.actorSelection("/user/IO-HTTP/listener-0") ! Http.GetStats
     }
   }
+
+  override def postStop() = {
+    statScheduler.cancel()
+  } 
 
   def receive = {
     case stat :Stats  => lastKnownState = Some(stat)

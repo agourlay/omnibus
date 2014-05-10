@@ -16,9 +16,10 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
 
   val timeout = akka.util.Timeout(Settings(context.system).Timeout)
   val retentionTime = Settings(system).Topic.RetentionTime
+  var purgeScheduler : Cancellable = _
 
   override def preStart() = {
-    system.scheduler.schedule(retentionTime, retentionTime, self, TopicContentProtocol.PurgeTopicContent)
+    purgeScheduler = system.scheduler.schedule(retentionTime, retentionTime, self, TopicContentProtocol.PurgeTopicContent)
     super.preStart()
   }
 
@@ -33,6 +34,10 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
     case PurgeFrom(id)             => deleteMessages(id, true)
     case FwProcessorId(replyTo)    => replyTo ! TopicContentProtocol.ProcessorId(processorId)
   }
+
+  override def postStop() = {
+    purgeScheduler.cancel()
+  }  
 
   def purgeOldContent() {
     val timeLimit = System.currentTimeMillis - retentionTime.toMillis
