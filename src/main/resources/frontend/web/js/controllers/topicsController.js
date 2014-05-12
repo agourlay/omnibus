@@ -2,7 +2,6 @@ App.TopicsController = Ember.ArrayController.extend({
   content: [],	
   sortProperties: ['name'],
   sortAscending: true,
-
   newTopicName : null,
 
   createTopic : function(newTopic) {

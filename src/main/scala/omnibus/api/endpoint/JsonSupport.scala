@@ -6,7 +6,6 @@ import DefaultJsonProtocol._
 import omnibus.domain.message._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
-import omnibus.api.stats.HttpStats
 
 object JsonSupport {
 
@@ -56,21 +55,4 @@ object JsonSupport {
     // we don't need to deserialize the view
     def read(json: JsValue): TopicView = ???
   }  
-
-  implicit val formatHttpServerStats = new RootJsonFormat[HttpStats] {
-    def write(obj: HttpStats) = JsObject(
-      "uptimeInMilli"      -> JsNumber(obj.uptimeInMilli),
-      "totalRequests"      -> JsNumber(obj.totalRequests),
-      "openRequests"       -> JsNumber(obj.openRequests),
-      "maxOpenRequests"    -> JsNumber(obj.maxOpenRequests),
-      "totalConnections"   -> JsNumber(obj.totalConnections),
-      "openConnections"    -> JsNumber(obj.openConnections),
-      "maxOpenConnections" -> JsNumber(obj.maxOpenConnections),
-      "requestTimeouts"    -> JsNumber(obj.requestTimeouts),
-      "timestamp"          -> JsNumber(obj.timestamp)
-    )
-
-    // we don't need to deserialize
-    def read(json: JsValue): HttpStats = ???
-  }
 }

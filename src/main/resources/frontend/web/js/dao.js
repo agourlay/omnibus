@@ -53,12 +53,10 @@ App.Dao = Em.Object.create({
 
     summary :function() {
         var dao = this;
-        var systemPromise = dao.system();
         var topicsPromise = dao.topics();
         var subscribersPromise = dao.subscribers();
-        return $.when(systemPromise, topicsPromise, subscribersPromise).then(function (system, topics, subs) {
+        return $.when(topicsPromise, subscribersPromise).then(function (topics, subs) {
             var model = App.Summary.create();
-            model.set('system', system);
             model.set('rootTopics', topics);
             model.set('subscriptions', subs);
             return model;
@@ -68,12 +66,14 @@ App.Dao = Em.Object.create({
     system : function()  {
         var dao = this;
         return $.ajax({
-            url: "stats/system",
+            url: "stats/metrics",
             type: 'GET',
             error: function(xhr, ajaxOptions, thrownError) {
                 console.log("Error during current system stat retrieval");                                        
             }
-        }).then(function (data) {return dao.createSystemModel(data)});
+        }).then(function (json) {
+            return dao.prettyPrint(json);
+        });
     },
 
     subscribers : function() {
@@ -101,20 +101,6 @@ App.Dao = Em.Object.create({
         model.set('ip', sub.ip);
         model.set('mode', sub.mode);
         model.set('creationDate', sub.creationDate);
-        return model;
-    },
-
-    createSystemModel : function(system) {
-        var model = App.System.create();
-        model.set('totalRequests', system.totalRequests);
-        model.set('openRequests', system.openRequests);
-        model.set('maxOpenRequests', system.maxOpenRequests);
-        model.set('totalConnections', system.totalConnections);
-        model.set('openConnections', system.openConnections);
-        model.set('maxOpenConnections', system.maxOpenConnections);
-        model.set('requestTimeouts',system.requestTimeouts);
-        model.set('uptime',moment.duration(system.uptimeInMilli).humanize());
-        model.set('timestamp', system.timestamp);
         return model;
     },
 
@@ -183,5 +169,58 @@ App.Dao = Em.Object.create({
             method: "DELETE",
             contentType: "application/json"
         });
+    },
+
+    // just for tests
+    prettyPrint: function(obj){
+    var toString = Object.prototype.toString,
+        newLine = "<br>", space = "&nbsp;", tab = 8,
+        buffer = "",        
+        //Second argument is indent
+        indent = arguments[1] || 0,
+        //For better performance, Cache indentStr for a given indent.
+        indentStr = (function(n){
+            var str = "";
+            while(n--){
+                str += space;
+            }
+            return str;
+        })(indent); 
+ 
+    if(!obj || ( typeof obj != "object" && typeof obj!= "function" )){
+        //any non-object ( Boolean, String, Number), null, undefined, NaN
+        buffer += obj;
+    }else if(toString.call(obj) == "[object Date]"){
+        buffer += "[Date] " + obj;
+    }else if(toString.call(obj) == "[object RegExp"){
+        buffer += "[RegExp] " + obj;
+    }else if(toString.call(obj) == "[object Function]"){
+        buffer += "[Function] " + obj;
+    }else if(toString.call(obj) == "[object Array]"){
+        var idx = 0, len = obj.length;
+        buffer += "["+newLine;
+        while(idx < len){
+            buffer += [
+                indentStr, idx, ": ", 
+                this.prettyPrint(obj[idx], indent + tab)
+            ].join("");
+            buffer += "<br>";
+            idx++;
+        }
+        buffer += indentStr + "]";
+    }else { //Handle Object
+        var prop;
+        buffer += "{"+newLine;
+        for(prop in obj){
+            buffer += [
+                indentStr, prop, ": ", 
+                this.prettyPrint(obj[prop], indent + tab)
+            ].join("");
+            buffer += newLine;
+        }
+        buffer += indentStr + "}";
     }
+ 
+    return buffer;
+}
 });

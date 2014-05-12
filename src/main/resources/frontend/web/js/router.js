@@ -14,9 +14,9 @@ App.IndexRoute = Ember.Route.extend({
 });
 
 App.SystemRoute = Ember.Route.extend({    
-  afterModel: function(data) {
-    App.Dao.setupStream("stats/system?mode=streaming");
-  }  
+  model: function() {
+    return App.Dao.system();
+  }
 });
 
 App.TopicRoute = Ember.Route.extend({

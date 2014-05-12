@@ -1,28 +1,4 @@
-<h4>System HTTP stats</h4>
-
- <table id="center-table" class="pure-table">
-    <tr>
-        <td>Total requests : {{view.totalRequests}}</td>
-        <td>Max opened requests : {{view.maxOpenRequests}}</td>
-        <td>Opened requests : {{view.openRequests}}</td>
-        <td class="warning">
-           <i class="fa fa-exclamation-triangle"></i> Requests timed out : 
-           <span id="requestTimeouts">{{view.requestTimeouts}}</span>
-        </td>
-        <td rowspan="2"><span id="legend"></span></td>
-    </tr>
-    <tr>
-        <td>Total connections : {{view.totalConnections}}</td>
-        <td>Max opened connections : {{view.maxOpenConnections}}</td>
-        <td>Opened connections : {{view.openConnections}}</td>
-        <td><i class="fa fa-clock-o"></i> Uptime : 
-            <span id="uptime">{{view.uptime}}</span>
-        </td>
-    </tr>
-</table>
-
-<div id="chart_container">
-    <div id="chart"></div>
-    <div id="timeline"></div>
-    <div id="preview"></div>
+<h4>System metrics</h4>
+<div id="wrap" style="text-align:left">
+	{{{view.content}}}
 </div>

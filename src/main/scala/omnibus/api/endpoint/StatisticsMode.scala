@@ -1,4 +1,4 @@
-package omnibus.api.stats
+package omnibus.api.endpoint
 
 import spray.httpx.unmarshalling._
 

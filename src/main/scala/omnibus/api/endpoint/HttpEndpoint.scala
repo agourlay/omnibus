@@ -19,13 +19,12 @@ trait HttpEndpoint extends HttpService with RestFailureHandling {
   def routes(coreActors : CoreActors ) (implicit context: ActorContext) = {
     val subRepo = coreActors.subRepo
     val topicRepo = coreActors.topicRepo
-    val httpStatService = coreActors.httpStatService
     val metricsRepo = coreActors.metricsReporter
 
-    val topicRoute = new TopicRoute(subRepo, topicRepo).route         // '/topics'
-    val statsRoute = new StatsRoute(httpStatService, topicRepo, metricsRepo).route // '/stats'
-    val adminRoute = new AdminRoute(topicRepo, subRepo).route         // '/admin/topics'
-    val adminUIRoute = new AdminUIRoute().route                       // '/ '
+    val topicRoute = new TopicRoute(subRepo, topicRepo).route     // '/topics'
+    val statsRoute = new StatsRoute(topicRepo, metricsRepo).route // '/stats'
+    val adminRoute = new AdminRoute(topicRepo, subRepo).route     // '/admin/topics'
+    val adminUIRoute = new AdminUIRoute().route                   // '/ '
     topicRoute ~ statsRoute ~ adminRoute ~ adminUIRoute 
   }	
 }

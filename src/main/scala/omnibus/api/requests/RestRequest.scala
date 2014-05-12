@@ -21,7 +21,7 @@ abstract class RestRequest(ctx : RequestContext) extends Actor with ActorLogging
 
   val timeoutMeter = metrics.meter("timeout")
   
-  def receive = handleTimeout
+  override def receive : Receive = handleTimeout
 
   def handleTimeout : Receive = {
     case RequestTimeout => {

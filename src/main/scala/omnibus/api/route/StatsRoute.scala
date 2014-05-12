@@ -5,12 +5,12 @@ import akka.actor._
 import spray.routing._
 
 import omnibus.domain.topic.TopicPath
-import omnibus.api.stats.StatisticsMode
-import omnibus.api.stats.StatisticsMode._
-import omnibus.api.request.{HttpLiveStats, ViewTopic, AllMetrics}
-import omnibus.api.streaming.{HttpStat, HttpTopicView}
+import omnibus.api.endpoint.StatisticsMode
+import omnibus.api.endpoint.StatisticsMode._
+import omnibus.api.request.{ViewTopic, AllMetrics}
+import omnibus.api.streaming.HttpTopicView
 
-class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef, metricsRepo : ActorRef)(implicit context: ActorContext) extends Directives {
+class StatsRoute(topicRepo : ActorRef, metricsRepo : ActorRef)(implicit context: ActorContext) extends Directives {
 
   val route =
     pathPrefix("stats") {
@@ -18,14 +18,6 @@ class StatsRoute(httpStatService : ActorRef, topicRepo : ActorRef, metricsRepo :
         path("metrics") {
           get { ctx =>
             context.actorOf(AllMetrics.props(ctx, metricsRepo))
-          }
-        } ~
-        path("system") {
-          get { ctx =>
-            mode match {
-              case StatisticsMode.LIVE      => context.actorOf(HttpLiveStats.props(ctx, httpStatService))
-              case StatisticsMode.STREAMING => context.actorOf(HttpStat.props(ctx.responder, httpStatService))
-            }
           }
         } ~
         path("topics" / Rest) { topic =>
