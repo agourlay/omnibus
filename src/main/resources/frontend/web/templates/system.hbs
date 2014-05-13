@@ -1,4 +1,26 @@
 <h4>System metrics</h4>
-<div id="wrap" style="text-align:left">
-	{{{view.content}}}
-</div>
+
+<table id="center-table" class="pure-table pure-table-horizontal pure-table-striped">
+	<thead>
+	    <tr>
+	    	<th>Meter name</th>
+	        <th>Count</th>
+	        <th>FifteenMinuteRate</th>
+	        <th>FiveMinuteRate</th>
+	        <th>MeanRate</th>
+	        <th>OneMinuteRate</th>
+	    </tr>
+	</thead>
+	<tbody>
+		{{#each view.content.meters}}
+			<tr>
+				<td>{{name}}</td>
+				<td>{{count}}</td>
+				<td>{{fifteenMinuteRate}}</td>
+				<td>{{fiveMinuteRate}}</td>
+				<td>{{meanRate}}</td>
+				<td>{{oneMinuteRate}}</td>
+			</tr>
+		{{/each}}
+	</tbody>
+</table>

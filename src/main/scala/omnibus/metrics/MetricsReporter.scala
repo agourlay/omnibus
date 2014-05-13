@@ -43,12 +43,11 @@ class MetricsReporter extends Actor with ActorLogging with Instrumented {
   } 
 
 	def receive = {
-    case All          => sender ! metricsByName(MetricsReporter.allMetrics)
-    case Requests     => sender ! metricsByName(MetricsReporter.requestsMetrics)
-    case Streaming    => sender ! metricsByName(MetricsReporter.streamingMetrics)
-    case HttpEndpoint => sender ! metricsByName(MetricsReporter.httpEndpointMetrics)
-    case TopicRepo    => sender ! metricsByName(MetricsReporter.topicRepoMetrics)
-    case SubRepo      => sender ! metricsByName(MetricsReporter.subRepoMetrics)
+    case All       => sender ! metricsByName(MetricsReporter.allMetrics)
+    case Requests  => sender ! metricsByName(MetricsReporter.requestsMetrics)
+    case Streaming => sender ! metricsByName(MetricsReporter.streamingMetrics)
+    case TopicRepo => sender ! metricsByName(MetricsReporter.topicMetrics)
+    case SubRepo   => sender ! metricsByName(MetricsReporter.subRepoMetrics)
 	}
 
   def metricsByName(name : String) = {
@@ -62,8 +61,7 @@ object MetricsReporter {
   val allMetrics = "omnibus"
   val requestsMetrics = "omnibus.api.request"
   val streamingMetrics = "omnibus.api.streaming"
-  val httpEndpointMetrics = "omnibus.api.endpoint"
-  val topicRepoMetrics = "omnibus.domain.topic"
+  val topicMetrics = "omnibus.domain.topic"
   val subRepoMetrics = "omnibus.domain.subscriber"
 }
 
@@ -71,7 +69,6 @@ object MetricsReporterProtocol {
   case object All
   case object Requests
   case object Streaming
-  case object HttpEndpoint
   case object TopicRepo
   case object SubRepo
   case class MetricsReport(metrics : Map[String, JsValue])

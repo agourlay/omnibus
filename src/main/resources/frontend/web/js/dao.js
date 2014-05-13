@@ -72,8 +72,48 @@ App.Dao = Em.Object.create({
                 console.log("Error during current system stat retrieval");                                        
             }
         }).then(function (json) {
-            return dao.prettyPrint(json);
+            var system = App.System.create();
+            var meters = dao.buildMetric(json, 5);
+            var timers = dao.buildMetric(json, 9);
+            var counters = dao.buildMetric(json, 1);
+            system.set('meters', meters);
+            system.set('timers', timers);
+            system.set('counters', counters);
+            return system;
         });
+    },
+
+    buildMetric : function (json, keyNb) {
+        var filtered = this.filterByFieldNumber(json, keyNb);
+        var metrics = [];
+        jQuery.each(filtered, function(i, val) {
+            var newMetric = new Object();;
+            if( keyNb == 5) {
+                newMetric = App.Meter.create(val.value);
+            }
+            if( keyNb == 1) {
+                newMetric = App.Counter.create(val.value);
+            }
+            if( keyNb == 9) {
+                newMetric = App.Timer.create(val.value);
+            }    
+            newMetric.name = val.name;
+            metrics.push(newMetric);
+        });
+        return metrics;
+    },
+
+    filterByFieldNumber : function (jsonObj, n) {
+        var filtered = [];
+        jQuery.each(jsonObj, function(i, val) {
+            if(Object.keys(val).length == n) {
+                var container = new Object();
+                container.name = i;
+                container.value = val;
+                filtered.push(container);
+            }
+        });
+        return filtered;
     },
 
     subscribers : function() {
@@ -169,58 +209,5 @@ App.Dao = Em.Object.create({
             method: "DELETE",
             contentType: "application/json"
         });
-    },
-
-    // just for tests
-    prettyPrint: function(obj){
-    var toString = Object.prototype.toString,
-        newLine = "<br>", space = "&nbsp;", tab = 8,
-        buffer = "",        
-        //Second argument is indent
-        indent = arguments[1] || 0,
-        //For better performance, Cache indentStr for a given indent.
-        indentStr = (function(n){
-            var str = "";
-            while(n--){
-                str += space;
-            }
-            return str;
-        })(indent); 
- 
-    if(!obj || ( typeof obj != "object" && typeof obj!= "function" )){
-        //any non-object ( Boolean, String, Number), null, undefined, NaN
-        buffer += obj;
-    }else if(toString.call(obj) == "[object Date]"){
-        buffer += "[Date] " + obj;
-    }else if(toString.call(obj) == "[object RegExp"){
-        buffer += "[RegExp] " + obj;
-    }else if(toString.call(obj) == "[object Function]"){
-        buffer += "[Function] " + obj;
-    }else if(toString.call(obj) == "[object Array]"){
-        var idx = 0, len = obj.length;
-        buffer += "["+newLine;
-        while(idx < len){
-            buffer += [
-                indentStr, idx, ": ", 
-                this.prettyPrint(obj[idx], indent + tab)
-            ].join("");
-            buffer += "<br>";
-            idx++;
-        }
-        buffer += indentStr + "]";
-    }else { //Handle Object
-        var prop;
-        buffer += "{"+newLine;
-        for(prop in obj){
-            buffer += [
-                indentStr, prop, ": ", 
-                this.prettyPrint(obj[prop], indent + tab)
-            ].join("");
-            buffer += newLine;
-        }
-        buffer += indentStr + "}";
     }
- 
-    return buffer;
-}
 });
