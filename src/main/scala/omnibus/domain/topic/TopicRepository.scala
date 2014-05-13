@@ -10,7 +10,7 @@ import scala.language.postfixOps
 
 import spray.caching.{ LruCache, Cache }
 
-import omnibus.metrics.{Instrumented, InstrumentedActor}
+import omnibus.metrics.Instrumented
 import omnibus.configuration.Settings
 import omnibus.domain.topic._
 import omnibus.api.streaming.HttpTopicLeaves
@@ -153,7 +153,5 @@ object TopicRepositoryProtocol {
 }
 
 object TopicRepository {
-  def props = Props(classOf[InstrumentedTopicRepo]).withDispatcher("topics-dispatcher")
+  def props = Props(classOf[TopicRepository]).withDispatcher("topics-dispatcher")
 }
-
-class InstrumentedTopicRepo extends TopicRepository with InstrumentedActor

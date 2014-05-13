@@ -5,7 +5,6 @@ import akka.actor._
 import spray.routing._
 
 import omnibus.core.CoreActors
-import omnibus.metrics.InstrumentedActor
 import omnibus.api.route._
 import omnibus.api.exceptions.RestFailureHandling
 
@@ -30,7 +29,5 @@ trait HttpEndpoint extends HttpService with RestFailureHandling {
 }
 
 object HttpEndpointActor {
-	def props(coreActors : CoreActors) = Props(classOf[InstrumentedEndPoint], coreActors)
+	def props(coreActors : CoreActors) = Props(classOf[HttpEndpointActor], coreActors)
 }
-
-class InstrumentedEndPoint(coreActors : CoreActors) extends HttpEndpointActor(coreActors) with InstrumentedActor

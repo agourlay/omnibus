@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "omnibus frontend",
   "devDependencies": {
-    "grunt": "~0.4.2",
+    "grunt": "~0.4.5",
     "grunt-ember-templates": "~0.4.21",
     "grunt-contrib-uglify": "~0.4.0",
     "grunt-contrib-cssmin": "~0.9.0",
