@@ -88,19 +88,13 @@ App.Dao = Em.Object.create({
         var metrics = [];
         jQuery.each(filtered, function(i, val) {
             var newMetric = new Object();;
-            if( keyNb == 5) {
-                newMetric = App.Meter.create(val.value);
-            }
-            if( keyNb == 1) {
-                newMetric = App.Counter.create(val.value);
-            }
-            if( keyNb == 9) {
-                newMetric = App.Timer.create(val.value);
-            }    
+            if( keyNb == 5) { newMetric = App.Meter.create(val.value); }
+            if( keyNb == 1) { newMetric = App.Counter.create(val.value); }
+            if( keyNb == 9) { newMetric = App.Timer.create(val.value); }    
             newMetric.name = val.name;
             metrics.push(newMetric);
         });
-        return metrics;
+        return metrics.sort(function(a, b){return (a.name < b.name)?-1:1});
     },
 
     filterByFieldNumber : function (jsonObj, n) {
