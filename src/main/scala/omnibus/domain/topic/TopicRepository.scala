@@ -25,11 +25,9 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
 
   val rootTopicsNumber = metrics.counter("root-topics")
   val topicsNumber = metrics.counter("topics")
-  val lookupMeter = metrics.meter("lookup")
-
-  val openCbMeter = metrics.meter("circuitBreaker.open")
-  val closeCbMeter = metrics.meter("circuitBreakerclose")
-  val halfCbMeter = metrics.meter("circuitBreaker.half")
+  val openCbMeter = metrics.meter("circuit-breaker.open")
+  val closeCbMeter = metrics.meter("circuit-breaker.close")
+  val halfCbMeter = metrics.meter("circuit-breaker.half")
 
   var state = TopicRepoState()
   def updateState(msg: TopicRepoStateValue): Unit = {state = state.update(msg)} 
@@ -103,8 +101,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
   }
 
   //FIXME this is somewhat scary...
-  def lookUpTopic(topicPath: TopicPath): Future[TopicPathRef] = {
-    lookupMeter.mark() 
+  def lookUpTopic(topicPath: TopicPath): Future[TopicPathRef] = timing("lookup"){
     val topic = topicPath.prettyStr
     log.debug(s"Lookup in cache for topic $topic")
     val futureOpt: Future[ActorRef] = mostAskedTopic(topicPath) { context.actorSelection(topic).resolveOne }

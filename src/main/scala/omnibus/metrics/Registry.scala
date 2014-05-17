@@ -12,7 +12,7 @@ object OmnibusRegistry {
   val healthCheckRegistry = new HealthCheckRegistry()
 }
 
-trait Instrumented extends InstrumentedBuilder with CheckedBuilder {
+trait Instrumented extends InstrumentedBuilder with CheckedBuilder with FutureMetrics {
   val metricRegistry = OmnibusRegistry.metricRegistry
   val registry = OmnibusRegistry.healthCheckRegistry
   override lazy val metricBaseName = MetricName(getClass)
