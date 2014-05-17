@@ -91,7 +91,7 @@ App.Dao = Em.Object.create({
             if( keyNb == 5) { newMetric = App.Meter.create(val.value); }
             if( keyNb == 1) { newMetric = App.Counter.create(val.value); }
             if( keyNb == 9) { newMetric = App.Timer.create(val.value); }    
-            newMetric.name = val.name;
+            newMetric.name = val.name.replace("omnibus.", "");
             metrics.push(newMetric);
         });
         return metrics.sort(function(a, b){return (a.name < b.name)?-1:1});

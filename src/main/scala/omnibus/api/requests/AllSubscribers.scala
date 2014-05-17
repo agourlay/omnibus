@@ -21,7 +21,7 @@ class AllSubscribers(ctx : RequestContext, subRepo: ActorRef) extends RestReques
   def waitingLookup : Receive = {
     case Subscribers(subs) => {
       ctx.complete(subs)
-      self ! PoisonPill
+      requestOver()
     }  
   }
 }

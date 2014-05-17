@@ -18,7 +18,7 @@ class Publish(topicPath: TopicPath, message: String, ctx : RequestContext, topic
     case TopicProtocol.MessagePublished  => {
       val prettyTopic = topicPath.prettyStr()
       ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
-      self ! PoisonPill
+      requestOver()
     }
   }
 
@@ -33,7 +33,7 @@ class Publish(topicPath: TopicPath, message: String, ctx : RequestContext, topic
     }
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      self ! PoisonPill
+      requestOver()
     }  
   }
 }

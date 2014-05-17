@@ -23,12 +23,12 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
 
   var rootTopics = Map.empty[String, ActorRef]
 
-  val rootTopicsNumber = metrics.counter("topicRootNumber")
-  val topicsNumber = metrics.counter("topicNumber")
-  val lookupMeter = metrics.meter("topicLookup")
+  val rootTopicsNumber = metrics.counter("root-topics")
+  val topicsNumber = metrics.counter("topics")
+  val lookupMeter = metrics.meter("lookup")
 
   val openCbMeter = metrics.meter("circuitBreaker.open")
-  val closeCbMeter = metrics.meter("circuitBreaker.close")
+  val closeCbMeter = metrics.meter("circuitBreakerclose")
   val halfCbMeter = metrics.meter("circuitBreaker.half")
 
   var state = TopicRepoState()

@@ -31,7 +31,7 @@ class DeleteSubscriber(subId : String, ctx : RequestContext, subRepo: ActorRef) 
   def waitingAck : Receive = {
     case SubKilled(_) => {
       ctx.complete(StatusCodes.Accepted, s"Subscriber $subId deleted\n")
-      self ! PoisonPill
+      requestOver()
     }
   }
 }

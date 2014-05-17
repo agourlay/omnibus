@@ -49,10 +49,10 @@ object MetricsJson {
     implicit val formatTimer = new RootJsonFormat[Timer] {
 	    def write(obj: Timer) = JsObject(
 	      "count"             -> JsNumber(obj.count),
-	      "max"               -> JsNumber(obj.max),
-	      "min"               -> JsNumber(obj.min),
-	      "mean"              -> JsNumber(obj.mean),
-	      "stdDev"            -> JsNumber(obj.stdDev),
+	      "max"               -> JsNumber(obj.max / 1000000),
+	      "min"               -> JsNumber(obj.min / 1000000),
+	      "mean"              -> JsNumber(obj.mean / 1000000),
+	      "stdDev"            -> JsNumber(obj.stdDev / 1000000),
 	      "fifteenMinuteRate" -> JsNumber(obj.fifteenMinuteRate),
 	      "fiveMinuteRate"    -> JsNumber(obj.fiveMinuteRate),
 	      "meanRate"          -> JsNumber(obj.meanRate),

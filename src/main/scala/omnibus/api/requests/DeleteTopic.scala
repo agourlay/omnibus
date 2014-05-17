@@ -18,7 +18,7 @@ class DeleteTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRe
     case TopicDeletedFromRepo(topicPath) => {
       val prettyTopic = topicPath.prettyStr()
       ctx.complete(StatusCodes.Accepted, s"Topic $prettyTopic deleted\n")
-      self ! PoisonPill
+      requestOver()
     } 
   }
 
@@ -34,7 +34,7 @@ class DeleteTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRe
     }
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      self ! PoisonPill
+      requestOver()
     }  
   }
 }

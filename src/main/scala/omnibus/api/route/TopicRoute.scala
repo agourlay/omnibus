@@ -17,7 +17,7 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
   val route =
     path("topics") {
       get { ctx =>
-        context.actorOf(TopicRoots.props(ctx, topicRepo))
+        context.actorOf(RootTopics.props(ctx, topicRepo))
       }
     } ~
     path("topics" / Rest) { topic =>

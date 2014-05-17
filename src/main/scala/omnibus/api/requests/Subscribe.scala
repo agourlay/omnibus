@@ -28,13 +28,13 @@ class Subscribe(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx 
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      self ! PoisonPill
+      requestOver()
     }  
     case Some(ref) => {
       ack += ref
       if (ack.size == pending.size) {
         subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, ctx.responder, reactiveCmd, ip)
-        self ! PoisonPill
+        requestOver()
       }
     }  
   }

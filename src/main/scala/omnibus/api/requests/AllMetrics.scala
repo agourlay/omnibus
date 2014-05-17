@@ -22,7 +22,7 @@ class AllMetrics(ctx : RequestContext, metricsRepo: ActorRef) extends RestReques
   def waitingMetrics : Receive = {
     case MetricsReport(metrics) => {
       ctx.complete(metrics)
-      self ! PoisonPill
+      requestOver()
     }  
   }
 }

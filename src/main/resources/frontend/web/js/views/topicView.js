@@ -74,23 +74,11 @@ App.TopicView = Em.View.extend({
     },
 
     calculateFitHeight : function() {
-        return $(window).height() - $("#chart").offset().top - 150;
+        return $(window).height() - $("#chart").offset().top - 100;
     },
 
     graphExtensions : function (graph) {
         graph.render();
-
-        var preview = new Rickshaw.Graph.RangeSlider.Preview( {
-            graph: graph,
-            element: document.getElementById('preview'),
-        });
-
-        var previewXAxis = new Rickshaw.Graph.Axis.Time({
-            graph: preview.previews[0],
-            timeFixture: new Rickshaw.Fixtures.Time.Local(),
-            ticksTreatment: ticksTreatment
-        });
-        previewXAxis.render();
 
         var hoverDetail = new Rickshaw.Graph.HoverDetail( {
             graph: graph
@@ -128,9 +116,5 @@ App.TopicView = Em.View.extend({
         } );
 
         yAxis.render();
-        
-        //https://github.com/shutterstock/rickshaw/issues/364
-        graph.configure({renderer:'line'});
-        graph.render;
     }        
 });

@@ -20,8 +20,8 @@ class ViewTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef)
 
   def waitingTopicView : Receive = {
     case tv : TopicView  => {
-      ctx.complete (tv)
-      self ! PoisonPill
+      ctx.complete(tv)
+      requestOver()
     }
   }
 
@@ -36,7 +36,7 @@ class ViewTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef)
     }
     case None      => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      self ! PoisonPill
+      requestOver()
     }  
   }
 }

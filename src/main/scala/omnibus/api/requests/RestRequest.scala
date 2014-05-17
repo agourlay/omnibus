@@ -16,19 +16,22 @@ abstract class RestRequest(ctx : RequestContext) extends Actor with ActorLogging
   implicit val timeout = akka.util.Timeout(Settings(system).Timeout)
 
   val timeoutScheduler = system.scheduler.scheduleOnce(timeout.duration, self, RestRequestProtocol.RequestTimeout)
-
-  metrics.meter("start").mark()
-
-  val timeoutMeter = metrics.meter("timeout")
+  
+  val timerCtx = metrics.timer("timer").timerContext()
   
   override def receive : Receive = handleTimeout
 
   def handleTimeout : Receive = {
     case RequestTimeout => {
       ctx.complete(new RestRequestTimeoutException())
-      timeoutMeter.mark()
-      self ! PoisonPill
+      metrics.meter("timeout").mark()
+      requestOver()
     }  
+  }
+
+  def requestOver() = {
+    timerCtx.stop()
+    self ! PoisonPill
   }
 
   override def postStop() = {

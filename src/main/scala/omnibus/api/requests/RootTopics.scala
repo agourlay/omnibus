@@ -12,7 +12,7 @@ import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class TopicRoots(ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
+class RootTopics(ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
   topicRepo ! TopicRepositoryProtocol.AllRoots
 
@@ -24,7 +24,7 @@ class TopicRoots(ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(
     case Roots(rootsPath) => {
       if (rootsPath.isEmpty){
         ctx.complete(roots)
-        self ! PoisonPill
+        requestOver()
       } else {
         rootsPath.foreach (_.topicRef.get ! TopicProtocol.View)
         context.become(waitingTopicsView(rootsPath.size) orElse handleTimeout)
@@ -37,13 +37,13 @@ class TopicRoots(ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(
       roots += rootView
       if (roots.size == expected){
         ctx.complete(roots)
-        self ! PoisonPill
+        requestOver()
       }
     }  
   }
 }
 
-object TopicRoots {
+object RootTopics {
    def props(ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[TopicRoots], ctx, topicRepo).withDispatcher("requests-dispatcher")
+     = Props(classOf[RootTopics], ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

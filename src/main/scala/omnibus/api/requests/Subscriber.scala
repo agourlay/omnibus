@@ -18,7 +18,7 @@ class Subscriber(subId : String, ctx : RequestContext, subRepo: ActorRef) extend
   def waitingLookup : Receive = {
     case sub : SubscriberView => {
       ctx.complete(sub)
-      self ! PoisonPill
+      requestOver()
     }  
   }
 }

@@ -3,10 +3,43 @@
 <table id="center-table" class="pure-table pure-table-horizontal pure-table-striped">
 	<thead>
 	    <tr>
+	    	<th>timer name</th>
+	        <th>count</th>
+	        <th>max</th>
+	        <th>min</th>
+	        <th>mean</th>
+	        <th>stdDev</th>
+	        <th>15 min rate</th>
+	        <th>5 min rate</th>
+	        <th>mean rate</th>
+	        <th>1 min rate</th>
+	    </tr>
+	</thead>
+	<tbody>
+		{{#each view.content.timers}}
+			<tr>
+				<td class="left">{{name}}</td>
+				<td>{{count}}</td>
+				<td>{{toFixed max 2}} ms</td>
+				<td>{{toFixed min 2}} ms</td>
+				<td>{{toFixed mean 2}} ms</td>
+				<td>{{toFixed stdDev 2}} ms</td>
+				<td>{{toFixed fifteenMinuteRate 2}} / sec</td>
+				<td>{{toFixed fiveMinuteRate 2}} / sec</td>
+				<td>{{toFixed meanRate 2}} / sec</td>
+				<td>{{toFixed oneMinuteRate 2}} / sec</td>
+			</tr>
+		{{/each}}
+	</tbody>
+</table>
+
+<table id="center-table" class="pure-table pure-table-horizontal pure-table-striped">
+	<thead>
+	    <tr>
 	    	<th>meter name</th>
 	        <th>count</th>
 	        <th>15 min rate</th>
-	        <th>15 min rate</th>
+	        <th>5 min rate</th>
 	        <th>mean rate</th>
 	        <th>1 min rate</th>
 	    </tr>
@@ -14,12 +47,29 @@
 	<tbody>
 		{{#each view.content.meters}}
 			<tr>
-				<td>{{name}}</td>
+				<td class="left">{{name}}</td>
 				<td>{{count}}</td>
-				<td>{{toFixed fifteenMinuteRate 2}}</td>
-				<td>{{toFixed fiveMinuteRate 2}}</td>
-				<td>{{toFixed meanRate 2}}</td>
-				<td>{{toFixed oneMinuteRate 2}}</td>
+				<td>{{toFixed fifteenMinuteRate 2}} / sec</td>
+				<td>{{toFixed fiveMinuteRate 2}} / sec</td>
+				<td>{{toFixed meanRate 2}} / sec</td>
+				<td>{{toFixed oneMinuteRate 2}} / sec</td>
+			</tr>
+		{{/each}}
+	</tbody>
+</table>
+
+<table id="center-table" class="pure-table pure-table-horizontal pure-table-striped">
+	<thead>
+	    <tr>
+	    	<th>counter name</th>
+	        <th>count</th>
+	    </tr>
+	</thead>
+	<tbody>
+		{{#each view.content.counters}}
+			<tr>
+				<td class="left">{{name}}</td>
+				<td>{{count}}</td>
 			</tr>
 		{{/each}}
 	</tbody>

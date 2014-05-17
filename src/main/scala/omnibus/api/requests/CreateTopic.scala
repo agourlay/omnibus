@@ -24,7 +24,7 @@ class CreateTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRe
     case TopicCreated(topicRef) => {
       val prettyTopic = topicPath.prettyStr()
       ctx.complete (StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $prettyTopic created \n")
-      self ! PoisonPill
+      requestOver()
     } 
   }
 
@@ -35,7 +35,7 @@ class CreateTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRe
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(ref) => {
       ctx.complete(new TopicAlreadyExistsException(topicPath.prettyStr()))
-      self ! PoisonPill
+      requestOver()
     }
     case None      => {
       topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)

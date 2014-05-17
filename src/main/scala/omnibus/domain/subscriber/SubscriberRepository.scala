@@ -20,8 +20,8 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
 
   def nextSubId = new BigInteger(130, random).toString(32)
 
-  val subNumber = metrics.counter("subNumber")
-  var lookupMeter = metrics.meter("lookupMeter")
+  val subNumber = metrics.counter("subscribers")
+  var lookupMeter = metrics.meter("lookup")
 
   def receive = {
     case CreateSub(topics, responder, reactiveCmd, http) => createSub(topics, responder, reactiveCmd, http)

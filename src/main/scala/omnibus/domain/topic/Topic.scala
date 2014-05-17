@@ -20,9 +20,9 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   var subscribers = Set.empty[ActorRef]
   var subTopics = Map.empty[String, ActorRef]
 
-  var messageReceived = metrics.meter(s"$prettyPath.messageReceived")
-  val subscribersNumber = metrics.counter(s"$prettyPath.subscribersNumber")
-  val subTopicsNumber = metrics.counter(s"$prettyPath.subTopicsNumber")
+  var messageReceived = metrics.meter(s"$prettyPath.message-received")
+  val subscribersNumber = metrics.counter(s"$prettyPath.subscribers")
+  val subTopicsNumber = metrics.counter(s"$prettyPath.sub-topics")
 
   val contentHolder = context.actorOf(TopicContent.props(topicPath), "internal-topic-content")
 

@@ -11,8 +11,7 @@ import omnibus.api.endpoint.CustomMediaType
 
 class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented {
 
-  metrics.meter("start").mark()
-  val endMeter = metrics.meter("end")
+  val timerCtx = metrics.timer("timer").timerContext()
 
   lazy val responseStart = HttpResponse(
  		entity  = HttpEntity(CustomMediaType.EventStreamType, "Omnibus streaming..."),
@@ -26,13 +25,13 @@ class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging wit
 
   override def postStop() = {
     responder ! ChunkedMessageEnd
-    endMeter.mark()
+    timerCtx.stop()
   }
   
   def receive = {   
     case ev: Http.ConnectionClosed => {
       log.debug("Stopping response streaming due to {}", ev)
-      context.stop(self)
+      self ! PoisonPill
     }
     case ReceiveTimeout => responder ! MessageChunk(":\n") // Comment to keep connection alive  
   }
