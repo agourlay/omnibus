@@ -74,7 +74,7 @@ App.Dao = Em.Object.create({
         }).then(function (json) {
             var system = App.System.create();
             var meters = dao.buildMetric(json, 5);
-            var timers = dao.buildMetric(json, 9);
+            var timers = dao.buildMetric(json, 15);
             var counters = dao.buildMetric(json, 1);
             system.set('meters', meters);
             system.set('timers', timers);
@@ -87,11 +87,12 @@ App.Dao = Em.Object.create({
         var filtered = this.filterByFieldNumber(json, keyNb);
         var metrics = [];
         jQuery.each(filtered, function(i, val) {
-            var newMetric = new Object();;
+            var newMetric = new Object();
+            if( keyNb == 15) { newMetric = App.Timer.create(val.value); }  
             if( keyNb == 5) { newMetric = App.Meter.create(val.value); }
-            if( keyNb == 1) { newMetric = App.Counter.create(val.value); }
-            if( keyNb == 9) { newMetric = App.Timer.create(val.value); }    
-            newMetric.name = val.name.replace("omnibus.", "");
+            if( keyNb == 1) { newMetric = App.Counter.create(val.value); }  
+            newMetric.name = val.name.replace("omnibus.domain.", "")
+                                     .replace("omnibus.api.", "");
             metrics.push(newMetric);
         });
         return metrics.sort(function(a, b){return (a.name < b.name)?-1:1});

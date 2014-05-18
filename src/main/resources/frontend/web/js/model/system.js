@@ -19,7 +19,13 @@ App.Timer = Em.Object.extend({
 	fifteenMinuteRate : null,
 	fiveMinuteRate : null,
 	meanRate : null,
-	oneMinuteRate : null
+	oneMinuteRate : null,
+	"50p" : null,
+	"75p" : null,
+	"95p" : null,
+	"98p" : null,
+	"99p" : null,
+	"999p" : null
 });
 
 App.Meter = Em.Object.extend({

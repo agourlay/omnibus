@@ -1,18 +1,24 @@
-<h4>System metrics</h4>
+<h4>Timers metrics</h4>
 
 <table id="center-table" class="pure-table pure-table-horizontal pure-table-striped">
 	<thead>
 	    <tr>
-	    	<th>timer name</th>
+	    	<th>name</th>
 	        <th>count</th>
 	        <th>max</th>
 	        <th>min</th>
 	        <th>mean</th>
 	        <th>stdDev</th>
-	        <th>15 min rate</th>
-	        <th>5 min rate</th>
-	        <th>mean rate</th>
-	        <th>1 min rate</th>
+	        <th>50p</th>
+	        <th>75p</th>
+	        <th>95p</th>
+	        <th>98p</th>
+	        <th>99p</th>
+	        <th>99.9p</th>
+	        <th>15m</th>
+	        <th>5m</th>
+	        <th>1m</th>
+	        <th>mean</th>
 	    </tr>
 	</thead>
 	<tbody>
@@ -24,24 +30,32 @@
 				<td>{{toFixed min 2}} ms</td>
 				<td>{{toFixed mean 2}} ms</td>
 				<td>{{toFixed stdDev 2}} ms</td>
+				<td>{{toFixed 50p 2}} ms</td>
+				<td>{{toFixed 75p 2}} ms</td>
+				<td>{{toFixed 95p 2}} ms</td>
+				<td>{{toFixed 98p 2}} ms</td>
+				<td>{{toFixed 99p 2}} ms</td>
+				<td>{{toFixed 999p 2}} ms</td>
 				<td>{{toFixed fifteenMinuteRate 2}} / sec</td>
 				<td>{{toFixed fiveMinuteRate 2}} / sec</td>
+			    <td>{{toFixed oneMinuteRate 2}} / sec</td>
 				<td>{{toFixed meanRate 2}} / sec</td>
-				<td>{{toFixed oneMinuteRate 2}} / sec</td>
 			</tr>
 		{{/each}}
 	</tbody>
 </table>
 
+<h4>Meters metrics</h4>
+
 <table id="center-table" class="pure-table pure-table-horizontal pure-table-striped">
 	<thead>
 	    <tr>
-	    	<th>meter name</th>
+	    	<th>name</th>
 	        <th>count</th>
-	        <th>15 min rate</th>
-	        <th>5 min rate</th>
-	        <th>mean rate</th>
-	        <th>1 min rate</th>
+	        <th>15m</th>
+	        <th>5m</th>
+	        <th>mean</th>
+	        <th>1m</th>
 	    </tr>
 	</thead>
 	<tbody>
@@ -58,10 +72,12 @@
 	</tbody>
 </table>
 
+<h4>Counters metrics</h4>
+
 <table id="center-table" class="pure-table pure-table-horizontal pure-table-striped">
 	<thead>
 	    <tr>
-	    	<th>counter name</th>
+	    	<th>name</th>
 	        <th>count</th>
 	    </tr>
 	</thead>
