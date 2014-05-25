@@ -13,13 +13,17 @@ App.IndexRoute = Ember.Route.extend({
   }
 });
 
-App.SystemRoute = Ember.Route.extend({    
+App.SystemRoute = Ember.Route.extend({ 
   model: function() {
     return App.Dao.system();
   }
 });
 
 App.TopicRoute = Ember.Route.extend({
+  deactivate: function(transition) {
+    App.Dao.closeOpenStream();  
+  },
+
   model: function(params) {
     return params.topic_id;
   },

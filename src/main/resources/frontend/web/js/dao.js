@@ -23,13 +23,17 @@ App.Dao = Em.Object.create({
       return promise;
     },
 
-    setupStream : function (streamUrl) {
+    closeOpenStream : function() {
         var me = this;
         // close previous stream if any
         if (me.get("sourceSSE") != null) {
             me.get("sourceSSE").close();
         }
+    },
 
+    setupStream : function (streamUrl) {
+        var me = this;
+        me.closeOpenStream();
         me.set('eventBus', new Bacon.Bus());
 
         var source = new EventSource(streamUrl);
