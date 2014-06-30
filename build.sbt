@@ -46,18 +46,18 @@ resolvers ++= Seq(
 
 libraryDependencies ++= {
   val akkaV         = "2.3.3"
-  val sprayV        = "1.3.1-20140423"
+  val sprayV        = "1.3.1"
   val sprayJsonV    = "1.2.6"
   val logbackV      = "1.1.2"
   val specs2V       = "2.3.12"
   val scalaCheckV   = "1.11.4"
-  val scalaTestV    = "2.1.7"
-  val akkaCassanV   = "0.3"
+  val scalaTestV    = "2.2.0"
+  val akkaCassanV   = "0.3.1"
   val scalaMetricsV = "3.2.0_a2.3"
   val metricsV      = "3.0.2"
   Seq(
      "io.spray"             %% "spray-can"                     % sprayV               withSources() 
-    ,"io.spray"             %% "spray-routing"                 % sprayV               withSources()
+    ,"io.spray"             %% "spray-routing-shapeless2"      % sprayV               withSources()
     ,"io.spray"             %% "spray-caching"                 % sprayV               withSources()
     ,"io.spray"             %% "spray-json"                    % sprayJsonV           withSources()
     ,"com.typesafe.akka"    %% "akka-actor"                    % akkaV                withSources()
