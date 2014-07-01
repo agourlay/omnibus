@@ -45,14 +45,14 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val akkaV         = "2.3.3"
+  val akkaV         = "2.3.4"
   val sprayV        = "1.3.1"
   val sprayJsonV    = "1.2.6"
   val logbackV      = "1.1.2"
   val specs2V       = "2.3.12"
   val scalaCheckV   = "1.11.4"
   val scalaTestV    = "2.2.0"
-  val akkaCassanV   = "0.3.1"
+  val akkaCassanV   = "0.3.2"
   val scalaMetricsV = "3.2.0_a2.3"
   val metricsV      = "3.0.2"
   Seq(
