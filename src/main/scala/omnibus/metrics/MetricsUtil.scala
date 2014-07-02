@@ -12,6 +12,10 @@ object MetricsUtil {
 			val timer = new Timer(java.asInstanceOf[com.codahale.metrics.Timer])
 			return formatTimer.write(timer)
 		}
+		if (java.isInstanceOf[com.codahale.metrics.Gauge[Int]]) {
+			val gauge = new Gauge(java.asInstanceOf[com.codahale.metrics.Gauge[Int]])
+			return formatGauge.write(gauge)
+		}
 		if (java.isInstanceOf[com.codahale.metrics.Meter]) {
 			val meter = new Meter(java.asInstanceOf[com.codahale.metrics.Meter])
 			return formatMeter.write(meter)
@@ -30,9 +34,17 @@ object MetricsJson {
 	    def write(obj: Counter) = JsObject(
 	      "count" -> JsNumber(obj.count)
 	    )
-	    // we don't need to deserialize the TopicPath
+	    // we don't need to deserialize
 	    def read(json: JsValue): Counter = ???
-    } 
+    }
+
+    implicit val formatGauge = new RootJsonFormat[Gauge[Int]] {
+	    def write(obj: Gauge[Int]) = JsObject(
+	      "count" -> JsNumber(obj.value)
+	    )
+	    // we don't need to deserialize
+	    def read(json: JsValue): Gauge[Int] = ???
+    }  
 
 	implicit val formatMeter = new RootJsonFormat[Meter] {
 	    def write(obj: Meter) = JsObject(
@@ -42,7 +54,7 @@ object MetricsJson {
 	        "meanRate"          -> JsNumber(obj.meanRate),
 	        "oneMinuteRate"     -> JsNumber(obj.oneMinuteRate)
 	    )
-	    // we don't need to deserialize the TopicPath
+	    // we don't need to deserialize
 	    def read(json: JsValue): Meter = ???
     } 
 
@@ -64,7 +76,7 @@ object MetricsJson {
 	        "99p"               -> JsNumber(obj.snapshot.get99thPercentile()/ 1000000),
 	        "999p"              -> JsNumber(obj.snapshot.get999thPercentile()/ 1000000)
 	    )
-	    // we don't need to deserialize the TopicPath
+	    // we don't need to deserialize
 	    def read(json: JsValue): Timer = ???
     } 
 }

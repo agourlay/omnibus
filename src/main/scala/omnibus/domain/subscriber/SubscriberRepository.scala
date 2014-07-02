@@ -20,7 +20,7 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
 
   def nextSubId = new BigInteger(130, random).toString(32)
 
-  val subNumber = metrics.counter("subscribers")
+  val subNumber = metrics.gauge("subscribers")(subs.size)
   var lookupMeter = metrics.meter("lookup")
 
   def receive = {
@@ -44,7 +44,6 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
     val newSub = context.actorOf(Subscriber.props(httpSub, topics, cmd))
     val newView = SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr(_)).mkString("+"), ip, cmd.react.toString)
     subs += newView
-    subNumber += 1
     context.watch(newSub)
   }
 
@@ -54,7 +53,6 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
       case Some (sub) =>  {
         sub.ref ! PoisonPill
         subs -= (sub)
-        subNumber -= 1
         replyTo ! SubKilled(id)
       }  
     }

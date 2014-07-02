@@ -12,13 +12,12 @@ class Publish(topicPath: TopicPath, message: String, ctx : RequestContext, topic
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
-  override def receive = waitingLookup orElse handleTimeout
+  override def receive = super.receive orElse waitingLookup
 
   def waitingAck : Receive = {
     case TopicProtocol.MessagePublished  => {
       val prettyTopic = topicPath.prettyStr()
-      ctx.complete(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
-      requestOver()
+      requestOver(StatusCodes.Accepted, s"Message published to topic $prettyTopic\n")
     }
   }
 
@@ -29,12 +28,9 @@ class Publish(topicPath: TopicPath, message: String, ctx : RequestContext, topic
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(ref) => {
       ref ! TopicProtocol.PublishMessage(message)
-      context.become(waitingAck orElse handleTimeout)
+      context.become(super.receive orElse waitingAck)
     }
-    case None      => {
-      ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      requestOver()
-    }  
+    case None      => requestOver(new TopicNotFoundException(topicPath.prettyStr))
   }
 }
 

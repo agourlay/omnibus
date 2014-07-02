@@ -16,13 +16,10 @@ class ViewTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef)
   
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
-  override def receive = waitingLookup orElse handleTimeout
+  override def receive = super.receive orElse waitingLookup
 
   def waitingTopicView : Receive = {
-    case tv : TopicView  => {
-      ctx.complete(tv)
-      requestOver()
-    }
+    case tv : TopicView  => requestOver(tv)
   }
 
   def waitingLookup : Receive = {
@@ -32,12 +29,9 @@ class ViewTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef)
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
     case Some(ref) => {
       ref ! TopicProtocol.View
-      context.become(waitingTopicView orElse handleTimeout)
+      context.become(super.receive orElse waitingTopicView)
     }
-    case None      => {
-      ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      requestOver()
-    }  
+    case None      => requestOver(new TopicNotFoundException(topicPath.prettyStr))
   }
 }
 

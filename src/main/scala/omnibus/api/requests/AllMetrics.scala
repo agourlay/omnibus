@@ -17,13 +17,10 @@ class AllMetrics(ctx : RequestContext, metricsRepo: ActorRef) extends RestReques
 
   metricsRepo ! MetricsReporterProtocol.All
 
-  override def receive = waitingMetrics orElse handleTimeout
+  override def receive = super.receive orElse waitingMetrics
 
   def waitingMetrics : Receive = {
-    case MetricsReport(metrics) => {
-      ctx.complete(metrics)
-      requestOver()
-    }  
+    case MetricsReport(metrics) => requestOver(metrics)
   }
 }
 

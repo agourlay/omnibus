@@ -13,13 +13,10 @@ class Subscriber(subId : String, ctx : RequestContext, subRepo: ActorRef) extend
 
   subRepo ! SubscriberRepositoryProtocol.SubById(subId)
 
-  override def receive = waitingLookup orElse handleTimeout
+  override def receive = super.receive orElse waitingLookup
 
   def waitingLookup : Receive = {
-    case sub : SubscriberView => {
-      ctx.complete(sub)
-      requestOver()
-    }  
+    case sub : SubscriberView => requestOver(sub)
   }
 }
 

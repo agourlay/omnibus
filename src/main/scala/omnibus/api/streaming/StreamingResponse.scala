@@ -14,7 +14,7 @@ class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging wit
   val timerCtx = metrics.timer("timer").timerContext()
 
   lazy val responseStart = HttpResponse(
- 		entity  = HttpEntity(CustomMediaType.EventStreamType, "Omnibus streaming..."),
+ 		entity  = HttpEntity(CustomMediaType.EventStreamType, "Omnibus streaming...\n"),
   	headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
   )
 

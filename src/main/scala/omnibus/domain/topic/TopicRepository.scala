@@ -25,8 +25,9 @@ class TopicRepository extends PersistentActor with ActorLogging with Instrumente
 
   var rootTopics = Map.empty[String, ActorRef]
 
-  val rootTopicsNumber = metrics.counter("root-topics")
+  val rootTopicsNumber = metrics.gauge("root-topics")(rootTopics.size)
   val topicsNumber = metrics.counter("topics")
+  
   val openCbMeter = metrics.meter("circuit-breaker.open")
   val closeCbMeter = metrics.meter("circuit-breaker.close")
   val halfCbMeter = metrics.meter("circuit-breaker.half")
@@ -95,7 +96,6 @@ class TopicRepository extends PersistentActor with ActorLogging with Instrumente
       rootTopics(topicRoot) ! TopicProtocol.CreateSubTopic(topicsList.tail, replyTo)
     } else {
       log.debug(s"Creating new root topic $topicRoot")
-      rootTopicsNumber += 1
       val newRootTopic = context.actorOf(Topic.props(topicRoot), topicRoot)
       rootTopics += (topicRoot -> newRootTopic)
       newRootTopic ! TopicProtocol.CreateSubTopic(topicsList.tail, replyTo)
@@ -118,7 +118,6 @@ class TopicRepository extends PersistentActor with ActorLogging with Instrumente
     mostAskedTopic.remove(topicPath)
     if (rootTopics.contains(topicName)) {
       rootTopics -= topicName
-      rootTopicsNumber -= 1
     }
     state.events.find(_.topicPath == topicPath) match {
       case None        => log.info(s"Cannot find topic in repo state")

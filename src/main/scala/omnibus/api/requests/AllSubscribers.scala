@@ -16,13 +16,10 @@ class AllSubscribers(ctx : RequestContext, subRepo: ActorRef) extends RestReques
 
   subRepo ! SubscriberRepositoryProtocol.AllSubs
 
-  override def receive = waitingLookup orElse handleTimeout
+  override def receive = super.receive orElse waitingLookup
 
   def waitingLookup : Receive = {
-    case Subscribers(subs) => {
-      ctx.complete(subs)
-      requestOver()
-    }  
+    case Subscribers(subs) => requestOver(subs)
   }
 }
 

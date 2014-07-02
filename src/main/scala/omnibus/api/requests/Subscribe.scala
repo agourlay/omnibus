@@ -19,22 +19,19 @@ class Subscribe(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx 
     topicRepo ! TopicRepositoryProtocol.LookupTopic(topic)
   }
   
-  override def receive = receiveTopicPathRef orElse handleTimeout
+  override def receive = super.receive orElse receiveTopicPathRef
 
   def receiveTopicPathRef : Receive = {
     case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
-    case None      => {
-      ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      requestOver()
-    }  
+    case None      => requestOver(new TopicNotFoundException(topicPath.prettyStr))
     case Some(ref) => {
       ack += ref
       if (ack.size == pending.size) {
         subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, ctx.responder, reactiveCmd, ip)
-        requestOver()
+        closeThings()
       }
     }  
   }

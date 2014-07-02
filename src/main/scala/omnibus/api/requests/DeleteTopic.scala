@@ -12,13 +12,12 @@ class DeleteTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRe
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
-  override def receive = waitingLookup orElse handleTimeout
+  override def receive = super.receive orElse waitingLookup
 
   def waitingAck : Receive = {
     case TopicDeletedFromRepo(topicPath) => {
       val prettyTopic = topicPath.prettyStr()
-      ctx.complete(StatusCodes.Accepted, s"Topic $prettyTopic deleted\n")
-      requestOver()
+      requestOver(StatusCodes.Accepted, s"Topic $prettyTopic deleted\n")
     } 
   }
 
@@ -30,12 +29,9 @@ class DeleteTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRe
     case Some(ref) => {
       ref ! TopicProtocol.Delete
       topicRepo ! TopicRepositoryProtocol.DeleteTopic(topicPath)
-      context.become(waitingAck orElse handleTimeout)
+      context.become(super.receive orElse waitingAck)
     }
-    case None      => {
-      ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-      requestOver()
-    }  
+    case None      => requestOver(new TopicNotFoundException(topicPath.prettyStr))
   }
 }
 

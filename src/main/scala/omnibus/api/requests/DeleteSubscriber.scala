@@ -12,7 +12,7 @@ class DeleteSubscriber(subId : String, ctx : RequestContext, subRepo: ActorRef) 
 
   subRepo ! SubscriberRepositoryProtocol.SubById(subId)
 
-  override def receive = waitingLookup orElse handleTimeout
+  override def receive = super.receive orElse waitingLookup
 
   def waitingLookup : Receive = {
     case SubLookup(optView) => handleLookup(optView)
@@ -23,16 +23,13 @@ class DeleteSubscriber(subId : String, ctx : RequestContext, subRepo: ActorRef) 
       case None => ctx.complete(new SubscriberNotFoundException(subId))
       case Some(subView) => {
         subRepo ! SubscriberRepositoryProtocol.KillSub(subId)
-        context.become(waitingAck orElse handleTimeout)
+        context.become(super.receive orElse waitingAck)
       }
     }    
   }
 
   def waitingAck : Receive = {
-    case SubKilled(_) => {
-      ctx.complete(StatusCodes.Accepted, s"Subscriber $subId deleted\n")
-      requestOver()
-    }
+    case SubKilled(_) => requestOver(StatusCodes.Accepted, s"Subscriber $subId deleted\n")
   }
 }
 

@@ -9,31 +9,44 @@ import HttpHeaders._
 
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
+import omnibus.metrics.Instrumented
 
-trait RestFailureHandling {
+trait RestFailureHandling extends Instrumented {
   this: HttpService =>
 
-implicit def omnibusExceptionHandler(implicit log: LoggingContext) = ExceptionHandler {
+  val topicNotFound = metrics.meter("topicNotFoundException")
+  val topicAlreadyExists = metrics.meter("topicAlreadyExistsException")
+  val subscriberNotFound = metrics.meter("subscriberNotFoundException")
+  val requestTimeout = metrics.meter("requestTimeoutException")
+  val illegalArgument = metrics.meter("illegalArgumentException")
+  val circuitBreaker = metrics.meter("circuitBreakerException")
+  val otherException = metrics.meter("otherException")  
+
+  implicit def omnibusExceptionHandler(implicit log: LoggingContext) = ExceptionHandler {
   	case e : TopicNotFoundException  =>
     	requestUri { uri =>
+        topicNotFound.mark()
         log.warning("Request to {} could not be handled normally -> topic does not exist", uri)
     	  complete(StatusCodes.NotFound, s"Topic ${e.topicName} not found : please retry later or check topic name correctness\n")
     	}
 
     case e : TopicAlreadyExistsException =>
-      requestUri { uri => 
+      requestUri { uri =>
+        topicAlreadyExists.mark() 
         log.warning("Request to {} could not be handled normally -> topic {} already exists", uri, e.topicName)
         complete(StatusCodes.Accepted, Location(uri):: Nil, s"Topic ${e.topicName} already exist \n")
       }    
 
     case e : SubscriberNotFoundException  =>
       requestUri { uri =>
+        subscriberNotFound.mark()
         log.warning("Request to {} could not be handled normally -> subscriber does not exist", uri)
         complete(StatusCodes.NotFound, s"Subscriber ${e.subId} not found : please retry later or check subscriber id correctness\n")
       }
 
-    case e : RestRequestTimeoutException  =>
+    case e : RequestTimeoutException  =>
       requestUri { uri =>
+        requestTimeout.mark()
         log.error("Request to {} could not be handled normally -> RestRequestTimeout", uri)
         log.error("RestRequestTimeout : {} ", e)
         complete(StatusCodes.InternalServerError, "Something is taking longer than expected, retry later \n")
@@ -41,6 +54,7 @@ implicit def omnibusExceptionHandler(implicit log: LoggingContext) = ExceptionHa
 
     case e : CircuitBreakerOpenException  =>
       requestUri { uri =>
+        circuitBreaker.mark()
         log.error("Request to {} could not be handled normally -> CircuitBreakerOpenException", uri)
         log.error("CircuitBreakerOpenException : {} ", e)
         complete(StatusCodes.InternalServerError, "Omnibus is currently under high load and cannot process your request, retry later \n")
@@ -48,6 +62,7 @@ implicit def omnibusExceptionHandler(implicit log: LoggingContext) = ExceptionHa
 
     case e : IllegalArgumentException  => 
       requestUri { uri =>
+        illegalArgument.mark()
         log.error("Request to {} could not be handled normally -> IllegalArgumentException", uri)
         log.error("IllegalArgumentException : {} ", e)
         complete(StatusCodes.InternalServerError, e.getMessage)
@@ -55,10 +70,10 @@ implicit def omnibusExceptionHandler(implicit log: LoggingContext) = ExceptionHa
 
   	case e : Exception  =>
     	requestUri { uri =>
+        otherException.mark()
         log.error("Request to {} could not be handled normally -> unknown exception", uri)
         log.error("unknown exception : {} ", e)
     	  complete(StatusCodes.InternalServerError, "An unexpected error occured \n")
     	}
   }      
-
 }  
