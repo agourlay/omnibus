@@ -9,10 +9,12 @@ import omnibus.configuration.Settings
 import omnibus.domain.message._
 import omnibus.domain.topic.TopicContentProtocol._
 
-class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with ActorLogging {
+class TopicContent(val topicPath: TopicPath) extends PersistentActor with ActorLogging {
 
   implicit def executionContext = context.dispatcher
   val system = context.system
+
+  override def persistenceId = self.path.toStringWithoutAddress
 
   val timeout = akka.util.Timeout(Settings(context.system).Timeout)
   val retentionTime = Settings(system).Topic.RetentionTime
@@ -28,11 +30,11 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
   }
 
   val receiveCommand: Receive = {
-    case Publish(message,replyTo)  => publishMessage(message, replyTo)
-    case DeleteContent             => deleteTopicContent()
-    case PurgeTopicContent         => purgeOldContent()
-    case PurgeFrom(id)             => deleteMessages(id, true)
-    case FwProcessorId(replyTo)    => replyTo ! TopicContentProtocol.ProcessorId(processorId)
+    case Publish(message,replyTo) => publishMessage(message, replyTo)
+    case DeleteContent            => deleteTopicContent()
+    case PurgeTopicContent        => purgeOldContent()
+    case PurgeFrom(id)            => deleteMessages(id, true)
+    case FwProcessorId(replyTo)   => replyTo ! TopicContentProtocol.ProcessorId(persistenceId)
   }
 
   override def postStop() = {
@@ -41,7 +43,7 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
 
   def purgeOldContent() {
     val timeLimit = System.currentTimeMillis - retentionTime.toMillis
-    context.actorOf(TopicPurgerHelper.props(processorId, timeLimit), "purger-helper")                  
+    context.actorOf(TopicPurgerHelper.props(persistenceId, timeLimit), "purger-helper")                  
   } 
 
   def deleteTopicContent() {
@@ -55,7 +57,7 @@ class TopicContent(val topicPath: TopicPath) extends EventsourcedProcessor with 
 
   def publishMessage(message: String, replyTo : ActorRef) = {
     val event = Message(lastSequenceNr + 1, topicPath, message)
-    persist(event) { evt => 
+    persistAsync(event) { evt => 
       context.parent ! TopicContentProtocol.Saved(replyTo)
     }
   }

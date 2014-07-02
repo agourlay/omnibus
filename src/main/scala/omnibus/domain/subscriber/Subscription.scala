@@ -5,15 +5,15 @@ import akka.persistence._
 
 import omnibus.domain.message.Message
 
-class Subscription(val topicId : String, val cmd: ReactiveCmd) extends View with ActorLogging{
+class Subscription(val topicId : String, val cmd: ReactiveCmd) extends PersistentView with ActorLogging{
 
-	override def processorId = topicId
+	override def persistenceId = topicId
+	override def viewId = topicId + "-view"
 
 	val created = System.currentTimeMillis / 1000
 
 	def receive = {
-    	case Persistent(payload, _) => self ! payload
-  		case msg : Message          => if (reactiveFilter(msg)) context.parent ! msg
+  		case msg : Message => if (reactiveFilter(msg)) context.parent ! msg
   	}
 
   	def reactiveFilter(msg: Message) = {

@@ -16,10 +16,12 @@ import omnibus.domain.topic._
 import omnibus.api.streaming.HttpTopicLeaves
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class TopicRepository extends EventsourcedProcessor with ActorLogging with Instrumented {
+class TopicRepository extends PersistentActor with ActorLogging with Instrumented {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout)
+
+  override def persistenceId = self.path.toStringWithoutAddress
 
   var rootTopics = Map.empty[String, ActorRef]
 
@@ -78,7 +80,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
   }
 
   def persistTopic(topicPath: TopicPath, replyTo : ActorRef) = {
-    persist(TopicRepoStateValue(lastSequenceNr + 1, topicPath)) { t =>
+    persistAsync(TopicRepoStateValue(lastSequenceNr + 1, topicPath)) { t =>
       createTopic(t.topicPath, replyTo)
       updateState(TopicRepoStateValue(lastSequenceNr, topicPath))
     }
@@ -122,6 +124,7 @@ class TopicRepository extends EventsourcedProcessor with ActorLogging with Instr
       case None        => log.info(s"Cannot find topic in repo state")
       case Some(topic) => {
         topicsNumber -= 1
+        // FIXME : should not delete message if it is valid
         deleteMessage(topic.seqNumber, true)
         state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
       }  
