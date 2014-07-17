@@ -3,26 +3,6 @@ App.Dao = Em.Object.create({
     sourceSSE : null,
     eventBus : null,
 
-    getJSON : function(url) {
-      var promise = new Ember.RSVP.Promise(function(resolve, reject){
-        var client = new XMLHttpRequest();
-        client.open("GET", url);
-        client.onreadystatechange = handler;
-        client.responseType = "json";
-        client.setRequestHeader("Accept", "application/json");
-        client.send();
-
-        function handler() {
-          if (this.readyState === this.DONE) {
-            if (this.status === 200) { resolve(this.response); }
-            else { reject(this); }
-          }
-        };
-      });
-
-      return promise;
-    },
-
     closeOpenStream : function() {
         var me = this;
         // close previous stream if any
