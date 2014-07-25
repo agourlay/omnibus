@@ -14,7 +14,7 @@ name := "omnibus"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.2"
 
 scalacOptions := Seq(
   "-unchecked",
@@ -52,7 +52,7 @@ libraryDependencies ++= {
   val specs2V       = "2.3.13"
   val scalaCheckV   = "1.11.4"
   val scalaTestV    = "2.2.0"
-  val akkaCassanV   = "0.3.2"
+  val akkaCassanV   = "0.3.3"
   val scalaMetricsV = "3.2.0_a2.3"
   val metricsV      = "3.0.2"
   Seq(
