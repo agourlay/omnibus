@@ -8,7 +8,7 @@ import omnibus.core.CoreActors
 import omnibus.api.route._
 import omnibus.api.exceptions.RestFailureHandling
 
-class HttpEndpointActor(coreActors : CoreActors) extends HttpEndpoint with Actor {
+class ApiEndpoint(coreActors : CoreActors) extends HttpEndpoint with Actor {
   implicit def actorRefFactory = context    
   def receive = runRoute(routes(coreActors))
 }
@@ -28,6 +28,6 @@ trait HttpEndpoint extends HttpService with RestFailureHandling {
   }	
 }
 
-object HttpEndpointActor {
-	def props(coreActors : CoreActors) = Props(classOf[HttpEndpointActor], coreActors)
+object ApiEndpoint {
+	def props(coreActors : CoreActors) = Props(classOf[ApiEndpoint], coreActors)
 }

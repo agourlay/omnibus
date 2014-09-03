@@ -11,7 +11,7 @@ import omnibus.api.endpoint.CustomMediaType
 
 class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented {
 
-  val timerCtx = metrics.timer("timer").timerContext()
+  val timerCtx = metrics.timer("streaming").timerContext()
 
   lazy val responseStart = HttpResponse(
  		entity  = HttpEntity(CustomMediaType.EventStreamType, "Omnibus streaming...\n"),

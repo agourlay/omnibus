@@ -1,9 +1,8 @@
 <h4>Create topics</h4>
 
 <form class="pure-form">
-	{{view Ember.TextField valueBinding="App.TopicsController.newTopicName" placeholder="new/topic" }}
-	<button class="pure-button pure-button-primary" 
-	{{action "createTopic" App.TopicsController.newTopicName}}>
+	{{input valueBinding="newTopicName" placeholder="new/topic" }}
+	<button class="pure-button pure-button-primary" {{action 'createTopic' newTopicName}}>
 		<i class="fa fa-plus-circle"></i>
 	</button>
 </form>
@@ -25,7 +24,7 @@
 	</thead>
 	<tbody>
 		{{#each controller}}
-			{{#view App.TopicRowView topicBinding="this"}}
+			{{#view 'topicRow' topicBinding="this"}}
 				<td>
 					{{#if view.topic.hasSubTopics}}
 						{{#if view.isExpanded}}
@@ -48,7 +47,7 @@
 			    <td>{{view.topic.subTopicsNumber}}</td>
 			    <td>{{view.topic.prettyCreationDate}}</td>
 			    <td>
-					<button class="pure-button delete-button" {{action "deleteTopic" view.topic.name}}>
+					<button class="pure-button delete-button" {{action "deleteTopic" view.topic.name }}>
 						<i class="fa fa-trash-o"></i>
 					</button>
 			    </td>

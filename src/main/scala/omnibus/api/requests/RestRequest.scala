@@ -27,7 +27,7 @@ abstract class RestRequest(ctx : RequestContext) extends Actor with Instrumented
   
   context.setReceiveTimeout(timeout.duration)
 
-  val timerCtx = metrics.timer("timer").timerContext()
+  val timerCtx = metrics.timer("request").timerContext()
   
   def receive = {
     case ReceiveTimeout => requestOver(new RequestTimeoutException())

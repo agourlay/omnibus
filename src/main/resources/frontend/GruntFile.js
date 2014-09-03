@@ -43,17 +43,9 @@ module.exports = function(grunt) {
             "web/js/app.js",
             "web/js/dao.js",
             "web/js/router.js",
-            "web/js/model/topic.js",
-            "web/js/model/system.js",
-            "web/js/model/summary.js",
-            "web/js/model/subscriber.js",
-            "web/js/controllers/subscribersController.js",
-            "web/js/controllers/topicsController.js",
-            "web/js/views/viewUtils.js",
-            "web/js/views/topicRowView.js",
-            "web/js/views/topicView.js",
-            "web/js/views/indexView.js",
-            "web/js/views/systemView.js"
+            "web/js/views/*",
+            "web/js/models/*",
+            "web/js/controllers/*"
           ]
         }
       }
@@ -85,6 +77,17 @@ module.exports = function(grunt) {
     watch: {
       files: ["web/css/**","web/js/**","web/templates/**"],
       tasks: ['default']
+    },
+    htmlmin: {                                     
+      dist: {                                      
+        options: {                                 
+          removeComments: true,
+          collapseWhitespace: true
+        },
+        files: {                                   
+          'web/dist/index.html': 'web/index.html'
+        }
+      }
     }
   });
 
@@ -94,8 +97,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-ember-templates');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-htmlmin');
 
   // Default task(s).
-  grunt.registerTask('default', ['emberTemplates','concat','uglify','cssmin','copy']);
+  grunt.registerTask('default', ['emberTemplates','concat','uglify','cssmin','copy', 'htmlmin']);
 
 };

@@ -16,11 +16,11 @@ class AdminUIRoute(implicit context: ActorContext) extends Directives {
     authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
       pathSingleSlash{
         encodeResponse(Gzip){
-          getFromResource("frontend/web/index.html")   
+          getFromResource("frontend/web/dist/index.html")   
         }
       } ~
       encodeResponse(Gzip){
-        getFromResourceDirectory("frontend/web")
+        getFromResourceDirectory("frontend/web/dist")
       }
     }        
 }

@@ -14,13 +14,13 @@ import omnibus.metrics.Instrumented
 trait RestFailureHandling extends Instrumented {
   this: HttpService =>
 
-  val topicNotFound = metrics.meter("topicNotFoundException")
-  val topicAlreadyExists = metrics.meter("topicAlreadyExistsException")
-  val subscriberNotFound = metrics.meter("subscriberNotFoundException")
-  val requestTimeout = metrics.meter("requestTimeoutException")
-  val illegalArgument = metrics.meter("illegalArgumentException")
-  val circuitBreaker = metrics.meter("circuitBreakerException")
-  val otherException = metrics.meter("otherException")  
+  val topicNotFound = metrics.meter("TopicNotFoundException")
+  val topicAlreadyExists = metrics.meter("TopicAlreadyExistsException")
+  val subscriberNotFound = metrics.meter("SubscriberNotFoundException")
+  val requestTimeout = metrics.meter("RequestTimeoutException")
+  val illegalArgument = metrics.meter("IllegalArgumentException")
+  val circuitBreaker = metrics.meter("CircuitBreakerException")
+  val otherException = metrics.meter("OtherException")  
 
   implicit def omnibusExceptionHandler(implicit log: LoggingContext) = ExceptionHandler {
   	case e : TopicNotFoundException  =>

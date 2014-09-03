@@ -28,9 +28,9 @@ class TopicRepository extends PersistentActor with ActorLogging with Instrumente
   val rootTopicsNumber = metrics.gauge("root-topics")(rootTopics.size)
   val topicsNumber = metrics.counter("topics")
   
-  val openCbMeter = metrics.meter("circuit-breaker.open")
-  val closeCbMeter = metrics.meter("circuit-breaker.close")
-  val halfCbMeter = metrics.meter("circuit-breaker.half")
+  val openCbMeter = metrics.meter("cb-open")
+  val closeCbMeter = metrics.meter("cb-close")
+  val halfCbMeter = metrics.meter("cb-half")
 
   var state = TopicRepoState()
   def updateState(msg: TopicRepoStateValue): Unit = {state = state.update(msg)} 

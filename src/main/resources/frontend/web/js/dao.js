@@ -75,8 +75,8 @@ App.Dao = Em.Object.create({
             if( keyNb == 15) { newMetric = App.Timer.create(val.value); }  
             if( keyNb == 5) { newMetric = App.Meter.create(val.value); }
             if( keyNb == 1) { newMetric = App.Counter.create(val.value); }  
-            newMetric.name = val.name.replace("omnibus.domain.", "")
-                                     .replace("omnibus.api.", "");
+             var tmpArr = val.name.split(".");
+            newMetric.name = tmpArr.slice(tmpArr.length-2, tmpArr.length).join(".");
             metrics.push(newMetric);
         });
         return metrics.sort(function(a, b){return (a.name < b.name)?-1:1});

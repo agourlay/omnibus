@@ -1,5 +1,4 @@
-App.SubscriptionsController = Ember.ArrayController.extend({
-  content: [],	
+App.SubscriptionsController = Ember.ArrayController.extend({	
   sortProperties: ['topic'],
   sortAscending: true,
 
