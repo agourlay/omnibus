@@ -12,7 +12,7 @@ import omnibus.domain.subscriber.ReactiveCmd
 class Topic(val topic: String) extends Actor with ActorLogging with Instrumented {
 
   var numEvents = 0L
-
+  var lastReceivedTS = System.currentTimeMillis
   val creationDate = System.currentTimeMillis / 1000L
   val topicPath = TopicPath(self)
   val prettyPath = TopicPath.prettyStr(self)
@@ -45,7 +45,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   def view() = {
     val subTopicNumber = subTopics.size
     val prettyChildren = subTopics.values.map(TopicPath.prettyStr(_)).toSeq
-    val throughput = Math.round(messageReceived.oneMinuteRate*100.0)/100.0
+    val throughput = if (System.currentTimeMillis - lastReceivedTS > 5000) { 0 } else { Math.round(messageReceived.oneMinuteRate*100.0) / 100.0 }
     TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents, throughput, creationDate)
   }
 
@@ -86,6 +86,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
     replyTo ! TopicProtocol.MessagePublished
     messageReceived.mark()
     numEvents += 1
+    lastReceivedTS = System.currentTimeMillis
   }
 
   def subscribe(subscriber: ActorRef) = {
