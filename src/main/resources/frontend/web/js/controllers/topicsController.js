@@ -5,7 +5,6 @@ App.TopicsController = Ember.ArrayController.extend({
   actions : {
     createTopic : function(newTopic) {
       var controller = this;
-      console.dir(newTopic);
       if (newTopic) {
         App.Dao.postTopic(newTopic).done(function() {
           controller.reloadContent();

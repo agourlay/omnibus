@@ -20,7 +20,7 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
         context.actorOf(RootTopics.props(ctx, topicRepo))
       }
     } ~
-    path("topics" / Rest) { topic =>
+    pathPrefix("topics" / Rest) { topic =>
       validate(!topic.isEmpty, "topic name cannot be empty \n") {  
         val topicPath = TopicPath(topic)
         get { ctx =>
@@ -35,7 +35,7 @@ class TopicRoute(subRepo: ActorRef, topicRepo : ActorRef) (implicit context: Act
       }  
     } ~ 
     pathPrefix("streams") {
-      path("topics" / Rest) { topic =>
+      pathPrefix("topics" / Rest) { topic =>
         validate(!topic.isEmpty, "topic name cannot be empty \n") {
           parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveCmd) { reactiveCmd =>
             clientIP { ip =>

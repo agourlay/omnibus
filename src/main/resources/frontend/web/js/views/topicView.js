@@ -7,6 +7,8 @@ App.TopicView = Em.View.extend({
     subscribersNumber : 0,
     subTopicsNumber : 0,
 
+    chartMaxSize : 0,
+
     listenStats : function(series, graph) {   
      	var view = this;
         App.Dao.get("eventBus").onValue(function(stats) {
@@ -19,6 +21,11 @@ App.TopicView = Em.View.extend({
             view.set('subTopicsNumber',subTopicsNumber);
            
             var xNow = moment().unix();
+            if (series[0].length > view.get("chartMaxSize")) {
+                series[0].shift();
+                series[1].shift();
+                series[2].shift();
+            }
             series[0].push({x: xNow, y:throughputPerSec});
             series[1].push({x: xNow, y:subscribersNumber});
             series[2].push({x: xNow, y:subTopicsNumber});
@@ -29,11 +36,12 @@ App.TopicView = Em.View.extend({
 
     didInsertElement: function() {
         var view = this;
+        view.set("chartMaxSize", view.calculateFitWidth() / 10);
         var seriesData = [ [], [], [] ];
         seriesData.forEach(function(series) {
             series.push( {x: moment().unix(), y: NaN} );
         });
-        
+
         var palette = new Rickshaw.Color.Palette( { scheme: 'munin' } );
         var graph = new Rickshaw.Graph( {
             element: document.getElementById("chart"),

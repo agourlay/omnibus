@@ -20,7 +20,7 @@ class StatsRoute(topicRepo : ActorRef, metricsRepo : ActorRef)(implicit context:
             context.actorOf(AllMetrics.props(ctx, metricsRepo))
           }
         } ~
-        path("topics" / Rest) { topic =>
+        pathPrefix("topics" / Rest) { topic =>
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
             val topicPath = TopicPath(topic)
             get { ctx =>

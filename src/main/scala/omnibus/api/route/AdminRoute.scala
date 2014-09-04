@@ -16,7 +16,7 @@ class AdminRoute(topicRepo : ActorRef, subRepo : ActorRef) (implicit context: Ac
   val route =
     pathPrefix("admin") {
       authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
-        path("topics" / Rest) { topic =>
+        pathPrefix("topics" / Rest) { topic =>
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
             delete { ctx =>
               context.actorOf(DeleteTopic.props(TopicPath(topic), ctx, topicRepo)) 

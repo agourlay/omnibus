@@ -16,8 +16,8 @@ App.SubscriptionsController = Ember.ArrayController.extend({
   reloadContent : function() {
     var controller = this;
     App.Dao.subscribers().then(function(topics){
-      controller.content.clear();
-      controller.content.pushObjects(topics);  
+      controller.model.clear();
+      controller.model.pushObjects(topics);  
     });
   }
 })
