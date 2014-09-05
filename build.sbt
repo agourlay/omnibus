@@ -38,7 +38,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val akkaV         = "2.3.5"
+  val akkaV         = "2.3.6"
   val sprayV        = "1.3.1"
   val sprayJsonV    = "1.2.6"
   val logbackV      = "1.1.2"
