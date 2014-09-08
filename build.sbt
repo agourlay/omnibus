@@ -10,7 +10,7 @@ name := "omnibus"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.10.4"
 
 scalacOptions := Seq(
   "-unchecked",
@@ -36,6 +36,18 @@ resolvers ++= Seq(
   ,"spray repo"         at "http://repo.spray.io/"
   ,"akka cassandra"     at "http://dl.bintray.com/krasserm/maven"
 )
+
+val test = project.in(file("."))
+  .enablePlugins(GatlingPlugin)
+  .settings(libraryDependencies ++= {
+    val gatlingV     = "2.0.0-RC3"
+    val gatlingTestV = "1.0-RC3"
+    Seq(
+       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV     % "test"
+      ,"io.gatling"            % "test-framework"            % gatlingTestV % "test"
+    )
+  })
+
 
 libraryDependencies ++= {
   val akkaV         = "2.3.6"
