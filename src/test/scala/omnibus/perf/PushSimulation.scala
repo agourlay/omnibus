@@ -14,7 +14,8 @@ class PushSimulation extends Simulation {
 	val scenarioCreateTopic = scenario("Create topic")
 		.exec(
 			http("create topic batman")
-			    .post("/topics/batman"))
+			    .post("/topics/batman")
+			    .check(status.is(201)))
 		.exec(
 			http("create topic batman")
 			    .get("/topics/batman")

@@ -14,6 +14,11 @@ class Settings(config: Config, extendedSystem: ExtendedActorSystem) extends Exte
     val Port = config.getInt("omnibus.http.port")
   }
 
+  object Websocket {
+    val Port = config.getInt("omnibus.websocket.port")
+    val Enable = config.getBoolean("omnibus.websocket.enable")
+  }
+
   object Admin {
     val Name = config.getString("omnibus.admin.userName")
     val Password = config.getString("omnibus.admin.password")
