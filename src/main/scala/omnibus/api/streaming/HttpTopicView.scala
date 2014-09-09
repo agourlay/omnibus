@@ -38,7 +38,7 @@ class HttpTopicView(topicPath : TopicPath, ctx : RequestContext, topicRepo : Act
   }
 
   def handleStream : Receive = {
-   case topic : TopicView => ctx.responder ! MessageChunk("data: "+ formatTopicView.write(topic) +"\n\n")
+    case topic : TopicView => ctx.responder ! MessageChunk("data: "+ formatTopicView.write(topic) +"\n\n")
   }
 }
 

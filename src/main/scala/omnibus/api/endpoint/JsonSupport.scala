@@ -25,6 +25,7 @@ object JsonSupport {
       "id"           -> JsString(obj.id),
       "ip"           -> JsString(obj.ip),
       "mode"         -> JsString(obj.mode),
+      "support"      -> JsString(obj.support),
       "creationDate" -> JsNumber(obj.creationDate)
     )
 

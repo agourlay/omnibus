@@ -1,4 +1,3 @@
-
 package omnibus.domain.subscriber
 
 import spray.httpx.unmarshalling._

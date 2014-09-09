@@ -6,6 +6,7 @@
 	        <th><i class="fa fa-tags"></i> Topic</th>
 	        <th>IP Address</th>
 	        <th>Mode</th>
+	        <th>Support</th>
 	        <th>Creation date</th>
 	        <th>Kill</th>
 	    </tr>
@@ -16,6 +17,7 @@
   			    <td><b>{{#link-to 'topic' topic}}{{topic}}{{/link-to}}</b></td>
   			    <td>{{ip}}</td>
   			    <td>{{mode}}</td>
+  			    <td>{{support}}</td>
   		     	<td>{{prettyCreationDate}}</td>
  				 <td>
 					<button class="pure-button delete-button" {{action "deleteSubscriber" id}}>

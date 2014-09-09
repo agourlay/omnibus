@@ -7,6 +7,7 @@ import spray.routing._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
+import omnibus.domain.subscriber.SubscriberSupport._
 
 class Subscribe(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx : RequestContext, subRepo : ActorRef, topicRepo: ActorRef) extends RestRequest(ctx) {
   
@@ -30,7 +31,7 @@ class Subscribe(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx 
     case Some(ref) => {
       ack += ref
       if (ack.size == pending.size) {
-        subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, ctx.responder, reactiveCmd, ip)
+        subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, ctx.responder, reactiveCmd, ip, SubscriberSupport.SSE)
         closeThings()
       }
     }  

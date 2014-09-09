@@ -1,6 +1,7 @@
 package omnibus.domain.message
 
 import spray.http._
+import spray.can.websocket.frame.{ BinaryFrame, TextFrame }
 
 import omnibus.domain.topic.TopicPath
 
@@ -13,10 +14,20 @@ case class Message(id: Long
 }
 
 object MessageObj {
-  def toMessageChunk(message: Message) = {
-    MessageChunk("id: " + message.id + "\n" +
+
+  def toJson(message: Message) = {
+      "id: " + message.id + "\n" +
       "event: " + message.topicPath.prettyStr() + "\n" +
       "data: " + message.payload + "\n" +
-      "timestamp: " + message.timestamp + "\n\n")
+      "timestamp: " + message.timestamp + "\n\n"
   }
+
+  def toMessageChunk(message: Message) = {
+    MessageChunk(toJson(message))
+  }
+
+  def toMessageFrame(message: Message) = {
+    TextFrame(toJson(message))
+  }
+
 }

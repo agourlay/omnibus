@@ -11,6 +11,7 @@ import omnibus.metrics.Instrumented
 import omnibus.domain.topic.TopicPath
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.api.streaming.HttpTopicSubscriber
+import omnibus.domain.subscriber.SubscriberSupport._
 
 class SubscriberRepository extends Actor with ActorLogging with Instrumented {
 
@@ -24,11 +25,11 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
   var lookupMeter = metrics.meter("lookup")
 
   def receive = {
-    case CreateSub(topics, responder, reactiveCmd, http) => createSub(topics, responder, reactiveCmd, http)
-    case KillSub(id)                                     => killSub(id, sender)
-    case AllSubs                                         => sender ! Subscribers(subs.toList)
-    case Terminated(refSub)                              => handleTerminated(refSub)
-    case SubById(id)                                     => sender ! subLookup(id)
+    case CreateSub(topics, responder, reactiveCmd, ip, support) => createSub(topics, responder, reactiveCmd, ip, support)
+    case KillSub(id)                                            => killSub(id, sender)
+    case AllSubs                                                => sender ! Subscribers(subs.toList)
+    case Terminated(refSub)                                     => handleTerminated(refSub)
+    case SubById(id)                                            => sender ! subLookup(id)
   }
 
   def subLookup(id : String) = {
@@ -36,13 +37,13 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
     SubLookup(subs.find(_.id == id))
   }
 
-  def createSub(topics: Set[ActorRef], responder: ActorRef, cmd: ReactiveCmd, ip: String) = {
+  def createSub(topics: Set[ActorRef], responder: ActorRef, cmd: ReactiveCmd, ip: String, support: SubscriberSupport) = {
     log.debug("Creating sub on topics " + topics)
     // HttpSubscriber will proxify the responder
     val prettyTopics = TopicPath.prettySubscription(topics)     
     val httpSub = context.actorOf(HttpTopicSubscriber.props(responder, cmd, prettyTopics))
     val newSub = context.actorOf(Subscriber.props(httpSub, topics, cmd))
-    val newView = SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr(_)).mkString("+"), ip, cmd.react.toString)
+    val newView = SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr(_)).mkString("+"), ip, cmd.react.toString, support.toString)
     subs += newView
     context.watch(newSub)
   }
@@ -67,7 +68,7 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
 }
 
 object SubscriberRepositoryProtocol {
-  case class CreateSub(topics: Set[ActorRef], responder: ActorRef, reactiveCmd: ReactiveCmd, ip: String)
+  case class CreateSub(topics: Set[ActorRef], responder: ActorRef, reactiveCmd: ReactiveCmd, ip: String, support: SubscriberSupport)
   case class KillSub(id : String)
   case class SubKilled(id : String)
   case class SubById(id : String)

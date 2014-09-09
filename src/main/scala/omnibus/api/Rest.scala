@@ -13,7 +13,7 @@ trait Rest {
   this: CoreActors with Core =>
 
   val rootService = system.actorOf(ApiEndpoint.props(this), "omnibus-http")
-  val webSocketServer = system.actorOf(WebSocketServer.props(), "omnibus-websocket")  
+  val webSocketServer = system.actorOf(WebSocketServer.props(this), "omnibus-websocket")  
 }
 
 trait Web {

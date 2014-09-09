@@ -7,4 +7,5 @@ case class SubscriberView(ref : ActorRef
 	                    , topic: String
 	                    , ip : String
 	                    , mode : String
+	                    , support : String
 	                    , creationDate: Long = System.currentTimeMillis / 1000)
