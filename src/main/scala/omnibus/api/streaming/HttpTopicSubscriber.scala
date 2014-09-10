@@ -6,7 +6,7 @@ import omnibus.domain._
 import omnibus.domain.message._
 import omnibus.domain.subscriber._
 
-class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) extends StreamingResponse(responder) {
+class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd) extends StreamingResponse(responder) {
 
   override def receive = ({
     case msg: Message => responder ! MessageObj.toMessageChunk(msg) 
@@ -14,6 +14,5 @@ class HttpTopicSubscriber(responder: ActorRef, cmd : ReactiveCmd, topicsPath : S
 }
 
 object HttpTopicSubscriber {
-  def props(responder: ActorRef, cmd : ReactiveCmd, topicsPath : String) =
-      Props(classOf[HttpTopicSubscriber], responder, cmd, topicsPath).withDispatcher("streaming-dispatcher")
+  def props(responder: ActorRef, cmd : ReactiveCmd) = Props(classOf[HttpTopicSubscriber], responder, cmd).withDispatcher("streaming-dispatcher")
 }

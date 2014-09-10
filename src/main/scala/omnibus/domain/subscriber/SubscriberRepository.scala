@@ -10,7 +10,6 @@ import java.math.BigInteger
 import omnibus.metrics.Instrumented
 import omnibus.domain.topic.TopicPath
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
-import omnibus.api.streaming.HttpTopicSubscriber
 import omnibus.domain.subscriber.SubscriberSupport._
 
 class SubscriberRepository extends Actor with ActorLogging with Instrumented {
@@ -38,11 +37,8 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
   }
 
   def createSub(topics: Set[ActorRef], responder: ActorRef, cmd: ReactiveCmd, ip: String, support: SubscriberSupport) = {
-    log.debug("Creating sub on topics " + topics)
-    // HttpSubscriber will proxify the responder
-    val prettyTopics = TopicPath.prettySubscription(topics)     
-    val httpSub = context.actorOf(HttpTopicSubscriber.props(responder, cmd, prettyTopics))
-    val newSub = context.actorOf(Subscriber.props(httpSub, topics, cmd))
+    log.info(s"Creating sub on topics $topics with support $support and channel $responder") 
+    val newSub = context.actorOf(Subscriber.props(responder, topics, cmd))
     val newView = SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr(_)).mkString("+"), ip, cmd.react.toString, support.toString)
     subs += newView
     context.watch(newSub)
@@ -55,6 +51,7 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
         sub.ref ! PoisonPill
         subs -= (sub)
         replyTo ! SubKilled(id)
+        log.info(s"Sub $sub deleted")
       }  
     }
   }

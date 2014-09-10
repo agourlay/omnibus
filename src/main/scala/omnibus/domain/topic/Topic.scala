@@ -95,6 +95,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
       subscribers += subscriber
       subscriber ! SubscriberProtocol.AcknowledgeSub(self)
       subscribersNumber += 1
+      log.info(s"subscriber $subscriber added to topic")
     }
   }
 
@@ -112,8 +113,10 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
       val key = subTopics.find(_._2 == ref).get._1
       subTopics -= (key)
       subTopicsNumber -= 1
+      log.info(s"subtopic $key died")
     } else {
       unsubscribe(ref)
+      log.info(s"subscriber $ref died")
     }
   }
 
