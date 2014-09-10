@@ -13,23 +13,47 @@ class PushSimulation extends Simulation {
 
 	val scenarioCreateTopic = scenario("Create topic")
 		.exec(
-			http("create topic batman")
+			http("create topic")
 			    .post("/topics/batman")
 			    .check(status.is(201)))
 		.exec(
-			http("create topic batman")
+			http("topic existence")
 			    .get("/topics/batman")
+				.check(status.is(200)))
+		.exec(
+			http("topic stats")
+			    .get("/stats/topics/batman")
+				.check(status.is(200)))
+		.exec(
+			http("server metrics")
+			    .get("/stats/metrics")
 				.check(status.is(200)))
 
 
 	val scenarioOmnibus = scenario("Publish on topic")
+		.exec(
+			http("get wrong topic")
+			    .get("/topics/batmans")
+				.check(status.is(404)))
+		.exec(
+			http("get proper topic")
+			    .get("/topics/batman")
+				.check(status.is(200)))
 		.pause(1)
 		.repeat(100){
 			exec(
-				http("push on batman")
+				http("push on topic")
 					.put("/topics/batman")
 					.body(StringBody("Na na na na na na na na na na na na na na na na... BATMAN!"))
 					.check(status.is(202)))
+		.exec(
+			http("topic stats")
+			    .get("/stats/topics/batman")
+				.check(status.is(200)))
+		.exec(
+			http("server metrics")
+			    .get("/stats/metrics")
+				.check(status.is(200)))	
 		}
 
 	setUp(
