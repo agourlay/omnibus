@@ -51,9 +51,9 @@ val test = project.in(file("."))
 
 libraryDependencies ++= {
   val akkaV         = "2.3.6"
-  val sprayV        = "1.3.2-20140428"
+  val sprayV        = "1.3.2-20140909"
   val sprayJsonV    = "1.2.6"
-  val sprayWsV      = "0.1.2"
+  val sprayWsV      = "0.1.3"
   val logbackV      = "1.1.2"
   val specs2V       = "2.4.2"
   val scalaCheckV   = "1.11.5"
@@ -62,9 +62,9 @@ libraryDependencies ++= {
   val scalaMetricsV = "3.2.1_a2.3"
   val metricsV      = "3.0.2"
   Seq(
-     "io.spray"             %  "spray-can"                     % sprayV               withSources() 
-    ,"io.spray"             %  "spray-routing"                 % sprayV               withSources()
-    ,"io.spray"             %  "spray-caching"                 % sprayV               withSources()
+     "io.spray"             %% "spray-can"                     % sprayV               withSources() 
+    ,"io.spray"             %% "spray-routing"                 % sprayV               withSources()
+    ,"io.spray"             %% "spray-caching"                 % sprayV               withSources()
     ,"io.spray"             %% "spray-json"                    % sprayJsonV           withSources()
     ,"com.wandoulabs.akka"  %% "spray-websocket"               % sprayWsV             withSources()
     ,"com.typesafe.akka"    %% "akka-actor"                    % akkaV                withSources()
@@ -74,7 +74,7 @@ libraryDependencies ++= {
     ,"nl.grons"             %% "metrics-scala"                 % scalaMetricsV        withSources()
     ,"com.codahale.metrics" %  "metrics-graphite"              % metricsV             withSources()
     ,"ch.qos.logback"       %  "logback-classic"               % logbackV             withSources()
-    ,"io.spray"             %  "spray-testkit"                 % sprayV      % "test" withSources()
+    ,"io.spray"             %% "spray-testkit"                 % sprayV      % "test" withSources()
     ,"com.typesafe.akka"    %% "akka-testkit"                  % akkaV       % "test" withSources()
     ,"org.specs2"           %% "specs2-core"                   % specs2V     % "test" withSources()
     ,"org.scalacheck"       %% "scalacheck"                    % scalaCheckV % "test" withSources()
