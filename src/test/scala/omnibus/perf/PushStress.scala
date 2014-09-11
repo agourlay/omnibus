@@ -6,7 +6,7 @@ import scala.concurrent.duration._
 
 import omnibus._
 
-class PushSimulation extends Simulation {
+class PushStress extends Simulation {
 
 	// starting app
 	val app = omnibus.Boot
@@ -19,14 +19,6 @@ class PushSimulation extends Simulation {
 		.exec(
 			http("topic existence")
 			    .get("/topics/batman")
-				.check(status.is(200)))
-		.exec(
-			http("topic stats")
-			    .get("/stats/topics/batman")
-				.check(status.is(200)))
-		.exec(
-			http("server metrics")
-			    .get("/stats/metrics")
 				.check(status.is(200)))
 
 
@@ -46,14 +38,14 @@ class PushSimulation extends Simulation {
 					.put("/topics/batman")
 					.body(StringBody("Na na na na na na na na na na na na na na na na... BATMAN!"))
 					.check(status.is(202)))
-		.exec(
-			http("topic stats")
-			    .get("/stats/topics/batman")
-				.check(status.is(200)))
-		.exec(
-			http("server metrics")
-			    .get("/stats/metrics")
-				.check(status.is(200)))	
+			.exec(
+				http("topic stats")
+				    .get("/stats/topics/batman")
+					.check(status.is(200)))
+			.exec(
+				http("server metrics")
+				    .get("/stats/metrics")
+					.check(status.is(200)))	
 		}
 
 	setUp(

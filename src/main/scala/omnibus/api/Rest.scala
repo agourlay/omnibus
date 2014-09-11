@@ -22,6 +22,6 @@ trait Web {
   val httpPort = Settings(system).Http.Port
   val wsPort = Settings(system).Websocket.Port
 
-  IO(Http)(system) ! Http.Bind(rootService, "localhost", port = httpPort)
-  if (Settings(system).Websocket.Enable) IO(UHttp)(systemWS) ! Http.Bind(webSocketServer, "localhost", port = wsPort)
+  IO(Http)(system) ! Http.Bind(rootService, "0.0.0.0", port = httpPort)
+  if (Settings(system).Websocket.Enable) IO(UHttp)(systemWS) ! Http.Bind(webSocketServer, "0.0.0.0", port = wsPort)
 }
