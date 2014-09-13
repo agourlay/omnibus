@@ -3,7 +3,6 @@ package omnibus.metrics
 import akka.actor._
 
 import java.util.concurrent.TimeUnit
-import java.net.InetSocketAddress
 
 import scala.collection.JavaConversions._
 
@@ -31,7 +30,7 @@ class MetricsReporter extends Actor with ActorLogging with Instrumented {
 
   	log.info(s"Starting MetricsReporter to Graphite $graphiteHost:$graphitePort")
 
-   	val graphite = new Graphite(new InetSocketAddress(graphiteHost, graphitePort))
+   	val graphite = new Graphite(graphiteHost, graphitePort)
     val graphiteReporter = GraphiteReporter.forRegistry(metricRegistry)
                                            .prefixedWith(Settings(system).Graphite.Prefix)
                                            .convertRatesTo(TimeUnit.SECONDS)
