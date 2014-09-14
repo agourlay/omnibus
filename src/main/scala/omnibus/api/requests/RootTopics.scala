@@ -12,7 +12,7 @@ import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class RootTopics(ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
+class RootTopics(ctx: RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
   topicRepo ! TopicRepositoryProtocol.AllRoots
 
@@ -20,28 +20,27 @@ class RootTopics(ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(
 
   var roots = Set.empty[TopicView]
 
-  def waitingTopicsPathRef : Receive = {
+  def waitingTopicsPathRef: Receive = {
     case Roots(rootsPath) => {
-      if (rootsPath.isEmpty){
+      if (rootsPath.isEmpty) {
         requestOver(roots)
       } else {
-        rootsPath.foreach (_.topicRef.get ! TopicProtocol.View)
+        rootsPath.foreach(_.topicRef.get ! TopicProtocol.View)
         context.become(super.receive orElse waitingTopicsView(rootsPath.size))
       }
-    }  
+    }
   }
 
-  def waitingTopicsView(expected : Integer) : Receive = {
-    case rootView : TopicView => {
+  def waitingTopicsView(expected: Integer): Receive = {
+    case rootView: TopicView => {
       roots += rootView
-      if (roots.size == expected){
+      if (roots.size == expected) {
         requestOver(roots)
       }
-    }  
+    }
   }
 }
 
 object RootTopics {
-   def props(ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[RootTopics], ctx, topicRepo).withDispatcher("requests-dispatcher")
+  def props(ctx: RequestContext, topicRepo: ActorRef) = Props(classOf[RootTopics], ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

@@ -14,7 +14,7 @@ import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.configuration._
 
-class HttpTopicView(topicPath : TopicPath, ctx : RequestContext, topicRepo : ActorRef) extends StreamingResponse(ctx.responder) {
+class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) extends StreamingResponse(ctx.responder) {
 
   implicit def executionContext = context.dispatcher
 
@@ -22,23 +22,23 @@ class HttpTopicView(topicPath : TopicPath, ctx : RequestContext, topicRepo : Act
 
   override def receive = waitingLookup orElse super.receive
 
-  def waitingLookup : Receive = {
+  def waitingLookup: Receive = {
     case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
   }
 
-  def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
+  def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
     case Some(topicRef) => {
       context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
       context.become(handleStream orElse super.receive)
     }
-    case None      => {
+    case None => {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
       self ! PoisonPill
-    }  
+    }
   }
 
-  def handleStream : Receive = {
-    case topic : TopicView => ctx.responder ! MessageChunk("data: "+ formatTopicView.write(topic) +"\n\n")
+  def handleStream: Receive = {
+    case topic: TopicView => ctx.responder ! MessageChunk("data: " + formatTopicView.write(topic) + "\n\n")
   }
 }
 
@@ -47,6 +47,5 @@ object HttpTopicStatProtocol {
 }
 
 object HttpTopicView {
-  def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef)
-    = Props(classOf[HttpTopicView], topicPath, ctx, topicRepo).withDispatcher("streaming-dispatcher")
+  def props(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) = Props(classOf[HttpTopicView], topicPath, ctx, topicRepo).withDispatcher("streaming-dispatcher")
 }

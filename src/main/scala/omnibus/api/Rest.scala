@@ -6,14 +6,14 @@ import spray.can.server.UHttp
 import spray.can.Http
 
 import omnibus.configuration._
-import omnibus.api.endpoint.{ApiEndpoint, WebSocketServer}
-import omnibus.core.{CoreActors, Core}
+import omnibus.api.endpoint.{ ApiEndpoint, WebSocketServer }
+import omnibus.core.{ CoreActors, Core }
 
 trait Rest {
   this: CoreActors with Core =>
 
   val rootService = system.actorOf(ApiEndpoint.props(this), "omnibus-http")
-  val webSocketServer = system.actorOf(WebSocketServer.props(this), "omnibus-websocket")  
+  val webSocketServer = system.actorOf(WebSocketServer.props(this), "omnibus-websocket")
 }
 
 trait Web {

@@ -14,7 +14,7 @@ import omnibus.core._
 
 class HttpEndpointTest extends Specification with Specs2RouteTest with HttpEndpoint {
 
-  def actorRefFactory = system 
+  def actorRefFactory = system
 
-  "OmnibusRoute" should { }
+  "OmnibusRoute" should {}
 }

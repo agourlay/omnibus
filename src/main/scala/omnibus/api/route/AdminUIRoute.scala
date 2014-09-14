@@ -12,15 +12,15 @@ class AdminUIRoute(implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
 
-  val route = 
+  val route =
     authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
-      pathSingleSlash{
-        encodeResponse(Gzip){
-          getFromResource("frontend/web/dist/index.html")   
+      pathSingleSlash {
+        encodeResponse(Gzip) {
+          getFromResource("frontend/web/dist/index.html")
         }
       } ~
-      encodeResponse(Gzip){
-        getFromResourceDirectory("frontend/web/dist")
-      }
-    }        
+        encodeResponse(Gzip) {
+          getFromResourceDirectory("frontend/web/dist")
+        }
+    }
 }

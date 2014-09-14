@@ -45,14 +45,14 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   def view() = {
     val subTopicNumber = subTopics.size
     val prettyChildren = subTopics.values.map(TopicPath.prettyStr(_)).toSeq
-    val throughput = if (System.currentTimeMillis - lastReceivedTS > 5000) { 0 } else { Math.round(messageReceived.oneMinuteRate*100.0) / 100.0 }
+    val throughput = if (System.currentTimeMillis - lastReceivedTS > 5000) { 0 } else { Math.round(messageReceived.oneMinuteRate * 100.0) / 100.0 }
     TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents, throughput, creationDate)
   }
 
-  def leaves(replyTo : ActorRef) {
+  def leaves(replyTo: ActorRef) {
     if (subTopics.isEmpty) replyTo ! view()
-    else for(sub <- subTopics.values) sub ! TopicProtocol.Leaves(replyTo)
-  }  
+    else for (sub <- subTopics.values) sub ! TopicProtocol.Leaves(replyTo)
+  }
 
   def deleteTopic() {
     contentHolder ! TopicContentProtocol.DeleteContent
@@ -82,7 +82,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
     contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
   }
 
-  def messageSaved(replyTo : ActorRef) = {
+  def messageSaved(replyTo: ActorRef) = {
     replyTo ! TopicProtocol.MessagePublished
     messageReceived.mark()
     numEvents += 1
@@ -90,7 +90,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   }
 
   def subscribe(subscriber: ActorRef) = {
-    if (!subscribers.contains(subscriber)){
+    if (!subscribers.contains(subscriber)) {
       context.watch(subscriber)
       subscribers += subscriber
       subscriber ! SubscriberProtocol.AcknowledgeSub(self)
@@ -107,7 +107,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   }
 
   // It is either a subtopic or a subscriber
-  def handleTerminated(ref : ActorRef) = {
+  def handleTerminated(ref: ActorRef) = {
     // FIXME it is SUPER ugly there
     if (subTopics.values.toSeq.contains(ref)) {
       val key = subTopics.find(_._2 == ref).get._1
@@ -120,7 +120,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
     }
   }
 
-  def createSubTopic(topics: List[String], replyTo : ActorRef) = topics match {
+  def createSubTopic(topics: List[String], replyTo: ActorRef) = topics match {
     case head :: tail => createTopicAndForward(head, tail, replyTo)
     case _            => onTopicCreation(replyTo)
   }
@@ -134,11 +134,11 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
     propagateToDirection(NewTopicDownTheTree(self), PropagationDirection.UP)
   }
 
-  def notifySubscribersOnNewTopic(newTopicRef : ActorRef) = sendToSubscribers(TopicProtocol.TopicCreated(newTopicRef))
+  def notifySubscribersOnNewTopic(newTopicRef: ActorRef) = sendToSubscribers(TopicProtocol.TopicCreated(newTopicRef))
 
   def sendToSubscribers(stuff: Any) = subscribers.foreach { actorRef => actorRef ! stuff }
 
-  def createTopicAndForward(subTopic: String, topics: List[String], replyTo : ActorRef) = {
+  def createTopicAndForward(subTopic: String, topics: List[String], replyTo: ActorRef) = {
     log.debug(s"Create sub topic $subTopic and forward $topics")
     if (subTopics.contains(subTopic)) {
       log.debug(s"sub topic $subTopic already exists, forward to its sub topics")
@@ -155,15 +155,15 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
 
 object TopicProtocol {
   case class PublishMessage(message: String) extends Operation
-  case class SetupReactiveMode(subscriber: ActorRef, cmd : ReactiveCmd) extends Operation
+  case class SetupReactiveMode(subscriber: ActorRef, cmd: ReactiveCmd) extends Operation
   case class Subscribe(subscriber: ActorRef) extends Operation
   case class Unsubscribe(subscriber: ActorRef) extends Operation
   case class ProcessorId(replyTo: ActorRef) extends Operation
-  case class CreateSubTopic(topics: List[String], replyTo : ActorRef)
-  case class Leaves(replyTo : ActorRef)
-  case class TopicCreated(topicRef : ActorRef)
+  case class CreateSubTopic(topics: List[String], replyTo: ActorRef)
+  case class Leaves(replyTo: ActorRef)
+  case class TopicCreated(topicRef: ActorRef)
   case class CascadeProcessorId(subscriber: ActorRef)
-  case class NewTopicDownTheTree(topicRef : ActorRef) extends Operation
+  case class NewTopicDownTheTree(topicRef: ActorRef) extends Operation
   case object SubscriberNumber
   case object Delete
   case object View
@@ -171,9 +171,9 @@ object TopicProtocol {
 
   // container used to propagate operation in topic tree
   case class Propagation(message: TopicProtocol.Operation, direction: PropagationDirection)
-  trait Operation{}
+  trait Operation {}
 }
 
-object Topic {  
+object Topic {
   def props(topic: String) = Props(classOf[Topic], topic).withDispatcher("topics-dispatcher")
 }

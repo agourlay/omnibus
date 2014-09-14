@@ -19,20 +19,20 @@ import omnibus.metrics.Instrumented
 import omnibus.configuration._
 import omnibus.api.exceptions.RequestTimeoutException
 
-abstract class RestRequest(ctx : RequestContext) extends Actor with Instrumented {
+abstract class RestRequest(ctx: RequestContext) extends Actor with Instrumented {
 
   implicit def system = context.system
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(system).Timeout)
-  
+
   context.setReceiveTimeout(timeout.duration)
 
   val timerCtx = metrics.timer("request").timerContext()
-  
+
   def receive = {
     case ReceiveTimeout => requestOver(new RequestTimeoutException())
     case Failure(e)     => requestOver(e)
-    case e : Exception  => requestOver(e)
+    case e: Exception   => requestOver(e)
   }
 
   def closeThings() {
@@ -62,5 +62,5 @@ abstract class RestRequest(ctx : RequestContext) extends Actor with Instrumented
         timerCtx.stop()
         Stop
       }
-    }  
+    }
 }

@@ -14,8 +14,8 @@ class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging wit
   val timerCtx = metrics.timer("streaming").timerContext()
 
   lazy val responseStart = HttpResponse(
- 		entity  = HttpEntity(CustomMediaType.EventStreamType, "Omnibus streaming...\n"),
-  	headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
+    entity = HttpEntity(CustomMediaType.EventStreamType, "Omnibus streaming...\n"),
+    headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
   )
 
   override def preStart() = {
@@ -27,8 +27,8 @@ class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging wit
     responder ! ChunkedMessageEnd
     timerCtx.stop()
   }
-  
-  def receive = {   
+
+  def receive = {
     case ev: Http.ConnectionClosed => {
       log.debug("Stopping response streaming due to {}", ev)
       self ! PoisonPill

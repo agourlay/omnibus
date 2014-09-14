@@ -14,33 +14,32 @@ import omnibus.domain.topic._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class CreateTopic(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
+class CreateTopic(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
   override def receive = super.receive orElse waitingLookup
 
-  def waitingAck : Receive = {
+  def waitingAck: Receive = {
     case TopicCreated(topicRef) => {
       val prettyTopic = topicPath.prettyStr()
-      requestOver(StatusCodes.Created, Location(ctx.request.uri):: Nil, s"Topic $prettyTopic created \n")
-    } 
+      requestOver(StatusCodes.Created, Location(ctx.request.uri) :: Nil, s"Topic $prettyTopic created \n")
+    }
   }
 
-  def waitingLookup : Receive = {
+  def waitingLookup: Receive = {
     case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
   }
 
-  def handleTopicPathRef(topicPath: TopicPath, topicRef : Option[ActorRef]) = topicRef match {
+  def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
     case Some(ref) => requestOver(new TopicAlreadyExistsException(topicPath.prettyStr()))
-    case None      => {
+    case None => {
       topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)
       context.become(super.receive orElse waitingAck)
-    }  
+    }
   }
 }
 
 object CreateTopic {
-   def props(topicPath: TopicPath, ctx : RequestContext, topicRepo: ActorRef) 
-     = Props(classOf[CreateTopic], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
+  def props(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) = Props(classOf[CreateTopic], topicPath, ctx, topicRepo).withDispatcher("requests-dispatcher")
 }

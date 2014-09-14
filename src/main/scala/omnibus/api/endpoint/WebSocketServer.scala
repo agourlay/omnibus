@@ -6,7 +6,7 @@ import spray.can.Http
 import omnibus.core.CoreActors
 import omnibus.api.streaming.WebSocketResponse
 
-class WebSocketServer(coreActors : CoreActors) extends Actor with ActorLogging {
+class WebSocketServer(coreActors: CoreActors) extends Actor with ActorLogging {
   def receive = {
     case Http.Connected(remoteAddress, localAddress) =>
       val serverConnection = sender()
@@ -16,5 +16,5 @@ class WebSocketServer(coreActors : CoreActors) extends Actor with ActorLogging {
 }
 
 object WebSocketServer {
-  def props(coreActors : CoreActors) = Props(classOf[WebSocketServer], coreActors)
+  def props(coreActors: CoreActors) = Props(classOf[WebSocketServer], coreActors)
 }

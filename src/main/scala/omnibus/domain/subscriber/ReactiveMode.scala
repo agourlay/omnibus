@@ -14,11 +14,11 @@ object ReactiveMode extends Enumeration {
   val BETWEEN_TS = Value("between-ts") // all the events between two given timestamp  
 
   implicit val string2ReactiveMode = new FromStringDeserializer[ReactiveMode] {
-    def apply(value: String) : Either[DeserializationError, ReactiveMode] = {
+    def apply(value: String): Either[DeserializationError, ReactiveMode] = {
       try Right(ReactiveMode.withName(value))
       catch {
         case e: Exception => Left(MalformedContent(s"The reactiveMode is not valid - please use one of ${ReactiveMode.values} \n"))
-      }  
+      }
     }
-  } 
+  }
 }

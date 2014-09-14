@@ -17,7 +17,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   var topicListened = Set.empty[ActorRef]
   val topicsPath = topics.map(TopicPath(_))
 
-  var pendingScheduler : Cancellable = _
+  var pendingScheduler: Cancellable = _
 
   override def preStart() = {
     val prettyTopics = TopicPath.prettySubscription(topics)
@@ -36,7 +36,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   override def postStop() = {
     channel ! PoisonPill
     pendingScheduler.cancel()
-  }  
+  }
 
   def receive = {
     case AcknowledgeSub(topicRef)                      => ackSubscription(topicRef)
@@ -49,11 +49,11 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     case TopicProtocol.TopicCreated(newTopicRef)       => topicCreatedWithinSub(newTopicRef)
   }
 
-  def topicCreatedWithinSub(newTopicRef : ActorRef) {
+  def topicCreatedWithinSub(newTopicRef: ActorRef) {
     newTopicRef ! TopicProtocol.ProcessorId(self)
   }
 
-  def setupSubscription(processorId : String) {
+  def setupSubscription(processorId: String) {
     context.actorOf(Subscription.props(processorId, reactiveCmd))
   }
 
@@ -63,15 +63,15 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   }
 
   def retryPending() {
-    for (topic <- pendingTopic) { 
+    for (topic <- pendingTopic) {
       log.info(s"Retry pending subcription to $topic")
-      topic ! TopicProtocol.Subscribe(self) 
+      topic ! TopicProtocol.Subscribe(self)
     }
   }
 
   def ackSubscription(topicRef: ActorRef) = {
     topicListened += topicRef
-    pendingTopic -= topicRef 
+    pendingTopic -= topicRef
     context.watch(topicRef)
     log.info(s"successfully subscribed to $topicRef")
     // retrieve all children processor id
@@ -82,12 +82,11 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
 object SubscriberProtocol {
   case class AcknowledgeSub(topic: ActorRef)
   case class AcknowledgeUnsub(topic: ActorRef)
-  case class Subscription(topicId : String)
+  case class Subscription(topicId: String)
   case object StopSubscription
   case object RetryPending
 }
 
 object Subscriber {
-  def props(channel: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd) 
-    = Props(classOf[Subscriber], channel, topics, reactiveCmd, System.currentTimeMillis / 1000).withDispatcher("subscribers-dispatcher")
+  def props(channel: ActorRef, topics: Set[ActorRef], reactiveCmd: ReactiveCmd) = Props(classOf[Subscriber], channel, topics, reactiveCmd, System.currentTimeMillis / 1000).withDispatcher("subscribers-dispatcher")
 }

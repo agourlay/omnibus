@@ -2,6 +2,8 @@ import com.typesafe.sbt.SbtNativePackager.Universal
 
 import com.typesafe.sbt.packager.Keys._
 
+import scalariform.formatter.preferences._
+
 packageArchetype.java_application
 
 organization := "com.agourlay"
@@ -16,10 +18,20 @@ scalacOptions := Seq(
   "-unchecked",
   "-Xlint",
   "-deprecation",
-  "-encoding","utf8",
+  "-target:jvm-1.7",
+  "-encoding", "UTF-8",
   "-Ywarn-dead-code",
   "-language:_",
-  "-feature")
+  "-feature"
+)
+
+scalariformSettings
+
+ScalariformKeys.preferences := ScalariformKeys.preferences.value
+  .setPreference(AlignSingleLineCaseStatements, true)
+  .setPreference(AlignSingleLineCaseStatements.MaxArrowIndent, 100)
+  .setPreference(DoubleIndentClassDeclaration, true)
+  .setPreference(PreserveDanglingCloseParenthesis, true)
 
 mappings in Universal += {
   file("src/main/resources/application.conf") -> "conf/omnibus.conf"

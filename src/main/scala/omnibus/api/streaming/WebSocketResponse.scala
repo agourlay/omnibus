@@ -19,7 +19,7 @@ import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.topic._
 
-class WebSocketResponse(val serverConnection: ActorRef, val coreActors : CoreActors) extends HttpServiceActor with websocket.WebSocketServerWorker with ActorLogging {
+class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActors) extends HttpServiceActor with websocket.WebSocketServerWorker with ActorLogging {
 
   override def receive = handshaking orElse businessLogicNoUpgrade orElse closeLogic
 
@@ -27,7 +27,7 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors : CoreAct
     case websocket.HandshakeRequest(state) =>
       state match {
         case wsFailure: websocket.HandshakeFailure => sender() ! wsFailure.response
-        case wsContext: websocket.HandshakeContext => 
+        case wsContext: websocket.HandshakeContext =>
           sender() ! UHttp.UpgradeServer(websocket.pipelineStage(self, wsContext), wsContext.response)
           routing(wsContext.request)
       }
@@ -74,5 +74,5 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors : CoreAct
 }
 
 object WebSocketResponse {
-  def props(serverConnection: ActorRef, coreActors : CoreActors) = Props(classOf[WebSocketResponse], serverConnection, coreActors)
+  def props(serverConnection: ActorRef, coreActors: CoreActors) = Props(classOf[WebSocketResponse], serverConnection, coreActors)
 }
