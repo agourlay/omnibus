@@ -6,7 +6,7 @@ import scala.concurrent.duration._
 
 import omnibus._
 
-class SimpleReplay extends Simulation {
+class ReplaySubscription extends Simulation {
 
   // starting app
   val app = omnibus.Boot

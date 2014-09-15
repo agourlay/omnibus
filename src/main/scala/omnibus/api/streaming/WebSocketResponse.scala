@@ -24,15 +24,15 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
   override def receive = handshaking orElse businessLogicNoUpgrade orElse closeLogic
 
   override def handshaking: Receive = {
-    case websocket.HandshakeRequest(state) =>
+    case websocket.HandshakeRequest(state) ⇒
       state match {
-        case wsFailure: websocket.HandshakeFailure => sender() ! wsFailure.response
-        case wsContext: websocket.HandshakeContext =>
+        case wsFailure: websocket.HandshakeFailure ⇒ sender() ! wsFailure.response
+        case wsContext: websocket.HandshakeContext ⇒
           sender() ! UHttp.UpgradeServer(websocket.pipelineStage(self, wsContext), wsContext.response)
           routing(wsContext.request)
       }
 
-    case UHttp.Upgraded =>
+    case UHttp.Upgraded ⇒
       context.become(businessLogic orElse closeLogic)
       self ! websocket.UpgradedToWebSocket // notify Upgraded to WebSocket protocol
   }
@@ -44,7 +44,7 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     log.info(s"Incoming websocket request $path $param from $ip")
     // TODO clean that for better routing
     if (path.toString.startsWith("/streams/topics/")) {
-      val reactiveCmd = ReactiveCmd(ReactiveMode.withName(param.get("react").getOrElse("simple")), None, None)
+      val reactiveCmd = ReactiveCmd(ReactiveMode.withName(param.get("react").getOrElse("simple")), param.get("since").map(_.toLong), param.get("to").map(_.toLong))
       context.actorOf(WebSocketTopicSubscriber.props(TopicPath(path.tail.toString.split("/")(2)), reactiveCmd, ip, coreActors.subRepo, coreActors.topicRepo))
     }
   }
@@ -54,13 +54,13 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     case TextFrame(content) ⇒
       send(TextFrame("You are not supposed to send me stuff"))
 
-    case x: FrameCommandFailed =>
+    case x: FrameCommandFailed ⇒
       log.error("frame command failed", x)
 
-    case msg: Message =>
+    case msg: Message ⇒
       send(MessageObj.toMessageFrame(msg))
 
-    case e: Exception =>
+    case e: Exception ⇒
       send(TextFrame(e.getMessage))
       context.stop(self)
   }
