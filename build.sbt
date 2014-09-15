@@ -52,8 +52,8 @@ resolvers ++= Seq(
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
-    val gatlingV     = "2.0.0-RC4"
-    val gatlingTestV = "1.0-RC4"
+    val gatlingV     = "2.0.0-RC5"
+    val gatlingTestV = "1.0-RC5"
     Seq(
        "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV     % "test"
       ,"io.gatling"            % "test-framework"            % gatlingTestV % "test"

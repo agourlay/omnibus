@@ -44,8 +44,10 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     log.info(s"Incoming websocket request $path $param from $ip")
     // TODO clean that for better routing
     if (path.toString.startsWith("/streams/topics/")) {
-      val reactiveCmd = ReactiveCmd(ReactiveMode.withName(param.get("react").getOrElse("simple")), param.get("since").map(_.toLong), param.get("to").map(_.toLong))
-      context.actorOf(WebSocketTopicSubscriber.props(TopicPath(path.tail.toString.split("/")(2)), reactiveCmd, ip, coreActors.subRepo, coreActors.topicRepo))
+      val reactiveMode = ReactiveMode.withName(param.get("react").getOrElse("simple"))
+      val reactiveCmd = ReactiveCmd(reactiveMode, param.get("since").map(_.toLong), param.get("to").map(_.toLong))
+      val topicPath = TopicPath(path.tail.toString.split("/")(2))
+      context.actorOf(WebSocketTopicSubscriber.props(topicPath, reactiveCmd, ip, coreActors.subRepo, coreActors.topicRepo))
     }
   }
 
