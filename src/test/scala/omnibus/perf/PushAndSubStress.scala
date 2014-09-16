@@ -10,8 +10,8 @@ class PushAndSubStress extends Simulation {
 
   // starting app
   val app = omnibus.Boot
-  val userNumber = 100
-  val publishNumber = 1000
+  val userNumber = 10
+  val publishNumber = 100
 
   val scenarioCreateTopic = scenario("Create topic")
     .exec(
@@ -25,7 +25,7 @@ class PushAndSubStress extends Simulation {
 
   val scenarioListenerTopic = scenario("Global listener")
     .exec(ws("Subscribe to topic").open("/streams/topics/batman")
-      .check(wsListen.within(200 seconds).expect(publishNumber * userNumber)))
+      .check(wsListen.within(30 seconds).expect(publishNumber * userNumber)))
 
   val scenarioOmnibus = scenario("Sub and push")
     .exec(ws("Subscribe to topic").open("/streams/topics/batman"))
@@ -40,7 +40,7 @@ class PushAndSubStress extends Simulation {
   setUp(
     scenarioCreateTopic.inject(atOnceUsers(1)),
     scenarioListenerTopic.inject(atOnceUsers(1)),
-    scenarioOmnibus.inject(rampUsers(userNumber) over (60 seconds)))
+    scenarioOmnibus.inject(rampUsers(userNumber) over (30 seconds)))
     .protocols(
       http.baseURL("http://localhost:8080")
         .wsBaseURL("ws://localhost:8081")

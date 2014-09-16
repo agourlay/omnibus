@@ -10,8 +10,8 @@ class SinceIdSubscription extends Simulation {
 
   // starting app
   val app = omnibus.Boot
-  val publishNumber = 1000
-  val pulishSince = 10
+  val publishNumber = 100
+  val publishSince = 10
 
   val scenarioOmnibus = scenario("Test sinceId")
     .exec(
@@ -30,7 +30,7 @@ class SinceIdSubscription extends Simulation {
       )
     }
     .exec(ws("Subscribe to topic").open("/streams/topics/batman?react=since-id&since=10")
-      .check(wsAwait.within(5 seconds).expect(publishNumber - pulishSince)))
+      .check(wsAwait.within(5 seconds).expect(publishNumber - publishSince)))
 
   setUp(scenarioOmnibus.inject(atOnceUsers(1)))
     .protocols(

@@ -18,10 +18,8 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
 
   val random = new SecureRandom()
 
-  def nextSubId = new BigInteger(130, random).toString(32)
-
   val subNumber = metrics.gauge("subscribers")(subs.size)
-  var lookupMeter = metrics.meter("lookup")
+  val lookupMeter = metrics.meter("lookup")
 
   def receive = {
     case CreateSub(topics, responder, reactiveCmd, ip, support) => createSub(topics, responder, reactiveCmd, ip, support)
@@ -30,6 +28,8 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
     case Terminated(refSub)                                     => handleTerminated(refSub)
     case SubById(id)                                            => sender ! subLookup(id)
   }
+
+  def nextSubId = new BigInteger(130, random).toString(32)
 
   def subLookup(id: String) = {
     lookupMeter.mark()

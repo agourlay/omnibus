@@ -10,7 +10,7 @@ class SimpleSubscription extends Simulation {
 
   // starting app
   val app = omnibus.Boot
-  val publishNumber = 1000
+  val publishNumber = 100
 
   val scenarioOmnibus = scenario("Test simple subscription")
     .exec(
@@ -22,7 +22,7 @@ class SimpleSubscription extends Simulation {
         .get("/topics/batman")
         .check(status.is(200)))
     .exec(ws("Subscribe to topic").open("/streams/topics/batman")
-      .check(wsListen.within(30 seconds).until(publishNumber)))
+      .check(wsListen.within(20 seconds).until(publishNumber)))
     .repeat(publishNumber) {
       exec(
         http("push on topic")

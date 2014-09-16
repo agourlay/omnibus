@@ -10,7 +10,7 @@ class ReplaySubscription extends Simulation {
 
   // starting app
   val app = omnibus.Boot
-  val publishNumber = 1000
+  val publishNumber = 100
 
   val scenarioOmnibus = scenario("Test replay")
     .exec(

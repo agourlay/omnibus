@@ -19,12 +19,8 @@ object MessageObj {
       "timestamp: " + message.timestamp + "\n\n"
   }
 
-  def toMessageChunk(message: Message) = {
-    MessageChunk(toJson(message))
-  }
+  def toMessageChunk(message: Message) = MessageChunk(toJson(message))
 
-  def toMessageFrame(message: Message) = {
-    TextFrame(toJson(message))
-  }
+  def toMessageFrame(message: Message) = TextFrame(toJson(message))
 
 }

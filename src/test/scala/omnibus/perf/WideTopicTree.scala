@@ -11,7 +11,7 @@ class WideTopicTree extends Simulation {
 
   // starting app
   val app = omnibus.Boot
-  val width = 20
+  val width = 10
   val topicNameLength = 5
 
   def randomTopic(length: Int): String = "/" + Random.alphanumeric.take(topicNameLength).mkString
@@ -30,7 +30,7 @@ class WideTopicTree extends Simulation {
     }
 
   setUp(
-    scenarioOmnibus.inject(rampUsers(10) over (30 seconds)))
+    scenarioOmnibus.inject(rampUsers(10) over (10 seconds)))
     .protocols(
       http.baseURL("http://localhost:8080")
     )

@@ -26,7 +26,7 @@ class SubStress extends Simulation {
 
   setUp(
     scenarioCreateTopic.inject(atOnceUsers(1)),
-    scenarioOmnibus.inject(rampUsers(1000) over (30 seconds)))
+    scenarioOmnibus.inject(rampUsers(100) over (10 seconds)))
     .protocols(
       http.baseURL("http://localhost:8080")
         .wsBaseURL("ws://localhost:8081")

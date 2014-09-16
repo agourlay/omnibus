@@ -10,6 +10,7 @@ class PushStress extends Simulation {
 
   // starting app
   val app = omnibus.Boot
+  val userNumber = 10
 
   val scenarioCreateTopic = scenario("Create topic")
     .exec(
@@ -49,10 +50,10 @@ class PushStress extends Simulation {
 
   setUp(
     scenarioCreateTopic.inject(atOnceUsers(1)),
-    scenarioOmnibus.inject(rampUsers(100) over (30 seconds)))
+    scenarioOmnibus.inject(rampUsers(userNumber) over (10 seconds)))
     .protocols(
       http.baseURL("http://localhost:8080")
     )
     .assertions(
-      global.successfulRequests.percent.is(100), global.responseTime.max.lessThan(500), global.requestsPerSec.greaterThan(300))
+      global.successfulRequests.percent.is(100), global.responseTime.max.lessThan(500))
 }

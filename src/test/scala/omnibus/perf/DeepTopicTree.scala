@@ -11,7 +11,7 @@ class DeepTopicTree extends Simulation {
 
   // starting app
   val app = omnibus.Boot
-  val depth = 20
+  val depth = 10
   val topicNameLength = 5
 
   def randomTopic(depth: Int): String = {
@@ -27,7 +27,7 @@ class DeepTopicTree extends Simulation {
         .check(status.is(201)))
 
   setUp(
-    scenarioOmnibus.inject(rampUsers(10) over (30 seconds)))
+    scenarioOmnibus.inject(rampUsers(10) over (10 seconds)))
     .protocols(
       http.baseURL("http://localhost:8080")
     )

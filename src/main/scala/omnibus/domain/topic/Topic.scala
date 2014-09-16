@@ -13,14 +13,14 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
 
   var numEvents = 0L
   var lastReceivedTS = System.currentTimeMillis
+  var subscribers = Set.empty[ActorRef]
+  var subTopics = Map.empty[String, ActorRef]
+
   val creationDate = System.currentTimeMillis / 1000L
   val topicPath = TopicPath(self)
   val prettyPath = TopicPath.prettyStr(self)
 
-  var subscribers = Set.empty[ActorRef]
-  var subTopics = Map.empty[String, ActorRef]
-
-  var messageReceived = metrics.meter(s"$prettyPath.message-received")
+  val messageReceived = metrics.meter(s"$prettyPath.message-received")
   val subscribersNumber = metrics.counter(s"$prettyPath.subscribers")
   val subTopicsNumber = metrics.counter(s"$prettyPath.sub-topics")
 
@@ -45,7 +45,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   def view() = {
     val subTopicNumber = subTopics.size
     val prettyChildren = subTopics.values.map(TopicPath.prettyStr(_)).toSeq
-    val throughput = if (System.currentTimeMillis - lastReceivedTS > 5000) { 0 } else { Math.round(messageReceived.oneMinuteRate * 100.0) / 100.0 }
+    val throughput = if (System.currentTimeMillis - lastReceivedTS > 5000) 0 else Math.round(messageReceived.oneMinuteRate * 100.0) / 100.0
     TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents, throughput, creationDate)
   }
 
