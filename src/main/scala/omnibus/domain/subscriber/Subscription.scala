@@ -12,7 +12,7 @@ class Subscription(val topicId: String, val cmd: ReactiveCmd) extends Persistent
   val creationDate = System.currentTimeMillis / 1000L
 
   override def preStart() = {
-    log.info(s"Creating subscription on $viewId")
+    log.debug(s"Creating subscription on $viewId")
     triggerRecoveryWindow()
   }
 

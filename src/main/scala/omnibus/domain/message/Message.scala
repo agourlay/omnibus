@@ -12,15 +12,15 @@ case class Message(id: Long, topicPath: TopicPath, payload: String, timestamp: L
 
 object MessageObj {
 
-  def toJson(message: Message) = {
+  def toSSE(message: Message) = {
     "id: " + message.id + "\n" +
       "event: " + message.topicPath.prettyStr() + "\n" +
       "data: " + message.payload + "\n" +
       "timestamp: " + message.timestamp + "\n\n"
   }
 
-  def toMessageChunk(message: Message) = MessageChunk(toJson(message))
+  def toMessageChunk(message: Message) = MessageChunk(toSSE(message))
 
-  def toMessageFrame(message: Message) = TextFrame(toJson(message))
+  def toMessageFrame(message: Message) = TextFrame(toSSE(message))
 
 }

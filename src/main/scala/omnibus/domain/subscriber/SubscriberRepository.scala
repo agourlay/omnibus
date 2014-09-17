@@ -37,7 +37,7 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
   }
 
   def createSub(topics: Set[ActorRef], responder: ActorRef, cmd: ReactiveCmd, ip: String, support: SubscriberSupport) = {
-    log.info(s"Creating sub on topics $topics with support $support and channel $responder")
+    log.info(s"Creating sub on topics $topics with support $support and channel $responder with react $cmd")
     val newSub = context.actorOf(Subscriber.props(responder, topics, cmd))
     val newView = SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr(_)).mkString("+"), ip, cmd.react.toString, support.toString)
     subs += newView

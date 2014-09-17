@@ -58,5 +58,5 @@ class BasicRestCompliance extends Simulation {
     )
     .assertions(
       global.responseTime.max.lessThan(200),
-      global.successfulRequests.percent.is(100))
+      global.successfulRequests.percent.greaterThan(95))
 }

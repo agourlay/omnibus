@@ -46,5 +46,5 @@ class PushAndSubStress extends Simulation {
         .wsBaseURL("ws://localhost:8081")
     )
     .assertions(
-      global.successfulRequests.percent.is(100), global.responseTime.max.lessThan(500))
+      global.successfulRequests.percent.greaterThan(95), global.responseTime.max.lessThan(400))
 }

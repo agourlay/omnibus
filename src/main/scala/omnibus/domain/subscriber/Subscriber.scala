@@ -22,7 +22,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   override def preStart() = {
     val prettyTopics = TopicPath.prettySubscription(topics)
     val react = reactiveCmd.react
-    log.info(s"Creating sub on topics $prettyTopics with react $react")
+    log.debug(s"Creating sub on topics $prettyTopics with react $react")
 
     context.watch(channel)
 
@@ -58,13 +58,13 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   }
 
   def stopSubscription() {
-    log.info(s"End of subscriber $self")
+    log.debug(s"End of subscriber $self")
     self ! PoisonPill
   }
 
   def retryPending() {
     for (topic <- pendingTopic) {
-      log.info(s"Retry pending subcription to $topic")
+      log.debug(s"Retry pending subcription to $topic")
       topic ! TopicProtocol.Subscribe(self)
     }
   }
@@ -73,7 +73,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     topicListened += topicRef
     pendingTopic -= topicRef
     context.watch(topicRef)
-    log.info(s"successfully subscribed to $topicRef")
+    log.debug(s"successfully subscribed to $topicRef")
     // retrieve all children processor id
     topicRef ! TopicProtocol.CascadeProcessorId(self)
   }

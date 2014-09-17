@@ -55,5 +55,5 @@ class PushStress extends Simulation {
       http.baseURL("http://localhost:8080")
     )
     .assertions(
-      global.successfulRequests.percent.is(100), global.responseTime.max.lessThan(500))
+      global.successfulRequests.percent.greaterThan(95), global.responseTime.max.lessThan(400))
 }
