@@ -64,10 +64,9 @@ val test = project.in(file("."))
 libraryDependencies ++= {
   val akkaV         = "2.3.6"
   val sprayV        = "1.3.2-20140909"
-  val sprayJsonV    = "1.2.6"
+  val sprayJsonV    = "1.3.0"
   val sprayWsV      = "0.1.3"
   val logbackV      = "1.1.2"
-  val specs2V       = "2.4.2"
   val scalaCheckV   = "1.11.5"
   val scalaTestV    = "2.2.2"
   val akkaCassanV   = "0.3.3"
@@ -88,7 +87,6 @@ libraryDependencies ++= {
     ,"ch.qos.logback"        %  "logback-classic"               % logbackV             withSources()
     ,"io.spray"              %% "spray-testkit"                 % sprayV      % "test" withSources()
     ,"com.typesafe.akka"     %% "akka-testkit"                  % akkaV       % "test" withSources()
-    ,"org.specs2"            %% "specs2-core"                   % specs2V     % "test" withSources()
     ,"org.scalacheck"        %% "scalacheck"                    % scalaCheckV % "test" withSources()
     ,"org.scalatest"         %% "scalatest"                     % scalaTestV  % "test" withSources()
   )
