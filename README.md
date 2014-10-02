@@ -3,10 +3,10 @@ Omnibus  [![Build Status](https://travis-ci.org/agourlay/omnibus.png?branch=mast
 
 Omnibus is an HTTP-friendly persistent message bus which means :
 
-- Topic hierachies and subscriptions are managed via a rest API.
+- Topic hierarchies and subscriptions are managed via a rest API.
 - Updates are streamed by WebSocket or Server-Sent-Event.
 - With reactive modes it is possible to replay specific parts of the events.
-- Subscriptions can be composed via the url keyword +.
+- Subscriptions can be composed via the URL keyword +.
 - Most of the features can be accessed via the administration web interface.
 - Messages are persisted into Cassandra.
 

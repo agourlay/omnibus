@@ -30,8 +30,10 @@ scalariformSettings
 ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(AlignSingleLineCaseStatements, true)
   .setPreference(AlignSingleLineCaseStatements.MaxArrowIndent, 100)
+  .setPreference(AlignParameters, true)
   .setPreference(DoubleIndentClassDeclaration, true)
   .setPreference(PreserveDanglingCloseParenthesis, true)
+  .setPreference(RewriteArrowSymbols, true)
 
 mappings in Universal += {
   file("src/main/resources/application.conf") -> "conf/omnibus.conf"
@@ -52,8 +54,8 @@ resolvers ++= Seq(
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
-    val gatlingV     = "2.0.0-RC5"
-    val gatlingTestV = "1.0-RC5"
+    val gatlingV     = "2.0.0-RC6"
+    val gatlingTestV = "1.0-RC6"
     Seq(
        "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV     % "test"
       ,"io.gatling"            % "test-framework"            % gatlingTestV % "test"
@@ -67,7 +69,7 @@ libraryDependencies ++= {
   val sprayJsonV    = "1.3.0"
   val sprayWsV      = "0.1.3"
   val logbackV      = "1.1.2"
-  val scalaCheckV   = "1.11.5"
+  val scalaCheckV   = "1.11.6"
   val scalaTestV    = "2.2.2"
   val akkaCassanV   = "0.3.3"
   val scalaMetricsV = "3.3.0_a2.3"
