@@ -26,15 +26,15 @@ class TopicContent(val topicPath: TopicPath) extends PersistentActor with ActorL
   }
 
   val receiveRecover: Receive = {
-    case _ => log.debug("no recovery write only model")
+    case _ ⇒ log.debug("no recovery write only model")
   }
 
   val receiveCommand: Receive = {
-    case Publish(message, replyTo) => publishMessage(message, replyTo)
-    case DeleteContent             => deleteTopicContent()
-    case PurgeTopicContent         => purgeOldContent()
-    case PurgeFrom(id)             => deleteMessages(id, true)
-    case FwProcessorId(replyTo)    => replyTo ! TopicContentProtocol.ProcessorId(persistenceId)
+    case Publish(message, replyTo) ⇒ publishMessage(message, replyTo)
+    case DeleteContent             ⇒ deleteTopicContent()
+    case PurgeTopicContent         ⇒ purgeOldContent()
+    case PurgeFrom(id)             ⇒ deleteMessages(id, true)
+    case FwProcessorId(replyTo)    ⇒ replyTo ! TopicContentProtocol.ProcessorId(persistenceId)
   }
 
   override def postStop() = {
@@ -57,7 +57,7 @@ class TopicContent(val topicPath: TopicPath) extends PersistentActor with ActorL
 
   def publishMessage(message: String, replyTo: ActorRef) = {
     val event = Message(lastSequenceNr + 1, topicPath, message)
-    persistAsync(event) { evt =>
+    persistAsync(event) { evt ⇒
       context.parent ! TopicContentProtocol.Saved(replyTo)
     }
   }

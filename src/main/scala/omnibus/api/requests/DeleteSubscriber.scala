@@ -1,6 +1,6 @@
 package omnibus.api.request
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.routing._
 import spray.http._
@@ -15,13 +15,13 @@ class DeleteSubscriber(subId: String, ctx: RequestContext, subRepo: ActorRef) ex
   override def receive = super.receive orElse waitingLookup
 
   def waitingLookup: Receive = {
-    case SubLookup(optView) => handleLookup(optView)
+    case SubLookup(optView) ⇒ handleLookup(optView)
   }
 
   def handleLookup(optView: Option[SubscriberView]) = {
     optView match {
-      case None => ctx.complete(new SubscriberNotFoundException(subId))
-      case Some(subView) => {
+      case None ⇒ ctx.complete(new SubscriberNotFoundException(subId))
+      case Some(subView) ⇒ {
         subRepo ! SubscriberRepositoryProtocol.KillSub(subId)
         context.become(super.receive orElse waitingAck)
       }
@@ -29,7 +29,7 @@ class DeleteSubscriber(subId: String, ctx: RequestContext, subRepo: ActorRef) ex
   }
 
   def waitingAck: Receive = {
-    case SubKilled(_) => requestOver(StatusCodes.Accepted, s"Subscriber $subId deleted\n")
+    case SubKilled(_) ⇒ requestOver(StatusCodes.Accepted, s"Subscriber $subId deleted\n")
   }
 }
 

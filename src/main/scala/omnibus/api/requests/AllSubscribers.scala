@@ -1,6 +1,6 @@
 package omnibus.api.request
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
@@ -19,7 +19,7 @@ class AllSubscribers(ctx: RequestContext, subRepo: ActorRef) extends RestRequest
   override def receive = super.receive orElse waitingLookup
 
   def waitingLookup: Receive = {
-    case Subscribers(subs) => requestOver(subs)
+    case Subscribers(subs) ⇒ requestOver(subs)
   }
 }
 

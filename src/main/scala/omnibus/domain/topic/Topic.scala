@@ -27,19 +27,19 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   val contentHolder = context.actorOf(TopicContent.props(topicPath), "internal-topic-content")
 
   def receive = {
-    case PublishMessage(message)             => contentHolder ! TopicContentProtocol.Publish(message, sender)
-    case Subscribe(subscriber)               => subscribe(subscriber)
-    case Unsubscribe(subscriber)             => unsubscribe(subscriber)
-    case CreateSubTopic(topics, replyTo)     => createSubTopic(topics, replyTo)
-    case Terminated(refSub)                  => handleTerminated(refSub)
-    case Delete                              => deleteTopic()
-    case Leaves(replyTo)                     => leaves(replyTo)
-    case View                                => sender ! view()
-    case CascadeProcessorId(replyTo)         => cascadeProcessorId(replyTo)
-    case ProcessorId(replyTo)                => contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
-    case Propagation(operation, direction)   => handlePropagation(operation, direction)
-    case NewTopicDownTheTree(newTopic)       => notifySubscribersOnNewTopic(newTopic)
-    case TopicContentProtocol.Saved(replyTo) => messageSaved(replyTo)
+    case PublishMessage(message)             ⇒ contentHolder ! TopicContentProtocol.Publish(message, sender)
+    case Subscribe(subscriber)               ⇒ subscribe(subscriber)
+    case Unsubscribe(subscriber)             ⇒ unsubscribe(subscriber)
+    case CreateSubTopic(topics, replyTo)     ⇒ createSubTopic(topics, replyTo)
+    case Terminated(refSub)                  ⇒ handleTerminated(refSub)
+    case Delete                              ⇒ deleteTopic()
+    case Leaves(replyTo)                     ⇒ leaves(replyTo)
+    case View                                ⇒ sender ! view()
+    case CascadeProcessorId(replyTo)         ⇒ cascadeProcessorId(replyTo)
+    case ProcessorId(replyTo)                ⇒ contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
+    case Propagation(operation, direction)   ⇒ handlePropagation(operation, direction)
+    case NewTopicDownTheTree(newTopic)       ⇒ notifySubscribersOnNewTopic(newTopic)
+    case TopicContentProtocol.Saved(replyTo) ⇒ messageSaved(replyTo)
   }
 
   def view() = {
@@ -51,7 +51,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
 
   def leaves(replyTo: ActorRef) {
     if (subTopics.isEmpty) replyTo ! view()
-    else for (sub <- subTopics.values) sub ! TopicProtocol.Leaves(replyTo)
+    else for (sub ← subTopics.values) sub ! TopicProtocol.Leaves(replyTo)
   }
 
   def deleteTopic() {
@@ -65,8 +65,8 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   }
 
   def propagateToDirection(operation: Operation, direction: PropagationDirection) = direction match {
-    case PropagationDirection.UP   => propagateToParent(operation)
-    case PropagationDirection.DOWN => propagateToSubTopics(operation)
+    case PropagationDirection.UP   ⇒ propagateToParent(operation)
+    case PropagationDirection.DOWN ⇒ propagateToSubTopics(operation)
   }
 
   def propagateToParent(operation: Operation) = {
@@ -121,8 +121,8 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   }
 
   def createSubTopic(topics: List[String], replyTo: ActorRef) = topics match {
-    case head :: tail => createTopicAndForward(head, tail, replyTo)
-    case _            => onTopicCreation(replyTo)
+    case head :: tail ⇒ createTopicAndForward(head, tail, replyTo)
+    case _            ⇒ onTopicCreation(replyTo)
   }
 
   def onTopicCreation(replyTo: ActorRef) = {
@@ -136,7 +136,7 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
 
   def notifySubscribersOnNewTopic(newTopicRef: ActorRef) = sendToSubscribers(TopicProtocol.TopicCreated(newTopicRef))
 
-  def sendToSubscribers(stuff: Any) = subscribers.foreach { actorRef => actorRef ! stuff }
+  def sendToSubscribers(stuff: Any) = subscribers.foreach { actorRef ⇒ actorRef ! stuff }
 
   def createTopicAndForward(subTopic: String, topics: List[String], replyTo: ActorRef) = {
     log.debug(s"Create sub topic $subTopic and forward $topics")

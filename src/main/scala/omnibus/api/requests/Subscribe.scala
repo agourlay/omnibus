@@ -1,6 +1,6 @@
 package omnibus.api.request
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.routing._
 
@@ -16,18 +16,18 @@ class Subscribe(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx:
   var ack = Set.empty[ActorRef]
 
   val topics = TopicPath.multi(topicPath.prettyStr)
-  topics foreach { topic =>
+  topics foreach { topic ⇒
     pending += topic
     topicRepo ! TopicRepositoryProtocol.LookupTopic(topic)
   }
 
   override def receive = {
-    case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
+    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case None => ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
-    case Some(ref) => {
+    case None ⇒ ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
+    case Some(ref) ⇒ {
       ack += ref
       if (ack.size == pending.size) {
         val httpSub = context.actorOf(HttpTopicSubscriber.props(ctx.responder, reactiveCmd))

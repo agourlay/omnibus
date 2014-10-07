@@ -1,6 +1,6 @@
 package omnibus.domain.topic
 
-import akka.actor._
+import akka.actor.ActorRef
 
 case class TopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef])
 

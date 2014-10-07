@@ -1,6 +1,6 @@
 package omnibus.api.streaming
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.http._
 
@@ -9,10 +9,10 @@ import omnibus.domain.topic._
 
 class HttpTopicLeaves(responder: ActorRef, roots: List[ActorRef]) extends StreamingResponse(responder) {
 
-  for (root <- roots) root ! TopicProtocol.Leaves(self)
+  for (root ← roots) root ! TopicProtocol.Leaves(self)
 
   override def receive = ({
-    case topic: TopicView => responder ! MessageChunk("data: " + formatTopicView.write(topic) + "\n\n")
+    case topic: TopicView ⇒ responder ! MessageChunk("data: " + formatTopicView.write(topic) + "\n\n")
   }: Receive) orElse super.receive
 }
 

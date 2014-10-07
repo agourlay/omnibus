@@ -1,6 +1,6 @@
 package omnibus.metrics
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props, ActorLogging }
 
 import java.util.concurrent.TimeUnit
 
@@ -22,7 +22,7 @@ class MetricsReporter extends Actor with ActorLogging with Instrumented {
 
   JmxReporter.forRegistry(metricRegistry).build().start()
 
-  log.info(s"Starting MetricsReporter to JMX")
+  log.info("Starting MetricsReporter to JMX")
 
   if (Settings(system).Graphite.Enable) {
     val graphiteHost = Settings(system).Graphite.Host
@@ -42,11 +42,11 @@ class MetricsReporter extends Actor with ActorLogging with Instrumented {
   }
 
   def receive = {
-    case All       => sender ! metricsByName(MetricsReporter.allMetrics)
-    case Requests  => sender ! metricsByName(MetricsReporter.requestsMetrics)
-    case Streaming => sender ! metricsByName(MetricsReporter.streamingMetrics)
-    case TopicRepo => sender ! metricsByName(MetricsReporter.topicMetrics)
-    case SubRepo   => sender ! metricsByName(MetricsReporter.subRepoMetrics)
+    case All       ⇒ sender ! metricsByName(MetricsReporter.allMetrics)
+    case Requests  ⇒ sender ! metricsByName(MetricsReporter.requestsMetrics)
+    case Streaming ⇒ sender ! metricsByName(MetricsReporter.streamingMetrics)
+    case TopicRepo ⇒ sender ! metricsByName(MetricsReporter.topicMetrics)
+    case SubRepo   ⇒ sender ! metricsByName(MetricsReporter.subRepoMetrics)
   }
 
   def metricsByName(name: String) = {

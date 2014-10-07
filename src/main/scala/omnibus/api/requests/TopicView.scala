@@ -1,6 +1,6 @@
 package omnibus.api.request
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
@@ -19,19 +19,19 @@ class ViewTopic(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) 
   override def receive = super.receive orElse waitingLookup
 
   def waitingTopicView: Receive = {
-    case tv: TopicView => requestOver(tv)
+    case tv: TopicView ⇒ requestOver(tv)
   }
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
+    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case Some(ref) => {
+    case Some(ref) ⇒ {
       ref ! TopicProtocol.View
       context.become(super.receive orElse waitingTopicView)
     }
-    case None => requestOver(new TopicNotFoundException(topicPath.prettyStr))
+    case None ⇒ requestOver(new TopicNotFoundException(topicPath.prettyStr))
   }
 }
 

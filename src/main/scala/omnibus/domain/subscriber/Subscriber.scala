@@ -27,7 +27,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
     context.watch(channel)
 
     // subscribe to every topic
-    for (topic <- topics) { topic ! TopicProtocol.Subscribe(self) }
+    for (topic ← topics) { topic ! TopicProtocol.Subscribe(self) }
 
     // schedule pending retry every minute
     pendingScheduler = context.system.scheduler.schedule(1 minute, 1 minute, self, SubscriberProtocol.RetryPending)
@@ -39,14 +39,14 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   }
 
   def receive = {
-    case AcknowledgeSub(topicRef)                      => ackSubscription(topicRef)
-    case AcknowledgeUnsub(topicRef)                    => topicListened -= topicRef
-    case StopSubscription                              => stopSubscription()
-    case RetryPending                                  => retryPending()
-    case message: Message                              => channel ! message
-    case Terminated(ref)                               => stopSubscription()
-    case TopicContentProtocol.ProcessorId(processorId) => setupSubscription(processorId)
-    case TopicProtocol.TopicCreated(newTopicRef)       => topicCreatedWithinSub(newTopicRef)
+    case AcknowledgeSub(topicRef)                      ⇒ ackSubscription(topicRef)
+    case AcknowledgeUnsub(topicRef)                    ⇒ topicListened -= topicRef
+    case StopSubscription                              ⇒ stopSubscription()
+    case RetryPending                                  ⇒ retryPending()
+    case message: Message                              ⇒ channel ! message
+    case Terminated(ref)                               ⇒ stopSubscription()
+    case TopicContentProtocol.ProcessorId(processorId) ⇒ setupSubscription(processorId)
+    case TopicProtocol.TopicCreated(newTopicRef)       ⇒ topicCreatedWithinSub(newTopicRef)
   }
 
   def topicCreatedWithinSub(newTopicRef: ActorRef) {
@@ -63,7 +63,7 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
   }
 
   def retryPending() {
-    for (topic <- pendingTopic) {
+    for (topic ← pendingTopic) {
       log.debug(s"Retry pending subcription to $topic")
       topic ! TopicProtocol.Subscribe(self)
     }

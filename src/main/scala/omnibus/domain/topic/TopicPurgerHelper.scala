@@ -24,8 +24,8 @@ class TopicPurgerHelper(val topicId: String, val timeLimit: Long) extends Persis
   val replyScheduler = system.scheduler.schedule(replyDelay, replyDelay, self, Reply)
 
   def receive = {
-    case msg: Message => if (msg.timestamp < timeLimit) lastMatchingId = Some(msg.id)
-    case Reply        => replyToParent()
+    case msg: Message ⇒ if (msg.timestamp < timeLimit) lastMatchingId = Some(msg.id)
+    case Reply        ⇒ replyToParent()
   }
 
   override def postStop() = {
@@ -34,8 +34,8 @@ class TopicPurgerHelper(val topicId: String, val timeLimit: Long) extends Persis
 
   def replyToParent() = {
     lastMatchingId match {
-      case Some(id) => context.parent ! PurgeFrom(id)
-      case None     => log.info("Nothing to purge yet")
+      case Some(id) ⇒ context.parent ! PurgeFrom(id)
+      case None     ⇒ log.info("Nothing to purge yet")
     }
     self ! PoisonPill
   }

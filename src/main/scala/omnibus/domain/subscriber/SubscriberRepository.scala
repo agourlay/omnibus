@@ -22,11 +22,11 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
   val lookupMeter = metrics.meter("lookup")
 
   def receive = {
-    case CreateSub(topics, responder, reactiveCmd, ip, support) => createSub(topics, responder, reactiveCmd, ip, support)
-    case KillSub(id)                                            => killSub(id, sender)
-    case AllSubs                                                => sender ! Subscribers(subs.toList)
-    case Terminated(refSub)                                     => handleTerminated(refSub)
-    case SubById(id)                                            => sender ! subLookup(id)
+    case CreateSub(topics, responder, reactiveCmd, ip, support) ⇒ createSub(topics, responder, reactiveCmd, ip, support)
+    case KillSub(id)                                            ⇒ killSub(id, sender)
+    case AllSubs                                                ⇒ sender ! Subscribers(subs.toList)
+    case Terminated(refSub)                                     ⇒ handleTerminated(refSub)
+    case SubById(id)                                            ⇒ sender ! subLookup(id)
   }
 
   def nextSubId = new BigInteger(130, random).toString(32)
@@ -46,8 +46,8 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
 
   def killSub(id: String, replyTo: ActorRef) = {
     subs.find(_.id == id) match {
-      case None => log.info(s"Cannot delete unknown subscriber $id")
-      case Some(sub) => {
+      case None ⇒ log.info(s"Cannot delete unknown subscriber $id")
+      case Some(sub) ⇒ {
         sub.ref ! PoisonPill
         subs -= (sub)
         replyTo ! SubKilled(id)
@@ -58,8 +58,8 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
 
   def handleTerminated(deadRef: ActorRef) = {
     subs.find(_.ref == deadRef) match {
-      case Some(sub) => subs -= (sub)
-      case None      => log.debug(s"Can not find dead subscriber in repository")
+      case Some(sub) ⇒ subs -= (sub)
+      case None      ⇒ log.debug(s"Can not find dead subscriber in repository")
     }
   }
 }

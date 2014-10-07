@@ -1,6 +1,6 @@
 package omnibus.configuration
 
-import akka.actor._
+import akka.actor.ActorContext
 import spray.routing.authentication._
 import scala.concurrent.Future
 
@@ -10,7 +10,7 @@ object Security {
     implicit def executionContext = context.dispatcher
 
     Future {
-      if (userPass.exists(up => up.user == Settings(system).Admin.Name && up.pass == Settings(system).Admin.Password))
+      if (userPass.exists(up ⇒ up.user == Settings(system).Admin.Name && up.pass == Settings(system).Admin.Password))
         Some(Settings(system).Admin.Name)
       else None
     }

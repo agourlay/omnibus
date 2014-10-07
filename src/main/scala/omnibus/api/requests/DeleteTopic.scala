@@ -1,6 +1,6 @@
 package omnibus.api.request
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.routing._
 import spray.http._
@@ -15,23 +15,23 @@ class DeleteTopic(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef
   override def receive = super.receive orElse waitingLookup
 
   def waitingAck: Receive = {
-    case TopicDeletedFromRepo(topicPath) => {
+    case TopicDeletedFromRepo(topicPath) ⇒ {
       val prettyTopic = topicPath.prettyStr()
       requestOver(StatusCodes.Accepted, s"Topic $prettyTopic deleted\n")
     }
   }
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
+    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case Some(ref) => {
+    case Some(ref) ⇒ {
       ref ! TopicProtocol.Delete
       topicRepo ! TopicRepositoryProtocol.DeleteTopic(topicPath)
       context.become(super.receive orElse waitingAck)
     }
-    case None => requestOver(new TopicNotFoundException(topicPath.prettyStr))
+    case None ⇒ requestOver(new TopicNotFoundException(topicPath.prettyStr))
   }
 }
 

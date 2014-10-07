@@ -1,6 +1,6 @@
 package omnibus.api.route
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props, ActorContext }
 
 import spray.routing._
 
@@ -14,19 +14,19 @@ class StatsRoute(topicRepo: ActorRef, metricsRepo: ActorRef)(implicit context: A
 
   val route =
     pathPrefix("stats") {
-      parameters('mode.as[StatisticsMode] ? StatisticsMode.LIVE) { mode =>
+      parameters('mode.as[StatisticsMode] ? StatisticsMode.LIVE) { mode ⇒
         path("metrics") {
-          get { ctx =>
+          get { ctx ⇒
             context.actorOf(AllMetrics.props(ctx, metricsRepo))
           }
         } ~
-          pathPrefix("topics" / Rest) { topic =>
+          pathPrefix("topics" / Rest) { topic ⇒
             validate(!topic.isEmpty, "topic name cannot be empty \n") {
               val topicPath = TopicPath(topic)
-              get { ctx =>
+              get { ctx ⇒
                 mode match {
-                  case StatisticsMode.LIVE      => context.actorOf(ViewTopic.props(topicPath, ctx, topicRepo))
-                  case StatisticsMode.STREAMING => context.actorOf(HttpTopicView.props(topicPath, ctx, topicRepo))
+                  case StatisticsMode.LIVE      ⇒ context.actorOf(ViewTopic.props(topicPath, ctx, topicRepo))
+                  case StatisticsMode.STREAMING ⇒ context.actorOf(HttpTopicView.props(topicPath, ctx, topicRepo))
                 }
               }
             }

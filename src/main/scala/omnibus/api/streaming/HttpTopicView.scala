@@ -1,6 +1,6 @@
 package omnibus.api.streaming
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props, PoisonPill }
 
 import spray.routing._
 import spray.http._
@@ -23,22 +23,22 @@ class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorR
   override def receive = waitingLookup orElse super.receive
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
+    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case Some(topicRef) => {
+    case Some(topicRef) ⇒ {
       context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
       context.become(handleStream orElse super.receive)
     }
-    case None => {
+    case None ⇒ {
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
       self ! PoisonPill
     }
   }
 
   def handleStream: Receive = {
-    case topic: TopicView => ctx.responder ! MessageChunk("data: " + formatTopicView.write(topic) + "\n\n")
+    case topic: TopicView ⇒ ctx.responder ! MessageChunk("data: " + formatTopicView.write(topic) + "\n\n")
   }
 }
 

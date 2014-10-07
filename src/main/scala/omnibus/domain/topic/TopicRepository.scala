@@ -61,27 +61,27 @@ class TopicRepository extends PersistentActor with ActorLogging with Instrumente
   }
 
   val receiveRecover: Receive = {
-    case t: TopicRepoStateValue => {
+    case t: TopicRepoStateValue ⇒ {
       createTopic(t.topicPath, self) //ack on self but no used
       updateState(TopicRepoStateValue(t.seqNumber, t.topicPath))
     }
-    case SnapshotOffer(_, snapshot: TopicRepoState) => {
+    case SnapshotOffer(_, snapshot: TopicRepoState) ⇒ {
       state = snapshot
-      state.events foreach { t => createTopic(t.topicPath, self) } //ack on self but no used
+      state.events foreach { t ⇒ createTopic(t.topicPath, self) } //ack on self but no used
     }
   }
 
   val receiveCommand: Receive = {
-    case CreateTopic(topic)        => cb.withSyncCircuitBreaker(persistTopic(topic, sender))
-    case DeleteTopic(topic)        => sender ! cb.withSyncCircuitBreaker(deleteTopic(topic))
-    case AllRoots                  => sender ! cb.withSyncCircuitBreaker(allRoots())
-    case AllLeaves(replyTo)        => allLeaves(replyTo)
-    case LookupTopic(topic)        => lookUpTopic(topic) pipeTo sender()
-    case TopicProtocol.Propagation => log.debug("message propagation reached Repo")
+    case CreateTopic(topic)        ⇒ cb.withSyncCircuitBreaker(persistTopic(topic, sender))
+    case DeleteTopic(topic)        ⇒ sender ! cb.withSyncCircuitBreaker(deleteTopic(topic))
+    case AllRoots                  ⇒ sender ! cb.withSyncCircuitBreaker(allRoots())
+    case AllLeaves(replyTo)        ⇒ allLeaves(replyTo)
+    case LookupTopic(topic)        ⇒ lookUpTopic(topic) pipeTo sender()
+    case TopicProtocol.Propagation ⇒ log.debug("message propagation reached Repo")
   }
 
   def persistTopic(topicPath: TopicPath, replyTo: ActorRef) = {
-    persistAsync(TopicRepoStateValue(lastSequenceNr + 1, topicPath)) { t =>
+    persistAsync(TopicRepoStateValue(lastSequenceNr + 1, topicPath)) { t ⇒
       createTopic(t.topicPath, replyTo)
       updateState(TopicRepoStateValue(lastSequenceNr, topicPath))
     }
@@ -107,9 +107,9 @@ class TopicRepository extends PersistentActor with ActorLogging with Instrumente
     val topic = topicPath.prettyStr
     log.debug(s"Lookup in cache for topic $topic")
     val futureOpt: Future[ActorRef] = mostAskedTopic(topicPath) { context.actorSelection(topic).resolveOne }
-    futureOpt.map { topicRef => Some(topicRef) }
-      .recover { case e: Exception => log.debug(s"$e"); mostAskedTopic.remove(topicPath); None }
-      .map { optTopicRef => TopicPathRef(topicPath, optTopicRef) }
+    futureOpt.map { topicRef ⇒ Some(topicRef) }
+      .recover { case e: Exception ⇒ log.debug(s"$e"); mostAskedTopic.remove(topicPath); None }
+      .map { optTopicRef ⇒ TopicPathRef(topicPath, optTopicRef) }
   }
 
   def deleteTopic(topicPath: TopicPath) = {
@@ -120,8 +120,8 @@ class TopicRepository extends PersistentActor with ActorLogging with Instrumente
       rootTopics -= topicName
     }
     state.events.find(_.topicPath == topicPath) match {
-      case None => log.info(s"Cannot find topic in repo state")
-      case Some(topic) => {
+      case None ⇒ log.info(s"Cannot find topic in repo state")
+      case Some(topic) ⇒ {
         topicsNumber -= 1
         // FIXME : should not delete message if it is valid
         deleteMessage(topic.seqNumber, true)

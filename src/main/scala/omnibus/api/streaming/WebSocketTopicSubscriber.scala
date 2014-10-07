@@ -1,6 +1,6 @@
 package omnibus.api.streaming
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.routing._
 
@@ -15,19 +15,19 @@ class WebSocketTopicSubscriber(topicPath: TopicPath, reactiveCmd: ReactiveCmd, i
   var ack = Set.empty[ActorRef]
 
   val topics = TopicPath.multi(topicPath.prettyStr)
-  topics foreach { topic =>
+  topics foreach { topic ⇒
     pending += topic
     topicRepo ! TopicRepositoryProtocol.LookupTopic(topic)
   }
 
   override def receive: Receive = {
-    case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
+    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case None =>
+    case None ⇒
       context.parent ! new TopicNotFoundException(topicPath.prettyStr)
-    case Some(ref) => {
+    case Some(ref) ⇒ {
       ack += ref
       if (ack.size == pending.size) {
         subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, context.parent, reactiveCmd, ip, SubscriberSupport.WS)

@@ -1,6 +1,6 @@
 package omnibus.api.request
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.routing._
 import spray.json._
@@ -21,19 +21,19 @@ class CreateTopic(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef
   override def receive = super.receive orElse waitingLookup
 
   def waitingAck: Receive = {
-    case TopicCreated(topicRef) => {
+    case TopicCreated(topicRef) ⇒ {
       val prettyTopic = topicPath.prettyStr()
       requestOver(StatusCodes.Created, Location(ctx.request.uri) :: Nil, s"Topic $prettyTopic created \n")
     }
   }
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, optRef) => handleTopicPathRef(topicPath, optRef)
+    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case Some(ref) => requestOver(new TopicAlreadyExistsException(topicPath.prettyStr()))
-    case None => {
+    case Some(ref) ⇒ requestOver(new TopicAlreadyExistsException(topicPath.prettyStr()))
+    case None ⇒ {
       topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)
       context.become(super.receive orElse waitingAck)
     }

@@ -54,8 +54,8 @@ resolvers ++= Seq(
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
-    val gatlingV     = "2.0.0-RC6"
-    val gatlingTestV = "1.0-RC6"
+    val gatlingV     = "2.0.0"
+    val gatlingTestV = "1.0"
     Seq(
        "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV     % "test"
       ,"io.gatling"            % "test-framework"            % gatlingTestV % "test"
@@ -69,9 +69,8 @@ libraryDependencies ++= {
   val sprayJsonV    = "1.3.0"
   val sprayWsV      = "0.1.3"
   val logbackV      = "1.1.2"
-  val scalaCheckV   = "1.11.6"
   val scalaTestV    = "2.2.2"
-  val akkaCassanV   = "0.3.3"
+  val akkaCassanV   = "0.3.4"
   val scalaMetricsV = "3.3.0_a2.3"
   val metricsV      = "3.1.0"
   Seq(
@@ -89,7 +88,6 @@ libraryDependencies ++= {
     ,"ch.qos.logback"        %  "logback-classic"               % logbackV             withSources()
     ,"io.spray"              %% "spray-testkit"                 % sprayV      % "test" withSources()
     ,"com.typesafe.akka"     %% "akka-testkit"                  % akkaV       % "test" withSources()
-    ,"org.scalacheck"        %% "scalacheck"                    % scalaCheckV % "test" withSources()
     ,"org.scalatest"         %% "scalatest"                     % scalaTestV  % "test" withSources()
   )
 }

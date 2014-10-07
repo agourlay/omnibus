@@ -1,6 +1,6 @@
 package omnibus.domain.message
 
-import spray.http._
+import spray.http.MessageChunk
 import spray.can.websocket.frame.{ BinaryFrame, TextFrame }
 
 import omnibus.domain.topic.TopicPath

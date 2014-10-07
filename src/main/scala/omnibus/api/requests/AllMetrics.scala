@@ -1,6 +1,6 @@
 package omnibus.api.request
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
@@ -20,7 +20,7 @@ class AllMetrics(ctx: RequestContext, metricsRepo: ActorRef) extends RestRequest
   override def receive = super.receive orElse waitingMetrics
 
   def waitingMetrics: Receive = {
-    case MetricsReport(metrics) => requestOver(metrics)
+    case MetricsReport(metrics) ⇒ requestOver(metrics)
   }
 }
 

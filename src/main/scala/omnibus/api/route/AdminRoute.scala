@@ -1,6 +1,6 @@
 package omnibus.api.route
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props, ActorContext }
 
 import spray.routing._
 import spray.routing.authentication._
@@ -15,25 +15,25 @@ class AdminRoute(topicRepo: ActorRef, subRepo: ActorRef)(implicit context: Actor
 
   val route =
     pathPrefix("admin") {
-      authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName =>
-        pathPrefix("topics" / Rest) { topic =>
+      authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName ⇒
+        pathPrefix("topics" / Rest) { topic ⇒
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
-            delete { ctx =>
+            delete { ctx ⇒
               context.actorOf(DeleteTopic.props(TopicPath(topic), ctx, topicRepo))
             }
           }
         } ~
           path("subscribers") {
-            get { ctx =>
+            get { ctx ⇒
               context.actorOf(AllSubscribers.props(ctx, subRepo))
             }
           } ~
-          path("subscribers" / Rest) { sub =>
+          path("subscribers" / Rest) { sub ⇒
             validate(!sub.isEmpty, "sub id cannot be empty \n") {
-              get { ctx =>
+              get { ctx ⇒
                 context.actorOf(Subscriber.props(sub, ctx, subRepo))
               } ~
-                delete { ctx =>
+                delete { ctx ⇒
                   context.actorOf(DeleteSubscriber.props(sub, ctx, subRepo))
                 }
             }

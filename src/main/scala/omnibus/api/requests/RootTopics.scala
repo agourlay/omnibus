@@ -1,6 +1,6 @@
 package omnibus.api.request
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
@@ -21,7 +21,7 @@ class RootTopics(ctx: RequestContext, topicRepo: ActorRef) extends RestRequest(c
   var roots = Set.empty[TopicView]
 
   def waitingTopicsPathRef: Receive = {
-    case Roots(rootsPath) => {
+    case Roots(rootsPath) ⇒ {
       if (rootsPath.isEmpty) {
         requestOver(roots)
       } else {
@@ -32,7 +32,7 @@ class RootTopics(ctx: RequestContext, topicRepo: ActorRef) extends RestRequest(c
   }
 
   def waitingTopicsView(expected: Integer): Receive = {
-    case rootView: TopicView => {
+    case rootView: TopicView ⇒ {
       roots += rootView
       if (roots.size == expected) {
         requestOver(roots)
