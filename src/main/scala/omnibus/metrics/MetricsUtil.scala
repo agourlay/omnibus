@@ -5,32 +5,19 @@ import spray.json._
 import DefaultJsonProtocol._
 import MetricsJson._
 
-// TODO This MUST go away...
 object MetricsUtil {
-  def magic(java: Any): JsValue = {
-    if (java.isInstanceOf[com.codahale.metrics.Timer]) {
-      val timer = new Timer(java.asInstanceOf[com.codahale.metrics.Timer])
-      return formatTimer.write(timer)
-    }
-    if (java.isInstanceOf[com.codahale.metrics.Gauge[Int]]) {
-      val gauge = new Gauge(java.asInstanceOf[com.codahale.metrics.Gauge[Int]])
-      return formatGauge.write(gauge)
-    }
-    if (java.isInstanceOf[com.codahale.metrics.Meter]) {
-      val meter = new Meter(java.asInstanceOf[com.codahale.metrics.Meter])
-      return formatMeter.write(meter)
-    }
-    if (java.isInstanceOf[com.codahale.metrics.Counter]) {
-      val counter = new Counter(java.asInstanceOf[com.codahale.metrics.Counter])
-      return formatCounter.write(counter)
-    }
-    throw new RuntimeException("From java with love")
+  def magic(java: Any): JsValue = java match {
+    case j: com.codahale.metrics.Timer      ⇒ fmtTimer.write(new Timer(j))
+    case j: com.codahale.metrics.Gauge[Int] ⇒ fmtGauge.write(new Gauge(j))
+    case j: com.codahale.metrics.Meter      ⇒ fmtMeter.write(new Meter(j))
+    case j: com.codahale.metrics.Counter    ⇒ fmtCounter.write(new Counter(j))
+    case _                                  ⇒ throw new RuntimeException("From java with love")
   }
 }
 
 object MetricsJson {
 
-  implicit val formatCounter = new RootJsonFormat[Counter] {
+  implicit val fmtCounter = new RootJsonFormat[Counter] {
     def write(obj: Counter) = JsObject(
       "count" -> JsNumber(obj.count)
     )
@@ -38,7 +25,7 @@ object MetricsJson {
     def read(json: JsValue): Counter = ???
   }
 
-  implicit val formatGauge = new RootJsonFormat[Gauge[Int]] {
+  implicit val fmtGauge = new RootJsonFormat[Gauge[Int]] {
     def write(obj: Gauge[Int]) = JsObject(
       "count" -> JsNumber(obj.value)
     )
@@ -46,7 +33,7 @@ object MetricsJson {
     def read(json: JsValue): Gauge[Int] = ???
   }
 
-  implicit val formatMeter = new RootJsonFormat[Meter] {
+  implicit val fmtMeter = new RootJsonFormat[Meter] {
     def write(obj: Meter) = JsObject(
       "count" -> JsNumber(obj.count),
       "fifteenMinuteRate" -> JsNumber(obj.fifteenMinuteRate),
@@ -58,7 +45,7 @@ object MetricsJson {
     def read(json: JsValue): Meter = ???
   }
 
-  implicit val formatTimer = new RootJsonFormat[Timer] {
+  implicit val fmtTimer: RootJsonFormat[Timer] = new RootJsonFormat[Timer] {
     def write(obj: Timer) = JsObject(
       "count" -> JsNumber(obj.count),
       "max" -> JsNumber(obj.max / 1000000),
