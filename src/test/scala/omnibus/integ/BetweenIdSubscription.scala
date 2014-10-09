@@ -1,4 +1,4 @@
-package omnibus.test.perf
+package omnibus.test.integ
 
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._

@@ -1,4 +1,4 @@
-package omnibus.test.domain
+package omnibus.test.unit.domain
 
 import scala.util.Random
 
@@ -108,8 +108,8 @@ akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
     val topicRef = context.actorOf(Topic.props("batman"), "batman")
 
     def receive = {
-      case msg: TopicProtocol.PublishMessage    => topicRef ! msg
-      case msg @ TopicProtocol.MessagePublished => senderReply ! msg
+      case msg: TopicProtocol.PublishMessage    ⇒ topicRef ! msg
+      case msg @ TopicProtocol.MessagePublished ⇒ senderReply ! msg
     }
   }
 
