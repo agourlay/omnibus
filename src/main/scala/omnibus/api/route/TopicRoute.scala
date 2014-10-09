@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.domain.topic._
 import omnibus.api.request._
-import omnibus.api.endpoint.CustomMediaType
+import omnibus.api.endpoint.ServerSentEventSupport
 
 class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: ActorContext) extends Directives {
 
@@ -38,7 +38,7 @@ class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: Actor
       pathPrefix("streams") {
         pathPrefix("topics" / Rest) { topic ⇒
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
-            CustomMediaType.lastEventId { lei ⇒
+            ServerSentEventSupport.lastEventId { lei ⇒
               parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveCmd) { reactiveCmd ⇒
                 val cmd = if (lei.isDefined) reactiveCmd.copy(since = lei.map(_.toLong)) else reactiveCmd
                 clientIP { ip ⇒

@@ -9,7 +9,7 @@ import omnibus.domain.subscriber._
 class HttpTopicSubscriber(responder: ActorRef, cmd: ReactiveCmd) extends StreamingResponse(responder) {
 
   override def receive = ({
-    case msg: Message ⇒ responder ! MessageObj.toMessageChunk(msg)
+    case msg: Message ⇒ responder ! toMessageChunk(msg)
   }: Receive) orElse super.receive
 }
 

@@ -18,6 +18,7 @@ import omnibus.domain.message._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.topic._
+import omnibus.api.endpoint.ServerSentEventSupport._
 
 class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActors) extends HttpServiceActor with websocket.WebSocketServerWorker with ActorLogging {
 
@@ -60,7 +61,7 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
       log.error("frame command failed", x)
 
     case msg: Message ⇒
-      send(MessageObj.toMessageFrame(msg))
+      send(toMessageFrame(msg))
 
     case e: Exception ⇒
       send(TextFrame(e.getMessage))
@@ -73,6 +74,8 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
       complete("upgrade not available")
     }
   }
+
+  def toMessageFrame[A](message: A)(implicit fmt: ServerSentEventFormat[A]) = TextFrame(fmt.format(message))
 }
 
 object WebSocketResponse {

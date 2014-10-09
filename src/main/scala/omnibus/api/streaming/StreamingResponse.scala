@@ -7,14 +7,14 @@ import HttpHeaders._
 import spray.can.Http
 
 import omnibus.metrics.Instrumented
-import omnibus.api.endpoint.CustomMediaType
+import omnibus.api.endpoint.ServerSentEventSupport._
 
 class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented {
 
   val timerCtx = metrics.timer("streaming").timerContext()
 
   lazy val responseStart = HttpResponse(
-    entity = HttpEntity(CustomMediaType.EventStreamType, "Omnibus streaming...\n"),
+    entity = HttpEntity(EventStreamType, "Omnibus streaming...\n"),
     headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
   )
 
@@ -29,10 +29,13 @@ class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging wit
   }
 
   def receive = {
-    case ev: Http.ConnectionClosed => {
+    case ev: Http.ConnectionClosed ⇒ {
       log.debug("Stopping response streaming due to {}", ev)
       self ! PoisonPill
     }
-    case ReceiveTimeout => responder ! MessageChunk(":\n") // Comment to keep connection alive  
+    case ReceiveTimeout ⇒ responder ! MessageChunk(":\n") // Comment to keep connection alive  
   }
+
+  def toMessageChunk[A](message: A)(implicit fmt: ServerSentEventFormat[A]) = MessageChunk(fmt.format(message))
+
 }

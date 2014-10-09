@@ -14,15 +14,4 @@ object CustomMediaType {
       binary = false
     )
   )
-
-  val EventStreamType = register(
-    MediaType.custom(
-      mainType = "text",
-      subType = "event-stream",
-      compressible = true,
-      binary = false
-    )
-  )
-
-  def lastEventId = optionalHeaderValueByName("Last-Event-ID") | parameter("lastEventId"?)
 }
