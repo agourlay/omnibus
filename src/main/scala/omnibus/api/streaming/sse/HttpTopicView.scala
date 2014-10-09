@@ -1,4 +1,4 @@
-package omnibus.api.streaming
+package omnibus.api.streaming.sse
 
 import akka.actor.{ Actor, ActorRef, Props, PoisonPill }
 
@@ -8,13 +8,12 @@ import spray.http._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.configuration._
 
-class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) extends StreamingResponse(ctx.responder) {
+class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) extends ServerSentEventResponse(ctx.responder) {
 
   implicit def executionContext = context.dispatcher
 
@@ -27,18 +26,16 @@ class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorR
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case Some(topicRef) ⇒ {
+    case Some(topicRef) ⇒
       context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
       context.become(handleStream orElse super.receive)
-    }
-    case None ⇒ {
+    case None ⇒
       ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
       self ! PoisonPill
-    }
   }
 
   def handleStream: Receive = {
-    case topic: TopicView ⇒ ctx.responder ! MessageChunk("data: " + formatTopicView.write(topic) + "\n\n")
+    case topicView: TopicView ⇒ ctx.responder ! toSseChunk(topicView)
   }
 }
 

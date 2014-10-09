@@ -1,15 +1,14 @@
-package omnibus.api.streaming
+package omnibus.api.streaming.sse
 
 import akka.actor.{ Actor, ActorRef, Props }
 
-import omnibus.domain._
-import omnibus.domain.message._
-import omnibus.domain.subscriber._
+import omnibus.domain.topic.TopicEvent
+import omnibus.domain.subscriber.ReactiveCmd
 
-class HttpTopicSubscriber(responder: ActorRef, cmd: ReactiveCmd) extends StreamingResponse(responder) {
+class HttpTopicSubscriber(responder: ActorRef, cmd: ReactiveCmd) extends ServerSentEventResponse(responder) {
 
   override def receive = ({
-    case msg: Message ⇒ responder ! toMessageChunk(msg)
+    case te: TopicEvent ⇒ responder ! toSseChunk(te)
   }: Receive) orElse super.receive
 }
 

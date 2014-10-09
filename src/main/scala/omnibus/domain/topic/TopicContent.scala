@@ -6,7 +6,6 @@ import akka.persistence._
 import scala.language.postfixOps
 
 import omnibus.configuration.Settings
-import omnibus.domain.message._
 import omnibus.domain.topic.TopicContentProtocol._
 
 class TopicContent(val topicPath: TopicPath) extends PersistentActor with ActorLogging {
@@ -30,7 +29,7 @@ class TopicContent(val topicPath: TopicPath) extends PersistentActor with ActorL
   }
 
   val receiveCommand: Receive = {
-    case Publish(message, replyTo) ⇒ publishMessage(message, replyTo)
+    case Publish(message, replyTo) ⇒ publishEvent(message, replyTo)
     case DeleteContent             ⇒ deleteTopicContent()
     case PurgeTopicContent         ⇒ purgeOldContent()
     case PurgeFrom(id)             ⇒ deleteMessages(id, true)
@@ -55,8 +54,8 @@ class TopicContent(val topicPath: TopicPath) extends PersistentActor with ActorL
     context stop self
   }
 
-  def publishMessage(message: String, replyTo: ActorRef) = {
-    val event = Message(lastSequenceNr + 1, topicPath, message)
+  def publishEvent(message: String, replyTo: ActorRef) = {
+    val event = TopicEvent(lastSequenceNr + 1, topicPath, message)
     persistAsync(event) { evt ⇒
       context.parent ! TopicContentProtocol.Saved(replyTo)
     }

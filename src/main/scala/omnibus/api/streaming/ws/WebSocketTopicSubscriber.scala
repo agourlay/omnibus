@@ -1,4 +1,4 @@
-package omnibus.api.streaming
+package omnibus.api.streaming.ws
 
 import akka.actor.{ Actor, ActorRef, Props }
 
@@ -25,14 +25,12 @@ class WebSocketTopicSubscriber(topicPath: TopicPath, reactiveCmd: ReactiveCmd, i
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case None ⇒
-      context.parent ! new TopicNotFoundException(topicPath.prettyStr)
-    case Some(ref) ⇒ {
+    case None ⇒ context.parent ! new TopicNotFoundException(topicPath.prettyStr)
+    case Some(ref) ⇒
       ack += ref
       if (ack.size == pending.size) {
         subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, context.parent, reactiveCmd, ip, SubscriberSupport.WS)
       }
-    }
   }
 }
 

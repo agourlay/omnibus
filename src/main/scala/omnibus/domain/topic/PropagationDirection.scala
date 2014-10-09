@@ -1,4 +1,4 @@
-package omnibus.domain.message
+package omnibus.domain.topic
 
 object PropagationDirection extends Enumeration {
   type PropagationDirection = Value

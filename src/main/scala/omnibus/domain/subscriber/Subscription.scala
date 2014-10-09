@@ -3,7 +3,7 @@ package omnibus.domain.subscriber
 import akka.actor.{ Actor, ActorRef, Props, ActorLogging }
 import akka.persistence._
 
-import omnibus.domain.message.Message
+import omnibus.domain.topic.TopicEvent
 
 class Subscription(val topicId: String, val cmd: ReactiveCmd) extends PersistentView with ActorLogging {
 
@@ -17,7 +17,7 @@ class Subscription(val topicId: String, val cmd: ReactiveCmd) extends Persistent
   }
 
   def receive = {
-    case msg: Message ⇒ if (reactiveFilter(msg)) context.parent ! msg
+    case te: TopicEvent ⇒ if (reactiveFilter(te)) context.parent ! te
   }
 
   def triggerRecoveryWindow() = {
@@ -31,14 +31,14 @@ class Subscription(val topicId: String, val cmd: ReactiveCmd) extends Persistent
     }
   }
 
-  def reactiveFilter(msg: Message) = {
+  def reactiveFilter(te: TopicEvent) = {
     cmd.react match {
       case ReactiveMode.REPLAY     ⇒ true
-      case ReactiveMode.SIMPLE     ⇒ msg.timestamp > creationDate
-      case ReactiveMode.SINCE_ID   ⇒ msg.id > cmd.since.get
-      case ReactiveMode.SINCE_TS   ⇒ msg.timestamp > cmd.since.get
-      case ReactiveMode.BETWEEN_ID ⇒ msg.id >= cmd.since.get && msg.id <= cmd.to.get
-      case ReactiveMode.BETWEEN_TS ⇒ msg.timestamp >= cmd.since.get && msg.timestamp <= cmd.to.get
+      case ReactiveMode.SIMPLE     ⇒ te.timestamp > creationDate
+      case ReactiveMode.SINCE_ID   ⇒ te.id > cmd.since.get
+      case ReactiveMode.SINCE_TS   ⇒ te.timestamp > cmd.since.get
+      case ReactiveMode.BETWEEN_ID ⇒ te.id >= cmd.since.get && te.id <= cmd.to.get
+      case ReactiveMode.BETWEEN_TS ⇒ te.timestamp >= cmd.since.get && te.timestamp <= cmd.to.get
     }
   }
 }

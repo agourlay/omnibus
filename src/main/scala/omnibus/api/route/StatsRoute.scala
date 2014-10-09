@@ -8,7 +8,7 @@ import omnibus.domain.topic.TopicPath
 import omnibus.api.endpoint.StatisticsMode
 import omnibus.api.endpoint.StatisticsMode._
 import omnibus.api.request.{ ViewTopic, AllMetrics }
-import omnibus.api.streaming.HttpTopicView
+import omnibus.api.streaming.sse.HttpTopicView
 
 class StatsRoute(topicRepo: ActorRef, metricsRepo: ActorRef)(implicit context: ActorContext) extends Directives {
 

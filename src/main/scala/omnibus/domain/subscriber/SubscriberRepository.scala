@@ -47,12 +47,11 @@ class SubscriberRepository extends Actor with ActorLogging with Instrumented {
   def killSub(id: String, replyTo: ActorRef) = {
     subs.find(_.id == id) match {
       case None ⇒ log.info(s"Cannot delete unknown subscriber $id")
-      case Some(sub) ⇒ {
+      case Some(sub) ⇒
         sub.ref ! PoisonPill
         subs -= (sub)
         replyTo ! SubKilled(id)
         log.info(s"Sub $sub deleted")
-      }
     }
   }
 

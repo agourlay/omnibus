@@ -8,7 +8,7 @@ import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.subscriber.SubscriberSupport._
-import omnibus.api.streaming.HttpTopicSubscriber
+import omnibus.api.streaming.sse.HttpTopicSubscriber
 
 class Subscribe(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx: RequestContext, subRepo: ActorRef, topicRepo: ActorRef) extends Actor {
 

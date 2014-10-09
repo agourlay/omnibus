@@ -1,4 +1,4 @@
-package omnibus.api.streaming
+package omnibus.api.streaming.ws
 
 import akka.actor._
 import akka.io.IO
@@ -14,13 +14,15 @@ import spray.can.websocket.FrameCommandFailed
 import spray.routing.HttpServiceActor
 
 import omnibus.core.CoreActors
-import omnibus.domain.message._
+import omnibus.metrics.Instrumented
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.topic._
 import omnibus.api.endpoint.ServerSentEventSupport._
 
-class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActors) extends HttpServiceActor with websocket.WebSocketServerWorker with ActorLogging {
+class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActors) extends HttpServiceActor with websocket.WebSocketServerWorker with ActorLogging with Instrumented {
+
+  val timerCtx = metrics.timer("ws").timerContext()
 
   override def receive = handshaking orElse businessLogicNoUpgrade orElse closeLogic
 
@@ -36,6 +38,10 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     case UHttp.Upgraded ⇒
       context.become(businessLogic orElse closeLogic)
       self ! websocket.UpgradedToWebSocket // notify Upgraded to WebSocket protocol
+  }
+
+  override def postStop() = {
+    timerCtx.stop()
   }
 
   def routing(request: HttpRequest) {
@@ -60,8 +66,8 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     case x: FrameCommandFailed ⇒
       log.error("frame command failed", x)
 
-    case msg: Message ⇒
-      send(toMessageFrame(msg))
+    case msg: TopicEvent ⇒
+      send(toWsFrame(msg))
 
     case e: Exception ⇒
       send(TextFrame(e.getMessage))
@@ -75,7 +81,7 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     }
   }
 
-  def toMessageFrame[A](message: A)(implicit fmt: ServerSentEventFormat[A]) = TextFrame(fmt.format(message))
+  def toWsFrame[A](event: A)(implicit fmt: ServerSentEventFormat[A]) = TextFrame(fmt.format(event))
 }
 
 object WebSocketResponse {

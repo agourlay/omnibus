@@ -5,7 +5,6 @@ import DefaultJsonProtocol._
 
 import nl.grons.metrics.scala._
 
-import omnibus.domain.message._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 
@@ -19,7 +18,7 @@ object JsonSupport {
     def read(json: JsValue): TopicPath = ???
   }
 
-  implicit val formatMessage = jsonFormat4(Message)
+  implicit val formatTopicEvent = jsonFormat4(TopicEvent)
 
   implicit val formatSubView = new RootJsonFormat[SubscriberView] {
     def write(obj: SubscriberView) = JsObject(

@@ -13,7 +13,7 @@ import spray.caching.{ LruCache, Cache }
 import omnibus.metrics.Instrumented
 import omnibus.configuration.Settings
 import omnibus.domain.topic._
-import omnibus.api.streaming.HttpTopicLeaves
+import omnibus.api.streaming.sse.HttpTopicLeaves
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class TopicRepository extends PersistentActor with ActorLogging with Instrumented {

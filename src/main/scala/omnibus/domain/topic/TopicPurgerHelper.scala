@@ -5,7 +5,6 @@ import akka.persistence._
 
 import scala.concurrent.duration._
 
-import omnibus.domain.message.Message
 import omnibus.domain.topic.TopicContentProtocol._
 import omnibus.domain.topic.TopicPurgerHelperProtocol._
 
@@ -24,8 +23,8 @@ class TopicPurgerHelper(val topicId: String, val timeLimit: Long) extends Persis
   val replyScheduler = system.scheduler.schedule(replyDelay, replyDelay, self, Reply)
 
   def receive = {
-    case msg: Message ⇒ if (msg.timestamp < timeLimit) lastMatchingId = Some(msg.id)
-    case Reply        ⇒ replyToParent()
+    case te: TopicEvent ⇒ if (te.timestamp < timeLimit) lastMatchingId = Some(te.id)
+    case Reply          ⇒ replyToParent()
   }
 
   override def postStop() = {

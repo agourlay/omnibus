@@ -1,4 +1,4 @@
-package omnibus.api.streaming
+package omnibus.api.streaming.sse
 
 import akka.actor._
 
@@ -9,12 +9,12 @@ import spray.can.Http
 import omnibus.metrics.Instrumented
 import omnibus.api.endpoint.ServerSentEventSupport._
 
-class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented {
+class ServerSentEventResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented {
 
-  val timerCtx = metrics.timer("streaming").timerContext()
+  val timerCtx = metrics.timer("sse").timerContext()
 
   lazy val responseStart = HttpResponse(
-    entity = HttpEntity(EventStreamType, "Omnibus streaming...\n"),
+    entity = HttpEntity(EventStreamType, "Omnibus SSE streaming...\n"),
     headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
   )
 
@@ -29,13 +29,12 @@ class StreamingResponse(responder: ActorRef) extends Actor with ActorLogging wit
   }
 
   def receive = {
-    case ev: Http.ConnectionClosed ⇒ {
+    case ev: Http.ConnectionClosed ⇒
       log.debug("Stopping response streaming due to {}", ev)
       self ! PoisonPill
-    }
     case ReceiveTimeout ⇒ responder ! MessageChunk(":\n") // Comment to keep connection alive  
   }
 
-  def toMessageChunk[A](message: A)(implicit fmt: ServerSentEventFormat[A]) = MessageChunk(fmt.format(message))
+  def toSseChunk[A](event: A)(implicit fmt: ServerSentEventFormat[A]) = MessageChunk(fmt.format(event))
 
 }
