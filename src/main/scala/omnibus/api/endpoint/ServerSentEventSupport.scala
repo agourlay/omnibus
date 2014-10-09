@@ -5,7 +5,7 @@ import spray.http.MediaTypes._
 import spray.routing._
 import Directives._
 
-import omnibus.domain.message._
+import omnibus.domain.message.Message
 
 object ServerSentEventSupport {
   val EventStreamType = register(
