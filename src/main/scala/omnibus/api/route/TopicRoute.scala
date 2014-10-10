@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.domain.topic._
 import omnibus.api.request._
-import omnibus.api.endpoint.ServerSentEventSupport
+import omnibus.api.streaming.sse.ServerSentEventSupport
 
 class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: ActorContext) extends Directives {
 

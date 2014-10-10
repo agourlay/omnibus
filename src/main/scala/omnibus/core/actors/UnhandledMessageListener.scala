@@ -11,7 +11,7 @@ class UnhandledMessageListener extends CommonActor {
   override def receive = {
     case message: UnhandledMessage ⇒
       unhandledReceived.mark()
-      log.error(s"actor did not handle message ${message.getMessage}")
+      log.warning(s"actor did not handle message ${message.getMessage}")
   }
 }
 

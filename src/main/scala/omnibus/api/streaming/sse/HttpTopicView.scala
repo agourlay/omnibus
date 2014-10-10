@@ -12,6 +12,7 @@ import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.configuration._
+import omnibus.api.streaming.sse.ServerSentEventSupport._
 
 class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) extends ServerSentEventResponse(ctx.responder) {
 
@@ -35,7 +36,7 @@ class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorR
   }
 
   def handleStream: Receive = {
-    case topicView: TopicView ⇒ ctx.responder ! toSseChunk(topicView)
+    case topicView: TopicView ⇒ ctx.responder ! toChunkFormat(topicView)
   }
 }
 

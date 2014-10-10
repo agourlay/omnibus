@@ -14,12 +14,12 @@ import spray.json._
 import HttpHeaders._
 import DefaultJsonProtocol._
 
+import omnibus.core.actors.CommonActor
 import omnibus.api.endpoint.JsonSupport._
-import omnibus.core.metrics.Instrumented
 import omnibus.configuration._
 import omnibus.api.exceptions.RequestTimeoutException
 
-abstract class RestRequest(ctx: RequestContext) extends Actor with Instrumented {
+abstract class RestRequest(ctx: RequestContext) extends CommonActor {
 
   implicit def system = context.system
   implicit def executionContext = context.dispatcher

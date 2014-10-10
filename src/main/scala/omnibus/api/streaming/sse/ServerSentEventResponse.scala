@@ -6,12 +6,11 @@ import spray.http._
 import HttpHeaders._
 import spray.can.Http
 
-import omnibus.core.metrics.Instrumented
-import omnibus.api.endpoint.ServerSentEventSupport._
+import omnibus.core.actors.CommonActor
+import omnibus.api.streaming.StreamingResponse
+import omnibus.api.streaming.sse.ServerSentEventSupport.EventStreamType
 
-class ServerSentEventResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented {
-
-  val timerCtx = metrics.timer("sse").timerContext()
+class ServerSentEventResponse(responder: ActorRef) extends StreamingResponse[MessageChunk] {
 
   lazy val responseStart = HttpResponse(
     entity = HttpEntity(EventStreamType, "Omnibus SSE streaming...\n"),
@@ -24,8 +23,8 @@ class ServerSentEventResponse(responder: ActorRef) extends Actor with ActorLoggi
   }
 
   override def postStop() = {
+    super.postStop()
     responder ! ChunkedMessageEnd
-    timerCtx.stop()
   }
 
   def receive = {
@@ -34,7 +33,5 @@ class ServerSentEventResponse(responder: ActorRef) extends Actor with ActorLoggi
       self ! PoisonPill
     case ReceiveTimeout ⇒ responder ! MessageChunk(":\n") // Comment to keep connection alive  
   }
-
-  def toSseChunk[A](event: A)(implicit fmt: ServerSentEventFormat[A]) = MessageChunk(fmt.format(event))
 
 }

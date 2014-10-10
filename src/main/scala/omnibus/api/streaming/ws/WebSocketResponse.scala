@@ -13,16 +13,14 @@ import spray.http.Uri.Query
 import spray.can.websocket.FrameCommandFailed
 import spray.routing.HttpServiceActor
 
+import omnibus.api.streaming.StreamingResponse
 import omnibus.core.actors.CoreActors
-import omnibus.core.metrics.Instrumented
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.topic._
-import omnibus.api.endpoint.ServerSentEventSupport._
+import omnibus.api.streaming.ws.WebSocketSupport._
 
-class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActors) extends HttpServiceActor with websocket.WebSocketServerWorker with ActorLogging with Instrumented {
-
-  val timerCtx = metrics.timer("ws").timerContext()
+class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActors) extends HttpServiceActor with websocket.WebSocketServerWorker with StreamingResponse[TextFrame] {
 
   override def receive = handshaking orElse businessLogicNoUpgrade orElse closeLogic
 
@@ -38,10 +36,6 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     case UHttp.Upgraded ⇒
       context.become(businessLogic orElse closeLogic)
       self ! websocket.UpgradedToWebSocket // notify Upgraded to WebSocket protocol
-  }
-
-  override def postStop() = {
-    timerCtx.stop()
   }
 
   def routing(request: HttpRequest) {
@@ -67,7 +61,7 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
       log.error("frame command failed", x)
 
     case msg: TopicEvent ⇒
-      send(toWsFrame(msg))
+      send(toChunkFormat(msg))
 
     case e: Exception ⇒
       send(TextFrame(e.getMessage))
@@ -80,8 +74,6 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
       complete("upgrade not available")
     }
   }
-
-  def toWsFrame[A](event: A)(implicit fmt: ServerSentEventFormat[A]) = TextFrame(fmt.format(event))
 }
 
 object WebSocketResponse {
