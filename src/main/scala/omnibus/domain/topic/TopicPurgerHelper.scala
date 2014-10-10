@@ -5,10 +5,11 @@ import akka.persistence._
 
 import scala.concurrent.duration._
 
+import omnibus.core.actors.CommonActor
 import omnibus.domain.topic.TopicContentProtocol._
 import omnibus.domain.topic.TopicPurgerHelperProtocol._
 
-class TopicPurgerHelper(val topicId: String, val timeLimit: Long) extends PersistentView with ActorLogging {
+class TopicPurgerHelper(val topicId: String, val timeLimit: Long) extends PersistentView with CommonActor {
 
   implicit val system = context.system
   implicit def executionContext = context.dispatcher

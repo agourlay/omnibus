@@ -1,4 +1,4 @@
-package omnibus.metrics
+package omnibus.core.metrics
 
 import akka.actor.{ Actor, ActorRef, Props, ActorLogging }
 
@@ -19,7 +19,7 @@ import com.codahale.metrics.graphite._
 import nl.grons.metrics.scala._
 
 import omnibus.configuration._
-import omnibus.metrics.MetricsReporterProtocol._
+import omnibus.core.metrics.MetricsReporterProtocol._
 import omnibus.api.endpoint.JsonSupport._
 
 class MetricsReporter extends Actor with ActorLogging with Instrumented {

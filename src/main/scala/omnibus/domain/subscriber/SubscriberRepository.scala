@@ -7,12 +7,12 @@ import scala.language.postfixOps
 import java.security.SecureRandom
 import java.math.BigInteger
 
-import omnibus.metrics.Instrumented
+import omnibus.core.actors.CommonActor
 import omnibus.domain.topic.TopicPath
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.subscriber.SubscriberSupport._
 
-class SubscriberRepository extends Actor with ActorLogging with Instrumented {
+class SubscriberRepository extends CommonActor {
 
   var subs = Set.empty[SubscriberView]
 

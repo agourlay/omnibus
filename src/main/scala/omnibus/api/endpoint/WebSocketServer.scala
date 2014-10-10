@@ -3,7 +3,7 @@ package omnibus.api.endpoint
 import akka.actor._
 import spray.can.Http
 
-import omnibus.core.CoreActors
+import omnibus.core.actors.CoreActors
 import omnibus.api.streaming.ws.WebSocketResponse
 
 class WebSocketServer(coreActors: CoreActors) extends Actor with ActorLogging {

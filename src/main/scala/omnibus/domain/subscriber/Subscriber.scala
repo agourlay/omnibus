@@ -5,10 +5,11 @@ import akka.actor._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
+import omnibus.core.actors.CommonActor
 import omnibus.domain.topic._
 import omnibus.domain.subscriber.SubscriberProtocol._
 
-class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long) extends Actor with ActorLogging {
+class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long) extends CommonActor {
 
   implicit def executionContext = context.dispatcher
 

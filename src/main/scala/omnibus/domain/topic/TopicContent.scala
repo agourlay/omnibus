@@ -5,10 +5,11 @@ import akka.persistence._
 
 import scala.language.postfixOps
 
+import omnibus.core.actors.CommonActor
 import omnibus.configuration.Settings
 import omnibus.domain.topic.TopicContentProtocol._
 
-class TopicContent(val topicPath: TopicPath) extends PersistentActor with ActorLogging {
+class TopicContent(val topicPath: TopicPath) extends PersistentActor with CommonActor {
 
   implicit def executionContext = context.dispatcher
   val system = context.system

@@ -6,7 +6,7 @@ import spray.http._
 import HttpHeaders._
 import spray.can.Http
 
-import omnibus.metrics.Instrumented
+import omnibus.core.metrics.Instrumented
 import omnibus.api.endpoint.ServerSentEventSupport._
 
 class ServerSentEventResponse(responder: ActorRef) extends Actor with ActorLogging with Instrumented {

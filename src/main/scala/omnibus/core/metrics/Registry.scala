@@ -1,4 +1,4 @@
-package omnibus.metrics
+package omnibus.core.metrics
 
 import com.codahale.metrics._
 import com.codahale.metrics.health.HealthCheckRegistry

@@ -13,8 +13,8 @@ import spray.http.Uri.Query
 import spray.can.websocket.FrameCommandFailed
 import spray.routing.HttpServiceActor
 
-import omnibus.core.CoreActors
-import omnibus.metrics.Instrumented
+import omnibus.core.actors.CoreActors
+import omnibus.core.metrics.Instrumented
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.topic._

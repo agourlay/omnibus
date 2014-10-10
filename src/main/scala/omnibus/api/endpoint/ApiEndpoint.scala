@@ -4,7 +4,7 @@ import akka.actor._
 
 import spray.routing._
 
-import omnibus.core.CoreActors
+import omnibus.core.actors.CoreActors
 import omnibus.api.route._
 import omnibus.api.exceptions.RestFailureHandling
 

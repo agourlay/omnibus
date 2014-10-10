@@ -10,13 +10,13 @@ import scala.language.postfixOps
 
 import spray.caching.{ LruCache, Cache }
 
-import omnibus.metrics.Instrumented
+import omnibus.core.actors.CommonActor
 import omnibus.configuration.Settings
 import omnibus.domain.topic._
 import omnibus.api.streaming.sse.HttpTopicLeaves
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
-class TopicRepository extends PersistentActor with ActorLogging with Instrumented {
+class TopicRepository extends PersistentActor with CommonActor {
 
   implicit def executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout)

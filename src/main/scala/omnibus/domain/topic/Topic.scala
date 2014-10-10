@@ -2,13 +2,13 @@ package omnibus.domain.topic
 
 import akka.actor._
 
-import omnibus.metrics.Instrumented
+import omnibus.core.actors.CommonActor
 import omnibus.domain.topic.PropagationDirection._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.domain.subscriber._
 import omnibus.domain.subscriber.ReactiveCmd
 
-class Topic(val topic: String) extends Actor with ActorLogging with Instrumented {
+class Topic(val topic: String) extends CommonActor {
 
   var numEvents = 0L
   var lastReceivedTS = System.currentTimeMillis
@@ -19,9 +19,9 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   val topicPath = TopicPath(self)
   val prettyPath = TopicPath.prettyStr(self)
 
-  val messageReceived = metrics.meter(s"$prettyPath.message-received")
-  val subscribersNumber = metrics.counter(s"$prettyPath.subscribers")
-  val subTopicsNumber = metrics.counter(s"$prettyPath.sub-topics")
+  val messageReceived = metrics.meter(s"$prettyPath.events")
+  val subscribersNumber = metrics.gauge(s"$prettyPath.subscribers")(subscribers.size)
+  val subTopicsNumber = metrics.gauge(s"$prettyPath.sub-topics")(subTopics.size)
 
   val contentHolder = context.actorOf(TopicContent.props(topicPath), "internal-topic-content")
 
@@ -42,10 +42,9 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
   }
 
   def view() = {
-    val subTopicNumber = subTopics.size
     val prettyChildren = subTopics.values.map(TopicPath.prettyStr(_)).toSeq
     val throughput = if (System.currentTimeMillis - lastReceivedTS > 5000) 0 else Math.round(messageReceived.oneMinuteRate * 100.0) / 100.0
-    TopicView(prettyPath, subTopicNumber, prettyChildren, subscribers.size, numEvents, throughput, creationDate)
+    TopicView(prettyPath, subTopics.size, prettyChildren, subscribers.size, numEvents, throughput, creationDate)
   }
 
   def leaves(replyTo: ActorRef) {
@@ -93,7 +92,6 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
       context.watch(subscriber)
       subscribers += subscriber
       subscriber ! SubscriberProtocol.AcknowledgeSub(self)
-      subscribersNumber += 1
       log.debug(s"subscriber $subscriber added to topic")
     }
   }
@@ -102,7 +100,6 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
     context.unwatch(subscriber)
     subscribers -= subscriber
     subscriber ! SubscriberProtocol.AcknowledgeUnsub(self)
-    subscribersNumber -= 1
   }
 
   // It is either a subtopic or a subscriber
@@ -111,7 +108,6 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
     if (subTopics.values.toSeq.contains(ref)) {
       val key = subTopics.find(_._2 == ref).get._1
       subTopics -= (key)
-      subTopicsNumber -= 1
       log.debug(s"subtopic $key died")
     } else {
       unsubscribe(ref)
@@ -147,7 +143,6 @@ class Topic(val topic: String) extends Actor with ActorLogging with Instrumented
       context.watch(subTopicActor)
       subTopics += (subTopic -> subTopicActor)
       subTopicActor ! TopicProtocol.CreateSubTopic(topics, replyTo)
-      subTopicsNumber += 1
     }
   }
 }

@@ -7,7 +7,8 @@ import spray.can.Http
 
 import omnibus.configuration._
 import omnibus.api.endpoint.{ ApiEndpoint, WebSocketServer }
-import omnibus.core.{ CoreActors, Core }
+import omnibus.core.Core
+import omnibus.core.actors.CoreActors
 
 trait Api {
   this: CoreActors with Core ⇒
@@ -21,5 +22,4 @@ trait Api {
     val webSocketServer = system.actorOf(WebSocketServer.props(this), "omnibus-websocket")
     IO(UHttp)(systemWS) ! Http.Bind(webSocketServer, "0.0.0.0", port = wsPort)
   }
-
 }

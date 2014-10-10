@@ -1,15 +1,18 @@
-package omnibus.core
+package omnibus.core.actors
 
+import omnibus.core.Core
+import omnibus.core.metrics.MetricsReporter
 import omnibus.domain.topic.TopicRepository
 import omnibus.domain.subscriber.SubscriberRepository
-import omnibus.metrics.MetricsReporter
 
 trait CoreActors {
-  this: Core =>
+  this: Core ⇒
 
   val topicRepo = system.actorOf(TopicRepository.props, "topic-repository")
 
   val subRepo = system.actorOf(SubscriberRepository.props, "subscriber-repository")
 
   val metricsReporter = system.actorOf(MetricsReporter.props, "metrics-reporter")
+
+  val unHandledlistener = system.actorOf(UnhandledMessageListener.props, "unhandled-message-listener")
 }

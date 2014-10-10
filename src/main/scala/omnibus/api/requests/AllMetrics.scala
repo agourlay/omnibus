@@ -9,9 +9,9 @@ import spray.json._
 import DefaultJsonProtocol._
 
 import omnibus.api.endpoint.JsonSupport._
-import omnibus.metrics.MetricsReporter._
-import omnibus.metrics.MetricsReporterProtocol._
-import omnibus.metrics.MetricsReporterProtocol
+import omnibus.core.metrics.MetricsReporter._
+import omnibus.core.metrics.MetricsReporterProtocol._
+import omnibus.core.metrics.MetricsReporterProtocol
 
 class AllMetrics(ctx: RequestContext, metricsRepo: ActorRef) extends RestRequest(ctx) {
 

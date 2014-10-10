@@ -15,7 +15,7 @@ import HttpHeaders._
 import DefaultJsonProtocol._
 
 import omnibus.api.endpoint.JsonSupport._
-import omnibus.metrics.Instrumented
+import omnibus.core.metrics.Instrumented
 import omnibus.configuration._
 import omnibus.api.exceptions.RequestTimeoutException
 
@@ -30,9 +30,9 @@ abstract class RestRequest(ctx: RequestContext) extends Actor with Instrumented 
   val timerCtx = metrics.timer("request").timerContext()
 
   def receive = {
-    case ReceiveTimeout => requestOver(new RequestTimeoutException())
-    case Failure(e)     => requestOver(e)
-    case e: Exception   => requestOver(e)
+    case ReceiveTimeout ⇒ requestOver(new RequestTimeoutException())
+    case Failure(e)     ⇒ requestOver(e)
+    case e: Exception   ⇒ requestOver(e)
   }
 
   def closeThings() {
@@ -57,7 +57,7 @@ abstract class RestRequest(ctx: RequestContext) extends Actor with Instrumented 
 
   override val supervisorStrategy =
     OneForOneStrategy() {
-      case e => {
+      case e ⇒ {
         ctx.complete(e)
         timerCtx.stop()
         Stop
