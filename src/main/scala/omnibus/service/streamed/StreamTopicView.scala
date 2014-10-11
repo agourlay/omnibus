@@ -22,16 +22,14 @@ class StreamTopicView(replyTo: ActorRef, topicPath: TopicPath, topicRepo: ActorR
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
-  override def receive = waitingLookup orElse super.receive
-
-  def waitingLookup: Receive = {
+  override def receive = {
     case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
   }
 
   def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
     case Some(topicRef) ⇒
       context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
-      context.become(handleStream orElse super.receive)
+      context.become(handleStream)
     case None ⇒
       replyTo ! Failure(new TopicNotFoundException(topicPath.prettyStr))
       self ! PoisonPill

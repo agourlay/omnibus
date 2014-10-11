@@ -12,7 +12,7 @@ import spray.httpx.marshalling._
 import spray.json._
 
 import omnibus.core.actors.CommonActor
-import omnibus.domain.topic.TopicView
+import omnibus.domain.topic.{ TopicView, TopicEvent }
 import omnibus.api.streaming.StreamingResponse
 import omnibus.api.streaming.sse.ServerSentEventSupport.EventStreamType
 import omnibus.api.streaming.sse.ServerSentEventSupport._
@@ -32,38 +32,39 @@ class ServerSentEventResponse(ctx: RequestContext) extends StreamingResponse[Mes
   }
 
   override def postStop() = {
-    super.postStop()
     responder ! ChunkedMessageEnd
+    super.postStop()
   }
 
   override def streamTimeout() {
-    responder ! ChunkedMessageEnd
+    responder ! MessageChunk("data: Stream Timeout \n")
+    self ! PoisonPill
   }
 
   override def endOfStream() {
-    responder ! ChunkedMessageEnd
+    responder ! MessageChunk("data: End of Stream \n")
+    self ! PoisonPill
+  }
+
+  override def handleException(e: Throwable) {
+    ctx.complete(e)
+    self ! PoisonPill
   }
 
   override def receive = receiveChunks orElse super.receive
 
   def receiveChunks: Receive = {
-    case topicView: TopicView ⇒ responder ! toChunkFormat(topicView)
+    case topicEvent: TopicEvent ⇒ responder ! toChunkFormat(topicEvent)
+    case topicView: TopicView   ⇒ responder ! toChunkFormat(topicView)
+    case ReceiveTimeout         ⇒ responder ! MessageChunk(":\n") // Comment to keep connection alive
     case ev: Http.ConnectionClosed ⇒
       log.debug("Stopping response streaming due to {}", ev)
-      closeThings()
-    case ReceiveTimeout ⇒ responder ! MessageChunk(":\n") // Comment to keep connection alive
-    case Failure(e)     ⇒ requestOver(e)
-    case e: Exception   ⇒ requestOver(e)
-  }
-
-  def closeThings() {
-    timerCtx.stop()
-    self ! PoisonPill
+      self ! PoisonPill
   }
 
   def requestOver[T](payload: T)(implicit marshaller: ToResponseMarshaller[T]) = {
     ctx.complete(payload)
-    closeThings()
+    self ! PoisonPill
   }
 }
 

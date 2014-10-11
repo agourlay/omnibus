@@ -6,9 +6,10 @@ import spray.can.server.UHttp
 import spray.can.Http
 
 import omnibus.configuration._
-import omnibus.api.endpoint.{ ApiEndpoint, WebSocketServer }
+import omnibus.api.endpoint.ApiEndpoint
 import omnibus.core.Core
 import omnibus.core.actors.CoreActors
+import omnibus.api.streaming.ws.WebSocketServer
 
 trait Api {
   this: CoreActors with Core ⇒

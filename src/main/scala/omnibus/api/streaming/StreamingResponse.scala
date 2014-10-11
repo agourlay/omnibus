@@ -2,8 +2,10 @@ package omnibus.api.streaming
 
 import akka.actor._
 
+import scala.util.Failure
+
 import omnibus.core.actors.CommonActor
-import omnibus.service.streamed.{ EndOfStream, TimeoutStream }
+import omnibus.service.streamed.{ EndOfStream, TimeOutStream }
 
 trait StreamingResponse[B] extends CommonActor {
 
@@ -14,13 +16,18 @@ trait StreamingResponse[B] extends CommonActor {
   }
 
   override def receive = {
-    case TimeoutStream ⇒ streamTimeout()
+    case TimeOutStream ⇒ streamTimeout()
     case EndOfStream   ⇒ endOfStream()
+    case Failure(e)    ⇒ handleException(e)
+    case e: Exception  ⇒ handleException(e)
   }
+
+  def handleException(e: Throwable)
 
   def toChunkFormat[A, F <: StreamingFormat[A, B]](event: A)(implicit fmt: F) = fmt.format(event)
 
   def streamTimeout()
+
   def endOfStream()
 }
 

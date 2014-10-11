@@ -8,7 +8,10 @@ import scala.concurrent.duration._
 
 import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.domain.topic._
+import omnibus.domain.subscriber.SubscriberSupport
+import omnibus.domain.subscriber.SubscriberSupport._
 import omnibus.api.request._
+import omnibus.service.streamed.StreamTopicEvent
 import omnibus.api.streaming.sse.{ ServerSentEventSupport, ServerSentEventResponse }
 import omnibus.service.streamed.StreamTopicLeaves
 
@@ -44,7 +47,8 @@ class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: Actor
                 val cmd = if (lei.isDefined) reactiveCmd.copy(since = lei.map(_.toLong)) else reactiveCmd
                 clientIP { ip ⇒
                   get { ctx ⇒
-                    context.actorOf(Subscribe.props(TopicPath(topic), cmd, ip.toOption.get.toString, ctx, subRepo, topicRepo))
+                    val sseHolder = context.actorOf(ServerSentEventResponse.props(ctx))
+                    context.actorOf(StreamTopicEvent.props(sseHolder, TopicPath(topic), cmd, ip.toOption.get.toString, SubscriberSupport.SSE, subRepo, topicRepo))
                   }
                 }
               }
