@@ -30,7 +30,7 @@ class Subscribe(topicPath: TopicPath, reactiveCmd: ReactiveCmd, ip: String, ctx:
     case Some(ref) ⇒ {
       ack += ref
       if (ack.size == pending.size) {
-        val httpSub = context.actorOf(HttpTopicSubscriber.props(ctx.responder, reactiveCmd))
+        val httpSub = context.actorOf(HttpTopicSubscriber.props(ctx, reactiveCmd))
         subRepo ! SubscriberRepositoryProtocol.CreateSub(ack, httpSub, reactiveCmd, ip, SubscriberSupport.SSE)
       }
     }

@@ -52,6 +52,14 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     }
   }
 
+  override def streamTimeout() {
+
+  }
+
+  override def endOfStream() {
+
+  }
+
   def businessLogic: Receive = {
 
     case TextFrame(content) ⇒

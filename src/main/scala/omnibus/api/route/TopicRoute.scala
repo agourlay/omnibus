@@ -9,7 +9,8 @@ import scala.concurrent.duration._
 import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.domain.topic._
 import omnibus.api.request._
-import omnibus.api.streaming.sse.ServerSentEventSupport
+import omnibus.api.streaming.sse.{ ServerSentEventSupport, ServerSentEventResponse }
+import omnibus.service.streamed.StreamTopicLeaves
 
 class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: ActorContext) extends Directives {
 
@@ -53,8 +54,8 @@ class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: Actor
       } ~
       path("leaves") {
         get { ctx ⇒
-          topicRepo ! TopicRepositoryProtocol.AllLeaves(ctx.responder)
-          context.system.scheduler.scheduleOnce(10.seconds) { ctx.complete("Connection closed") }
+          val sseHolder = context.actorOf(ServerSentEventResponse.props(ctx))
+          context.actorOf(StreamTopicLeaves.props(sseHolder, topicRepo))
         }
       }
 }

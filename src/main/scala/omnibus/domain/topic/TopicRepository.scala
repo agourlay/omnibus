@@ -13,7 +13,7 @@ import spray.caching.{ LruCache, Cache }
 import omnibus.core.actors.CommonActor
 import omnibus.configuration.Settings
 import omnibus.domain.topic._
-import omnibus.api.streaming.sse.HttpTopicLeaves
+import omnibus.api.streaming.sse.ServerSentEventResponse
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class TopicRepository extends PersistentActor with CommonActor {
@@ -75,7 +75,6 @@ class TopicRepository extends PersistentActor with CommonActor {
     case CreateTopic(topic)        ⇒ cb.withSyncCircuitBreaker(persistTopic(topic, sender))
     case DeleteTopic(topic)        ⇒ sender ! cb.withSyncCircuitBreaker(deleteTopic(topic))
     case AllRoots                  ⇒ sender ! cb.withSyncCircuitBreaker(allRoots())
-    case AllLeaves(replyTo)        ⇒ allLeaves(replyTo)
     case LookupTopic(topic)        ⇒ lookUpTopic(topic) pipeTo sender()
     case TopicProtocol.Propagation ⇒ log.debug("message propagation reached Repo")
   }
@@ -116,23 +115,16 @@ class TopicRepository extends PersistentActor with CommonActor {
     val topicName = topicPath.prettyStr
     log.debug(s"trying to delete topic $topicName")
     mostAskedTopic.remove(topicPath)
-    if (rootTopics.contains(topicName)) {
-      rootTopics -= topicName
-    }
+    if (rootTopics.contains(topicName)) rootTopics -= topicName
     state.events.find(_.topicPath == topicPath) match {
       case None ⇒ log.info(s"Cannot find topic in repo state")
-      case Some(topic) ⇒ {
+      case Some(topic) ⇒
         topicsNumber -= 1
         // FIXME : should not delete message if it is valid
         deleteMessage(topic.seqNumber, true)
         state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
-      }
     }
     TopicDeletedFromRepo(topicPath)
-  }
-
-  def allLeaves(replyTo: ActorRef) {
-    context.actorOf(HttpTopicLeaves.props(replyTo, rootTopics.values.toList))
   }
 
   def allRoots() = {
@@ -146,7 +138,6 @@ object TopicRepositoryProtocol {
   case class DeleteTopic(topicName: TopicPath)
   case class LookupTopic(topicName: TopicPath)
   case class TopicDeletedFromRepo(topicName: TopicPath)
-  case class AllLeaves(replyTo: ActorRef)
   case class Roots(refs: List[TopicPathRef])
   case object AllRoots
 }

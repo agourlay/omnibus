@@ -48,7 +48,6 @@ resolvers ++= Seq(
   ,"maven central"      at "http://repo1.maven.org/maven2/"
   ,"akka repo"          at "http://repo.akka.io/"
   ,"spray repo"         at "http://repo.spray.io/"
-  ,"akka cassandra"     at "http://dl.bintray.com/krasserm/maven"
 )
 
 val test = project.in(file("."))

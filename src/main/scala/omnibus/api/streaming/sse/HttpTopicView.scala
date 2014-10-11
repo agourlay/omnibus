@@ -14,7 +14,7 @@ import omnibus.domain.topic.TopicProtocol._
 import omnibus.configuration._
 import omnibus.api.streaming.sse.ServerSentEventSupport._
 
-class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) extends ServerSentEventResponse(ctx.responder) {
+class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) extends ServerSentEventResponse(ctx) {
 
   implicit def executionContext = context.dispatcher
 
