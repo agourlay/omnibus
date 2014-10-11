@@ -1,4 +1,4 @@
-package omnibus.test.integ
+package omnibus.it.contract
 
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
@@ -6,7 +6,7 @@ import scala.concurrent.duration._
 
 import omnibus._
 
-class BasicRestCompliance extends Simulation {
+class BasicRestComplianceIt extends Simulation {
 
   // starting app
   val app = omnibus.Boot

@@ -57,8 +57,8 @@ val test = project.in(file("."))
     val gatlingV     = "2.0.0"
     val gatlingTestV = "1.0"
     Seq(
-       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV     % "test"
-      ,"io.gatling"            % "test-framework"            % gatlingTestV % "test"
+       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV     % "it"
+      ,"io.gatling"            % "test-framework"            % gatlingTestV % "it"
     )
   })
 
@@ -74,21 +74,21 @@ libraryDependencies ++= {
   val scalaMetricsV = "3.3.0_a2.3"
   val metricsV      = "3.1.0"
   Seq(
-     "io.spray"              %% "spray-can"                     % sprayV               withSources() 
-    ,"io.spray"              %% "spray-routing"                 % sprayV               withSources()
-    ,"io.spray"              %% "spray-caching"                 % sprayV               withSources()
-    ,"io.spray"              %% "spray-json"                    % sprayJsonV           withSources()
-    ,"com.wandoulabs.akka"   %% "spray-websocket"               % sprayWsV             withSources()
-    ,"com.typesafe.akka"     %% "akka-actor"                    % akkaV                withSources()
-    ,"com.typesafe.akka"     %% "akka-slf4j"                    % akkaV                withSources()
-    ,"com.typesafe.akka"     %% "akka-persistence-experimental" % akkaV                withSources()
-    ,"com.github.krasserm"   %% "akka-persistence-cassandra"    % akkaCassanV          withSources()
-    ,"nl.grons"              %% "metrics-scala"                 % scalaMetricsV        withSources()
-    ,"io.dropwizard.metrics" %  "metrics-graphite"              % metricsV             withSources()
-    ,"ch.qos.logback"        %  "logback-classic"               % logbackV             withSources()
-    ,"io.spray"              %% "spray-testkit"                 % sprayV      % "test" withSources()
-    ,"com.typesafe.akka"     %% "akka-testkit"                  % akkaV       % "test" withSources()
-    ,"org.scalatest"         %% "scalatest"                     % scalaTestV  % "test" withSources()
+     "io.spray"              %% "spray-can"                     % sprayV                      withSources() 
+    ,"io.spray"              %% "spray-routing"                 % sprayV                      withSources()
+    ,"io.spray"              %% "spray-caching"                 % sprayV                      withSources()
+    ,"io.spray"              %% "spray-json"                    % sprayJsonV                  withSources()
+    ,"com.wandoulabs.akka"   %% "spray-websocket"               % sprayWsV                    withSources()
+    ,"com.typesafe.akka"     %% "akka-actor"                    % akkaV                       withSources()
+    ,"com.typesafe.akka"     %% "akka-slf4j"                    % akkaV                       withSources()
+    ,"com.typesafe.akka"     %% "akka-persistence-experimental" % akkaV                       withSources()
+    ,"com.github.krasserm"   %% "akka-persistence-cassandra"    % akkaCassanV                 withSources()
+    ,"nl.grons"              %% "metrics-scala"                 % scalaMetricsV               withSources()
+    ,"io.dropwizard.metrics" %  "metrics-graphite"              % metricsV                    withSources()
+    ,"ch.qos.logback"        %  "logback-classic"               % logbackV                    withSources()
+    ,"io.spray"              %% "spray-testkit"                 % sprayV         % "test"     withSources()
+    ,"com.typesafe.akka"     %% "akka-testkit"                  % akkaV          % "test"     withSources()
+    ,"org.scalatest"         %% "scalatest"                     % scalaTestV     % "test"     withSources()
   )
 }
 

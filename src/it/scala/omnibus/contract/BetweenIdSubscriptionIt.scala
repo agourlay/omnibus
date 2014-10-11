@@ -1,4 +1,4 @@
-package omnibus.test.integ
+package omnibus.it.contract
 
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
@@ -6,13 +6,13 @@ import scala.concurrent.duration._
 
 import omnibus._
 
-class ReplaySubscription extends Simulation {
+class BetweenIdSubscriptionIt extends Simulation {
 
   // starting app
   val app = omnibus.Boot
   val publishNumber = 100
 
-  val scenarioOmnibus = scenario("Test replay")
+  val scenarioOmnibus = scenario("Test betweenId")
     .exec(
       http("create topic")
         .post("/topics/batman")
@@ -28,8 +28,8 @@ class ReplaySubscription extends Simulation {
           .body(StringBody("Na na na na na na na na na na na na na na na na... BATMAN!"))
       )
     }
-    .exec(ws("Subscribe to topic").open("/streams/topics/batman?react=replay")
-      .check(wsAwait.within(5 seconds).expect(publishNumber)))
+    .exec(ws("Subscribe to topic").open("/streams/topics/batman?react=between-id&since=10&to=50")
+      .check(wsAwait.within(5 seconds).expect(41)))
 
   setUp(scenarioOmnibus.inject(atOnceUsers(1)))
     .protocols(

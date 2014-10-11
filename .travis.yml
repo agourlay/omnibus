@@ -4,4 +4,5 @@ scala:
 jdk:
   - openjdk7
   - oraclejdk7
-  - oraclejdk8   
+  - oraclejdk8
+script: sbt test:test

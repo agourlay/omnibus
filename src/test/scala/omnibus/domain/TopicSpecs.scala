@@ -1,4 +1,4 @@
-package omnibus.test.unit.domain
+package omnibus.test.domain
 
 import scala.util.Random
 
