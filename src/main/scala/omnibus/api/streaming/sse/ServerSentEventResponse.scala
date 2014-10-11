@@ -2,10 +2,14 @@ package omnibus.api.streaming.sse
 
 import akka.actor._
 
+import scala.util.Failure
+
 import spray.http._
 import spray.routing._
 import HttpHeaders._
 import spray.can.Http
+import spray.httpx.marshalling._
+import spray.json._
 
 import omnibus.core.actors.CommonActor
 import omnibus.domain.topic.TopicView
@@ -46,8 +50,20 @@ class ServerSentEventResponse(ctx: RequestContext) extends StreamingResponse[Mes
     case topicView: TopicView ⇒ responder ! toChunkFormat(topicView)
     case ev: Http.ConnectionClosed ⇒
       log.debug("Stopping response streaming due to {}", ev)
-      self ! PoisonPill
-    case ReceiveTimeout ⇒ responder ! MessageChunk(":\n") // Comment to keep connection alive  
+      closeThings()
+    case ReceiveTimeout ⇒ responder ! MessageChunk(":\n") // Comment to keep connection alive
+    case Failure(e)     ⇒ requestOver(e)
+    case e: Exception   ⇒ requestOver(e)
+  }
+
+  def closeThings() {
+    timerCtx.stop()
+    self ! PoisonPill
+  }
+
+  def requestOver[T](payload: T)(implicit marshaller: ToResponseMarshaller[T]) = {
+    ctx.complete(payload)
+    closeThings()
   }
 }
 

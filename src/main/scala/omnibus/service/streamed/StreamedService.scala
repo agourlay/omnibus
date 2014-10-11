@@ -13,7 +13,9 @@ class StreamedService(replyTo: ActorRef) extends CommonActor {
   context.setReceiveTimeout(timeout.duration)
 
   override def receive: Receive = {
-    case ReceiveTimeout ⇒ replyTo ! TimeoutStream
+    case ReceiveTimeout ⇒
+      replyTo ! TimeoutStream
+      self ! PoisonPill
   }
 }
 

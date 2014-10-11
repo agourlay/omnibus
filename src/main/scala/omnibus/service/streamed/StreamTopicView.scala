@@ -1,4 +1,4 @@
-package omnibus.api.streaming.sse
+package omnibus.service.streamed
 
 import akka.actor.{ Actor, ActorRef, Props, PoisonPill }
 
@@ -7,14 +7,16 @@ import spray.http._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util.Failure
 
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.configuration._
+import omnibus.api.streaming.sse.ServerSentEventResponse
 import omnibus.api.streaming.sse.ServerSentEventSupport._
 
-class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) extends ServerSentEventResponse(ctx) {
+class StreamTopicView(replyTo: ActorRef, topicPath: TopicPath, topicRepo: ActorRef) extends StreamedService(replyTo) {
 
   implicit def executionContext = context.dispatcher
 
@@ -31,12 +33,12 @@ class HttpTopicView(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorR
       context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
       context.become(handleStream orElse super.receive)
     case None ⇒
-      ctx.complete(new TopicNotFoundException(topicPath.prettyStr))
+      replyTo ! Failure(new TopicNotFoundException(topicPath.prettyStr))
       self ! PoisonPill
   }
 
   def handleStream: Receive = {
-    case topicView: TopicView ⇒ ctx.responder ! toChunkFormat(topicView)
+    case topicView: TopicView ⇒ replyTo ! topicView
   }
 }
 
@@ -44,6 +46,6 @@ object HttpTopicStatProtocol {
   object RequestTopicStats
 }
 
-object HttpTopicView {
-  def props(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) = Props(classOf[HttpTopicView], topicPath, ctx, topicRepo).withDispatcher("streaming-dispatcher")
+object StreamTopicView {
+  def props(replyTo: ActorRef, topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[StreamTopicView], replyTo, topicPath, topicRepo).withDispatcher("streaming-dispatcher")
 }

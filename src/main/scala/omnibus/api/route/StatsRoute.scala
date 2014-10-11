@@ -8,7 +8,8 @@ import omnibus.domain.topic.TopicPath
 import omnibus.api.endpoint.StatisticsMode
 import omnibus.api.endpoint.StatisticsMode._
 import omnibus.api.request.{ ViewTopic, AllMetrics }
-import omnibus.api.streaming.sse.HttpTopicView
+import omnibus.service.streamed.StreamTopicView
+import omnibus.api.streaming.sse.ServerSentEventResponse
 
 class StatsRoute(topicRepo: ActorRef, metricsRepo: ActorRef)(implicit context: ActorContext) extends Directives {
 
@@ -25,8 +26,10 @@ class StatsRoute(topicRepo: ActorRef, metricsRepo: ActorRef)(implicit context: A
               val topicPath = TopicPath(topic)
               get { ctx ⇒
                 mode match {
-                  case StatisticsMode.LIVE      ⇒ context.actorOf(ViewTopic.props(topicPath, ctx, topicRepo))
-                  case StatisticsMode.STREAMING ⇒ context.actorOf(HttpTopicView.props(topicPath, ctx, topicRepo))
+                  case StatisticsMode.LIVE ⇒ context.actorOf(ViewTopic.props(topicPath, ctx, topicRepo))
+                  case StatisticsMode.STREAMING ⇒
+                    val sseHolder = context.actorOf(ServerSentEventResponse.props(ctx))
+                    context.actorOf(StreamTopicView.props(sseHolder, topicPath, topicRepo))
                 }
               }
             }
