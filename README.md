@@ -8,7 +8,7 @@ Omnibus is an HTTP-friendly persistent message bus which means :
 - With reactive modes it is possible to replay specific parts of the events.
 - Subscriptions can be composed via the URL keyword +.
 - Most of the features can be accessed via the administration web interface.
-- Messages are persisted into Cassandra.
+- Events are persisted on the file system.
 
 Omnibus is in alpha stage under active development. Breaking changes could occur at any moment.
 

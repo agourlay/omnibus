@@ -62,12 +62,12 @@ class TopicRepository extends PersistentActor with CommonActor {
 
   val receiveRecover: Receive = {
     case t: TopicRepoStateValue ⇒ {
-      createTopic(t.topicPath, self) //ack on self but no used
+      createTopic(t.topicPath, context.system.deadLetters) //no need for ACK
       updateState(TopicRepoStateValue(t.seqNumber, t.topicPath))
     }
     case SnapshotOffer(_, snapshot: TopicRepoState) ⇒ {
       state = snapshot
-      state.events foreach { t ⇒ createTopic(t.topicPath, self) } //ack on self but no used
+      state.events foreach { t ⇒ createTopic(t.topicPath, context.system.deadLetters) } //no need for ACK
     }
   }
 

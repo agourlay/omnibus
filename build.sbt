@@ -70,9 +70,9 @@ libraryDependencies ++= {
   val sprayWsV      = "0.1.3"
   val logbackV      = "1.1.2"
   val scalaTestV    = "2.2.2"
-  val akkaCassanV   = "0.3.4"
   val scalaMetricsV = "3.3.0_a2.3"
   val metricsV      = "3.1.0"
+  val levelDbV      = "0.7"
   Seq(
      "io.spray"              %% "spray-can"                     % sprayV                      withSources() 
     ,"io.spray"              %% "spray-routing"                 % sprayV                      withSources()
@@ -82,7 +82,7 @@ libraryDependencies ++= {
     ,"com.typesafe.akka"     %% "akka-actor"                    % akkaV                       withSources()
     ,"com.typesafe.akka"     %% "akka-slf4j"                    % akkaV                       withSources()
     ,"com.typesafe.akka"     %% "akka-persistence-experimental" % akkaV                       withSources()
-    ,"com.github.krasserm"   %% "akka-persistence-cassandra"    % akkaCassanV                 withSources()
+    ,"org.iq80.leveldb"      %  "leveldb"                       % levelDbV                    withSources()
     ,"nl.grons"              %% "metrics-scala"                 % scalaMetricsV               withSources()
     ,"io.dropwizard.metrics" %  "metrics-graphite"              % metricsV                    withSources()
     ,"ch.qos.logback"        %  "logback-classic"               % logbackV                    withSources()
