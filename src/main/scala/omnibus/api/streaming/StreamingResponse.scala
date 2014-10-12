@@ -20,11 +20,15 @@ trait StreamingResponse[B] extends CommonActor {
     case EndOfStream   ⇒ endOfStream()
     case Failure(e)    ⇒ handleException(e)
     case e: Exception  ⇒ handleException(e)
+    // TODO add generic event handling 
+    // case s: StreamChunk =>  push(toChunkFormat(s))
   }
+
+  def push(b: B)
 
   def handleException(e: Throwable)
 
-  def toChunkFormat[A, F <: StreamingFormat[A, B]](event: A)(implicit fmt: F) = fmt.format(event)
+  def toChunkFormat[A, F <: StreamingFormat[A, B]](event: A)(implicit fmt: F): B = fmt.format(event)
 
   def streamTimeout()
 

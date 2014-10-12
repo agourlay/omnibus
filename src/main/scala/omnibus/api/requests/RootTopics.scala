@@ -21,22 +21,18 @@ class RootTopics(ctx: RequestContext, topicRepo: ActorRef) extends RestRequest(c
   var roots = Set.empty[TopicView]
 
   def waitingTopicsPathRef: Receive = {
-    case Roots(rootsPath) ⇒ {
-      if (rootsPath.isEmpty) {
-        requestOver(roots)
-      } else {
+    case Roots(rootsPath) ⇒
+      if (rootsPath.isEmpty) requestOver(roots)
+      else {
         rootsPath.foreach(_.topicRef.get ! TopicProtocol.View)
         context.become(super.receive orElse waitingTopicsView(rootsPath.size))
       }
-    }
   }
 
   def waitingTopicsView(expected: Integer): Receive = {
     case rootView: TopicView ⇒ {
       roots += rootView
-      if (roots.size == expected) {
-        requestOver(roots)
-      }
+      if (roots.size == expected) requestOver(roots)
     }
   }
 }

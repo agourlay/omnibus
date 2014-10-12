@@ -24,11 +24,10 @@ class DeleteTopic(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef
   def waitingLookup: Receive = {
     case TopicPathRef(topicPath, topicRef) ⇒
       topicRef match {
-        case Some(ref) ⇒ {
+        case Some(ref) ⇒
           ref ! TopicProtocol.Delete
           topicRepo ! TopicRepositoryProtocol.DeleteTopic(topicPath)
           context.become(super.receive orElse waitingAck)
-        }
         case None ⇒ requestOver(new TopicNotFoundException(topicPath.prettyStr))
       }
   }

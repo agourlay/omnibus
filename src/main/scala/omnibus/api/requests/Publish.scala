@@ -24,10 +24,9 @@ class Publish(topicPath: TopicPath, message: String, ctx: RequestContext, topicR
   def waitingLookup: Receive = {
     case TopicPathRef(topicPath, topicRef) ⇒
       topicRef match {
-        case Some(ref) ⇒ {
+        case Some(ref) ⇒
           ref ! TopicProtocol.PublishMessage(message)
           context.become(super.receive orElse waitingAck)
-        }
         case None ⇒ requestOver(new TopicNotFoundException(topicPath.prettyStr))
       }
   }

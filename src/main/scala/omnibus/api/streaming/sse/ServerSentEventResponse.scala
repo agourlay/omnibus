@@ -51,24 +51,20 @@ class ServerSentEventResponse(ctx: RequestContext) extends StreamingResponse[Mes
     self ! PoisonPill
   }
 
+  override def push(mc: MessageChunk) { responder ! mc }
+
   override def receive = receiveChunks orElse super.receive
 
   def receiveChunks: Receive = {
-    case topicEvent: TopicEvent ⇒ responder ! toChunkFormat(topicEvent)
-    case topicView: TopicView   ⇒ responder ! toChunkFormat(topicView)
-    case ReceiveTimeout         ⇒ responder ! MessageChunk(":\n") // Comment to keep connection alive
+    case topicEvent: TopicEvent ⇒ push(toChunkFormat(topicEvent))
+    case topicView: TopicView   ⇒ push(toChunkFormat(topicView))
+    case ReceiveTimeout         ⇒ push(MessageChunk(":\n")) // Comment to keep connection alive
     case ev: Http.ConnectionClosed ⇒
       log.debug("Stopping response streaming due to {}", ev)
       self ! PoisonPill
   }
-
-  def requestOver[T](payload: T)(implicit marshaller: ToResponseMarshaller[T]) = {
-    ctx.complete(payload)
-    self ! PoisonPill
-  }
 }
 
 object ServerSentEventResponse {
-  def props(ctx: RequestContext) =
-    Props(classOf[ServerSentEventResponse], ctx).withDispatcher("streaming-dispatcher")
+  def props(ctx: RequestContext) = Props(classOf[ServerSentEventResponse], ctx).withDispatcher("streaming-dispatcher")
 }

@@ -35,7 +35,7 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
       }
 
     case UHttp.Upgraded ⇒
-      context.become(businessLogic orElse closeLogic)
+      context.become(businessLogic orElse closeLogic orElse super.receive)
       self ! websocket.UpgradedToWebSocket // notify Upgraded to WebSocket protocol
   }
 
@@ -44,12 +44,13 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     val param = request.uri.query
     val ip = request.headers.filter(_.name == "Remote-Address").head.value
     log.debug(s"Incoming websocket request $path $param from $ip")
-    // FIXME Improve routing
+    // FIXME improve routing
     if (path.toString.startsWith("/streams/topics/")) {
       val reactiveMode = ReactiveMode.withName(param.get("react").getOrElse("simple"))
       val reactiveCmd = ReactiveCmd(reactiveMode, param.get("since").map(_.toLong), param.get("to").map(_.toLong))
       val topicPath = TopicPath(path.tail.toString.split("/")(2))
-      context.actorOf(StreamTopicEvent.props(self, topicPath, reactiveCmd, ip, SubscriberSupport.WS, coreActors.subRepo, coreActors.topicRepo))
+      val sd = SubscriptionDescription(topicPath, reactiveCmd, ip, SubscriberSupport.WS)
+      context.actorOf(StreamTopicEvent.props(self, sd, coreActors.subRepo, coreActors.topicRepo))
     }
   }
 
@@ -61,11 +62,13 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     context.stop(self)
   }
 
+  override def push(mc: TextFrame) { send(mc) }
+
   def businessLogic: Receive = {
     case TextFrame(content)     ⇒ send(TextFrame("You are not supposed to send me stuff"))
     case x: FrameCommandFailed  ⇒ log.error("frame command failed", x)
-    case topicEvent: TopicEvent ⇒ send(toChunkFormat(topicEvent))
-    case topicView: TopicView   ⇒ send(toChunkFormat(topicView))
+    case topicEvent: TopicEvent ⇒ push(toChunkFormat(topicEvent))
+    case topicView: TopicView   ⇒ push(toChunkFormat(topicView))
   }
 
   override def handleException(e: Throwable) {

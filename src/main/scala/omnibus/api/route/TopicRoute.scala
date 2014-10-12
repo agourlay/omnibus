@@ -8,6 +8,7 @@ import scala.concurrent.duration._
 
 import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.domain.topic._
+import omnibus.domain.subscriber.SubscriptionDescription
 import omnibus.domain.subscriber.SubscriberSupport
 import omnibus.domain.subscriber.SubscriberSupport._
 import omnibus.api.request._
@@ -48,7 +49,8 @@ class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: Actor
                 clientIP { ip ⇒
                   get { ctx ⇒
                     val sseHolder = context.actorOf(ServerSentEventResponse.props(ctx))
-                    context.actorOf(StreamTopicEvent.props(sseHolder, TopicPath(topic), cmd, ip.toOption.get.toString, SubscriberSupport.SSE, subRepo, topicRepo))
+                    val sd = SubscriptionDescription(TopicPath(topic), cmd, ip.toOption.get.toString, SubscriberSupport.SSE)
+                    context.actorOf(StreamTopicEvent.props(sseHolder, sd, subRepo, topicRepo))
                   }
                 }
               }

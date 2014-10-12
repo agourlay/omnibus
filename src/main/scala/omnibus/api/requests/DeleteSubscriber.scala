@@ -18,10 +18,9 @@ class DeleteSubscriber(subId: String, ctx: RequestContext, subRepo: ActorRef) ex
     case SubLookup(optView) ⇒
       optView match {
         case None ⇒ ctx.complete(new SubscriberNotFoundException(subId))
-        case Some(subView) ⇒ {
+        case Some(subView) ⇒
           subRepo ! SubscriberRepositoryProtocol.KillSub(subId)
           context.become(super.receive orElse waitingAck)
-        }
       }
   }
 

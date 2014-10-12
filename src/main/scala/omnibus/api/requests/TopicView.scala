@@ -25,10 +25,9 @@ class ViewTopic(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef) 
   def waitingLookup: Receive = {
     case TopicPathRef(topicPath, topicRef) ⇒
       topicRef match {
-        case Some(ref) ⇒ {
+        case Some(ref) ⇒
           ref ! TopicProtocol.View
           context.become(super.receive orElse waitingTopicView)
-        }
         case None ⇒ requestOver(new TopicNotFoundException(topicPath.prettyStr))
       }
   }

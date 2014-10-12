@@ -12,5 +12,6 @@ abstract class StreamedService(replyTo: ActorRef) extends CommonActor {
   }
 }
 
+trait StreamChunk
 case object EndOfStream
 case object TimeOutStream

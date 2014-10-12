@@ -21,19 +21,17 @@ class CreateTopic(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef
   override def receive = super.receive orElse waitingLookup
 
   def waitingAck: Receive = {
-    case TopicCreated(topicRef) ⇒ {
+    case TopicCreated(topicRef) ⇒
       val prettyTopic = topicPath.prettyStr()
       requestOver(StatusCodes.Created, Location(ctx.request.uri) :: Nil, s"Topic $prettyTopic created \n")
-    }
   }
 
   def waitingLookup: Receive = {
     case TopicPathRef(topicPath, topicRef) ⇒ topicRef match {
       case Some(ref) ⇒ requestOver(new TopicAlreadyExistsException(topicPath.prettyStr()))
-      case None ⇒ {
+      case None ⇒
         topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)
         context.become(super.receive orElse waitingAck)
-      }
     }
   }
 }
