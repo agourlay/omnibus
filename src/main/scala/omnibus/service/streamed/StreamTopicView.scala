@@ -2,9 +2,6 @@ package omnibus.service.streamed
 
 import akka.actor.{ Actor, ActorRef, Props, PoisonPill }
 
-import spray.routing._
-import spray.http._
-
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Failure
@@ -23,16 +20,15 @@ class StreamTopicView(replyTo: ActorRef, topicPath: TopicPath, topicRepo: ActorR
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
   override def receive = {
-    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
-  }
-
-  def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case Some(topicRef) ⇒
-      context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
-      context.become(handleStream)
-    case None ⇒
-      replyTo ! Failure(new TopicNotFoundException(topicPath.prettyStr))
-      self ! PoisonPill
+    case TopicPathRef(topicPath, topicRef) ⇒
+      topicRef match {
+        case Some(topicRef) ⇒
+          context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
+          context.become(handleStream)
+        case None ⇒
+          replyTo ! Failure(new TopicNotFoundException(topicPath.prettyStr))
+          self ! PoisonPill
+      }
   }
 
   def handleStream: Receive = {

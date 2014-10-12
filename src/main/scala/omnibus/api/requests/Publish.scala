@@ -22,15 +22,14 @@ class Publish(topicPath: TopicPath, message: String, ctx: RequestContext, topicR
   }
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
-  }
-
-  def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case Some(ref) ⇒ {
-      ref ! TopicProtocol.PublishMessage(message)
-      context.become(super.receive orElse waitingAck)
-    }
-    case None ⇒ requestOver(new TopicNotFoundException(topicPath.prettyStr))
+    case TopicPathRef(topicPath, topicRef) ⇒
+      topicRef match {
+        case Some(ref) ⇒ {
+          ref ! TopicProtocol.PublishMessage(message)
+          context.become(super.receive orElse waitingAck)
+        }
+        case None ⇒ requestOver(new TopicNotFoundException(topicPath.prettyStr))
+      }
   }
 }
 

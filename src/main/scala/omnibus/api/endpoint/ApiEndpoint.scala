@@ -15,15 +15,17 @@ class ApiEndpoint(coreActors: CoreActors) extends HttpEndpoint with Actor {
 
 trait HttpEndpoint extends HttpService with RestFailureHandling {
 
-  def routes(coreActors: CoreActors)(implicit context: ActorContext) = {
-    val subRepo = coreActors.subRepo
-    val topicRepo = coreActors.topicRepo
-    val metricsRepo = coreActors.metricsReporter
+  def routes(core: CoreActors)(implicit context: ActorContext) = {
 
-    val topicRoute = new TopicRoute(subRepo, topicRepo).route // '/topics'
-    val statsRoute = new StatsRoute(topicRepo, metricsRepo).route // '/stats'
-    val adminRoute = new AdminRoute(topicRepo, subRepo).route // '/admin/topics'
-    val adminUIRoute = new AdminUIRoute().route // '/ '
+    // '/topics'
+    val topicRoute = new TopicRoute(core.subRepo, core.topicRepo).route
+    // '/stats'
+    val statsRoute = new StatsRoute(core.topicRepo, core.metricsReporter).route
+    // '/admin/topics'
+    val adminRoute = new AdminRoute(core.topicRepo, core.subRepo).route
+    // '/ '
+    val adminUIRoute = new AdminUIRoute().route
+
     topicRoute ~ statsRoute ~ adminRoute ~ adminUIRoute
   }
 }

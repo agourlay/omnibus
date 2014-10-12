@@ -15,17 +15,14 @@ class DeleteSubscriber(subId: String, ctx: RequestContext, subRepo: ActorRef) ex
   override def receive = super.receive orElse waitingLookup
 
   def waitingLookup: Receive = {
-    case SubLookup(optView) ⇒ handleLookup(optView)
-  }
-
-  def handleLookup(optView: Option[SubscriberView]) = {
-    optView match {
-      case None ⇒ ctx.complete(new SubscriberNotFoundException(subId))
-      case Some(subView) ⇒ {
-        subRepo ! SubscriberRepositoryProtocol.KillSub(subId)
-        context.become(super.receive orElse waitingAck)
+    case SubLookup(optView) ⇒
+      optView match {
+        case None ⇒ ctx.complete(new SubscriberNotFoundException(subId))
+        case Some(subView) ⇒ {
+          subRepo ! SubscriberRepositoryProtocol.KillSub(subId)
+          context.become(super.receive orElse waitingAck)
+        }
       }
-    }
   }
 
   def waitingAck: Receive = {

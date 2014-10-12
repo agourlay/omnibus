@@ -28,14 +28,12 @@ class CreateTopic(topicPath: TopicPath, ctx: RequestContext, topicRepo: ActorRef
   }
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
-  }
-
-  def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case Some(ref) ⇒ requestOver(new TopicAlreadyExistsException(topicPath.prettyStr()))
-    case None ⇒ {
-      topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)
-      context.become(super.receive orElse waitingAck)
+    case TopicPathRef(topicPath, topicRef) ⇒ topicRef match {
+      case Some(ref) ⇒ requestOver(new TopicAlreadyExistsException(topicPath.prettyStr()))
+      case None ⇒ {
+        topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)
+        context.become(super.receive orElse waitingAck)
+      }
     }
   }
 }

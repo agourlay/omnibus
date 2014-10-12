@@ -2,8 +2,6 @@ package omnibus.service.streamed
 
 import akka.actor.{ Actor, ActorRef, Props }
 
-import spray.routing._
-
 import scala.util.Failure
 
 import omnibus.domain.topic._
@@ -23,15 +21,14 @@ class StreamTopicEvent(replyTo: ActorRef, topicPath: TopicPath, reactiveCmd: Rea
   }
 
   override def receive = {
-    case TopicPathRef(topicPath, optRef) ⇒ handleTopicPathRef(topicPath, optRef)
-  }
-
-  def handleTopicPathRef(topicPath: TopicPath, topicRef: Option[ActorRef]) = topicRef match {
-    case None ⇒ replyTo ! Failure(new TopicNotFoundException(topicPath.prettyStr))
-    case Some(ref) ⇒
-      validTopics += ref
-      if (validTopics.size == pendingTopics.size) {
-        subRepo ! SubscriberRepositoryProtocol.CreateSub(validTopics, replyTo, reactiveCmd, ip, SubscriberSupport.SSE)
+    case TopicPathRef(topicPath, topicRef) ⇒
+      topicRef match {
+        case None ⇒ replyTo ! Failure(new TopicNotFoundException(topicPath.prettyStr))
+        case Some(ref) ⇒
+          validTopics += ref
+          if (validTopics.size == pendingTopics.size) {
+            subRepo ! SubscriberRepositoryProtocol.CreateSub(validTopics, replyTo, reactiveCmd, ip, SubscriberSupport.SSE)
+          }
       }
   }
 }
