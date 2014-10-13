@@ -13,7 +13,8 @@ import omnibus.domain.subscriber.SubscriberSupport
 import omnibus.domain.subscriber.SubscriberSupport._
 import omnibus.api.request._
 import omnibus.service.streamed.StreamTopicEvent
-import omnibus.api.streaming.sse.{ ServerSentEventSupport, ServerSentEventResponse }
+import omnibus.api.streaming.sse.ServerSentEventSupport._
+import omnibus.api.streaming.sse.ServerSentEventResponse
 import omnibus.service.streamed.StreamTopicLeaves
 
 class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: ActorContext) extends Directives {
@@ -43,14 +44,15 @@ class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: Actor
       pathPrefix("streams") {
         pathPrefix("topics" / Rest) { topic ⇒
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
-            ServerSentEventSupport.lastEventId { lei ⇒
+            lastEventId { lei ⇒
               parameters('react.as[String] ? "simple", 'since.as[Long]?, 'to.as[Long]?).as(ReactiveCmd) { reactiveCmd ⇒
                 val cmd = if (lei.isDefined) reactiveCmd.copy(since = lei.map(_.toLong)) else reactiveCmd
                 clientIP { ip ⇒
                   get { ctx ⇒
-                    val sseHolder = context.actorOf(ServerSentEventResponse.props(ctx))
                     val sd = SubscriptionDescription(TopicPath(topic), cmd, ip.toOption.get.toString, SubscriberSupport.SSE)
-                    context.actorOf(StreamTopicEvent.props(sseHolder, sd, subRepo, topicRepo))
+                    serverSentEvent(ctx) {
+                      StreamTopicEvent.props(sd, subRepo, topicRepo)
+                    }
                   }
                 }
               }
@@ -60,8 +62,9 @@ class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: Actor
       } ~
       path("leaves") {
         get { ctx ⇒
-          val sseHolder = context.actorOf(ServerSentEventResponse.props(ctx))
-          context.actorOf(StreamTopicLeaves.props(sseHolder, topicRepo))
+          serverSentEvent(ctx) {
+            StreamTopicLeaves.props(topicRepo)
+          }
         }
       }
 }

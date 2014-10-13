@@ -50,7 +50,7 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
       val reactiveCmd = ReactiveCmd(reactiveMode, param.get("since").map(_.toLong), param.get("to").map(_.toLong))
       val topicPath = TopicPath(path.tail.toString.split("/")(2))
       val sd = SubscriptionDescription(topicPath, reactiveCmd, ip, SubscriberSupport.WS)
-      context.actorOf(StreamTopicEvent.props(self, sd, coreActors.subRepo, coreActors.topicRepo))
+      context.actorOf(StreamTopicEvent.props(sd, coreActors.subRepo, coreActors.topicRepo))
     }
   }
 

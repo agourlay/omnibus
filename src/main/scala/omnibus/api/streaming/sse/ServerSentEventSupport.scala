@@ -1,5 +1,7 @@
 package omnibus.api.streaming.sse
 
+import akka.actor._
+
 import spray.http._
 import spray.http.MediaTypes._
 import spray.routing._
@@ -20,6 +22,10 @@ object ServerSentEventSupport {
   )
 
   def lastEventId = optionalHeaderValueByName("Last-Event-ID") | parameter("lastEventId"?)
+
+  def serverSentEvent(ctx: RequestContext)(props: Props)(implicit context: ActorContext) {
+    context.actorOf(ServerSentEventResponse.props(ctx, props))
+  }
 
   trait ServerSentEventFormat[A] extends StreamingFormat[A, MessageChunk] {
     def format(a: A): MessageChunk

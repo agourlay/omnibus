@@ -6,7 +6,7 @@ import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.configuration._
 
-class StreamTopicLeaves(replyTo: ActorRef, topicRepo: ActorRef) extends StreamedService(replyTo) {
+class StreamTopicLeaves(topicRepo: ActorRef) extends StreamedService {
 
   implicit def system = context.system
   implicit val timeout = akka.util.Timeout(Settings(system).Timeout)
@@ -19,14 +19,14 @@ class StreamTopicLeaves(replyTo: ActorRef, topicRepo: ActorRef) extends Streamed
     case ReceiveTimeout ⇒
       // getting the leaves is a stream service within a bounded timeframe
       // i.e. you will not receive leaves created after the request
-      replyTo ! EndOfStream
+      context.parent ! EndOfStream
       self ! PoisonPill
     case Roots(rootsPath) ⇒
-      if (rootsPath.isEmpty) replyTo ! EndOfStream
-      else rootsPath.foreach(_.topicRef.get ! TopicProtocol.Leaves(replyTo))
+      if (rootsPath.isEmpty) context.parent ! EndOfStream
+      else rootsPath.foreach(_.topicRef.get ! TopicProtocol.Leaves(context.parent))
   }
 }
 
 object StreamTopicLeaves {
-  def props(replyTo: ActorRef, topicRepo: ActorRef) = Props(classOf[StreamTopicLeaves], replyTo, topicRepo).withDispatcher("streaming-dispatcher")
+  def props(topicRepo: ActorRef) = Props(classOf[StreamTopicLeaves], topicRepo).withDispatcher("streaming-dispatcher")
 }

@@ -17,9 +17,10 @@ import omnibus.api.streaming.StreamingResponse
 import omnibus.api.streaming.sse.ServerSentEventSupport.EventStreamType
 import omnibus.api.streaming.sse.ServerSentEventSupport._
 
-class ServerSentEventResponse(ctx: RequestContext) extends StreamingResponse[MessageChunk] {
+class ServerSentEventResponse(ctx: RequestContext, props: Props) extends StreamingResponse[MessageChunk] {
 
   val responder = ctx.responder
+  val streamingService = context.actorOf(props)
 
   lazy val responseStart = HttpResponse(
     entity = HttpEntity(EventStreamType, "Omnibus SSE streaming...\n"),
@@ -66,5 +67,5 @@ class ServerSentEventResponse(ctx: RequestContext) extends StreamingResponse[Mes
 }
 
 object ServerSentEventResponse {
-  def props(ctx: RequestContext) = Props(classOf[ServerSentEventResponse], ctx).withDispatcher("streaming-dispatcher")
+  def props(ctx: RequestContext, props: Props) = Props(classOf[ServerSentEventResponse], ctx, props).withDispatcher("streaming-dispatcher")
 }

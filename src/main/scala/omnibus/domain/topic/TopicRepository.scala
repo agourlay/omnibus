@@ -72,11 +72,11 @@ class TopicRepository extends PersistentActor with CommonActor {
   }
 
   val receiveCommand: Receive = {
-    case CreateTopic(topic)        ⇒ cb.withSyncCircuitBreaker(persistTopic(topic, sender))
-    case DeleteTopic(topic)        ⇒ sender ! cb.withSyncCircuitBreaker(deleteTopic(topic))
-    case AllRoots                  ⇒ sender ! cb.withSyncCircuitBreaker(allRoots())
-    case LookupTopic(topic)        ⇒ lookUpTopic(topic) pipeTo sender()
-    case TopicProtocol.Propagation ⇒ log.debug("message propagation reached Repo")
+    case CreateTopic(topic)                 ⇒ cb.withSyncCircuitBreaker(persistTopic(topic, sender))
+    case DeleteTopic(topic)                 ⇒ sender ! cb.withSyncCircuitBreaker(deleteTopic(topic))
+    case AllRoots                           ⇒ sender ! cb.withSyncCircuitBreaker(allRoots())
+    case LookupTopic(topic)                 ⇒ lookUpTopic(topic) pipeTo sender()
+    case TopicProtocol.Propagation(op, dir) ⇒ log.debug("message propagation reached Repo")
   }
 
   def persistTopic(topicPath: TopicPath, replyTo: ActorRef) = {

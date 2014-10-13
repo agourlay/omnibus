@@ -4,7 +4,7 @@ import akka.actor._
 
 import omnibus.core.actors.CommonActor
 
-abstract class StreamedService(replyTo: ActorRef) extends CommonActor {
+trait StreamedService extends CommonActor {
   val timerCtx = metrics.timer("streaming").timerContext()
 
   override def postStop() = {

@@ -13,7 +13,7 @@ import omnibus.configuration._
 import omnibus.api.streaming.sse.ServerSentEventResponse
 import omnibus.api.streaming.sse.ServerSentEventSupport._
 
-class StreamTopicView(replyTo: ActorRef, topicPath: TopicPath, topicRepo: ActorRef) extends StreamedService(replyTo) {
+class StreamTopicView(topicPath: TopicPath, topicRepo: ActorRef) extends StreamedService {
 
   implicit def executionContext = context.dispatcher
 
@@ -26,13 +26,13 @@ class StreamTopicView(replyTo: ActorRef, topicPath: TopicPath, topicRepo: ActorR
           context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
           context.become(handleStream)
         case None ⇒
-          replyTo ! Failure(new TopicNotFoundException(topicPath.prettyStr))
+          context.parent ! Failure(new TopicNotFoundException(topicPath.prettyStr))
           self ! PoisonPill
       }
   }
 
   def handleStream: Receive = {
-    case topicView: TopicView ⇒ replyTo ! topicView
+    case topicView: TopicView ⇒ context.parent ! topicView
   }
 }
 
@@ -41,5 +41,5 @@ object HttpTopicStatProtocol {
 }
 
 object StreamTopicView {
-  def props(replyTo: ActorRef, topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[StreamTopicView], replyTo, topicPath, topicRepo).withDispatcher("streaming-dispatcher")
+  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[StreamTopicView], topicPath, topicRepo).withDispatcher("streaming-dispatcher")
 }

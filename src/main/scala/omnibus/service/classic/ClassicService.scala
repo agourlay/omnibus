@@ -7,7 +7,7 @@ import scala.util.Failure
 import omnibus.configuration._
 import omnibus.core.actors.CommonActor
 
-abstract class ClassicService(replyTo: ActorRef) extends CommonActor {
+trait ClassicService extends CommonActor {
 
   implicit def system = context.system
   implicit def executionContext = context.dispatcher
@@ -22,9 +22,9 @@ abstract class ClassicService(replyTo: ActorRef) extends CommonActor {
   }
 
   def receive = {
-    case ReceiveTimeout ⇒ replyTo ! TimeOutService
-    case Failure(e)     ⇒ replyTo ! ErrorService(e)
-    case e: Exception   ⇒ replyTo ! ErrorService(e)
+    case ReceiveTimeout ⇒ context.parent ! TimeOutService
+    case Failure(e)     ⇒ context.parent ! ErrorService(e)
+    case e: Exception   ⇒ context.parent ! ErrorService(e)
   }
 }
 
