@@ -4,15 +4,14 @@ import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import scala.concurrent.duration._
 
-import omnibus._
+import omnibus.it.OmnibusSimulation
 
-class PushStress extends Simulation {
-
-  // starting app
-  val app = omnibus.Boot
+class PushStress extends OmnibusSimulation {
+  
   val userNumber = 10
 
   val scenarioCreateTopic = scenario("Create topic")
+    .pause(5)
     .exec(
       http("create topic")
         .post("/topics/batman")
@@ -23,6 +22,7 @@ class PushStress extends Simulation {
         .check(status.is(200)))
 
   val scenarioOmnibus = scenario("Publish on topic")
+    .pause(6)
     .exec(
       http("get wrong topic")
         .get("/topics/batmans")
@@ -53,7 +53,10 @@ class PushStress extends Simulation {
     scenarioOmnibus.inject(rampUsers(userNumber) over (10 seconds)))
     .protocols(
       http.baseURL("http://localhost:8080")
+       .warmUp("http://localhost:8080/stats/metrics")
     )
     .assertions(
-      global.successfulRequests.percent.greaterThan(95), global.responseTime.max.lessThan(400))
+      global.successfulRequests.percent.greaterThan(miniSuccessPercentage),
+      global.responseTime.max.lessThan(maxResponseTime)
+    )
 }

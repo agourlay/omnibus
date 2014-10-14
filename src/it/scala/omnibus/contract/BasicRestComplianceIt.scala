@@ -4,14 +4,12 @@ import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import scala.concurrent.duration._
 
-import omnibus._
+import omnibus.it.OmnibusSimulation
 
-class BasicRestComplianceIt extends Simulation {
-
-  // starting app
-  val app = omnibus.Boot
+class BasicRestComplianceIt extends OmnibusSimulation {
 
   val scenarioCreateTopic = scenario("Create topic")
+    .pause(5)
     .exec(
       http("create topic")
         .post("/topics/batman")
@@ -55,8 +53,10 @@ class BasicRestComplianceIt extends Simulation {
     scenarioCreateTopic.inject(atOnceUsers(1)))
     .protocols(
       http.baseURL("http://localhost:8080")
+      .warmUp("http://localhost:8080/stats/metrics")
     )
     .assertions(
-      global.responseTime.max.lessThan(200),
-      global.successfulRequests.percent.greaterThan(95))
+      global.responseTime.max.lessThan(maxResponseTime),
+      global.successfulRequests.percent.greaterThan(miniSuccessPercentage)
+    )
 }

@@ -5,12 +5,10 @@ import io.gatling.http.Predef._
 import scala.concurrent.duration._
 import util.Random
 
-import omnibus._
+import omnibus.it.OmnibusSimulation
 
-class DeepTopicTree extends Simulation {
-
-  // starting app
-  val app = omnibus.Boot
+class DeepTopicTree extends OmnibusSimulation {
+  
   val depth = 10
   val topicNameLength = 5
 
@@ -20,6 +18,7 @@ class DeepTopicTree extends Simulation {
   }
 
   val scenarioOmnibus = scenario("Publish on topic")
+    .pause(5)
     .exec(session => session.set("topicName", randomTopic(depth)))
     .exec(
       http("create random topic")
@@ -30,7 +29,10 @@ class DeepTopicTree extends Simulation {
     scenarioOmnibus.inject(rampUsers(10) over (10 seconds)))
     .protocols(
       http.baseURL("http://localhost:8080")
+      .warmUp("http://localhost:8080/stats/metrics")
     )
     .assertions(
-      global.successfulRequests.percent.greaterThan(95), global.responseTime.max.lessThan(400))
+      global.successfulRequests.percent.greaterThan(miniSuccessPercentage),
+      global.responseTime.max.lessThan(maxResponseTime)
+    )
 }

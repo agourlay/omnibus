@@ -4,16 +4,15 @@ import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import scala.concurrent.duration._
 
-import omnibus._
+import omnibus.it.OmnibusSimulation
 
-class SinceIdSubscriptionIt extends Simulation {
-
-  // starting app
-  val app = omnibus.Boot
+class SinceIdSubscriptionIt extends OmnibusSimulation {
+  
   val publishNumber = 100
   val publishSince = 10
 
   val scenarioOmnibus = scenario("Test sinceId")
+    .pause(5)
     .exec(
       http("create topic")
         .post("/topics/batman")
@@ -36,7 +35,9 @@ class SinceIdSubscriptionIt extends Simulation {
     .protocols(
       http.baseURL("http://localhost:8080")
         .wsBaseURL("ws://localhost:8081")
+        .warmUp("http://localhost:8080/stats/metrics")
     )
     .assertions(
-      global.successfulRequests.percent.greaterThan(95))
+      global.successfulRequests.percent.greaterThan(miniSuccessPercentage)
+    )
 }

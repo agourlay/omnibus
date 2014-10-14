@@ -5,18 +5,17 @@ import io.gatling.http.Predef._
 import scala.concurrent.duration._
 import util.Random
 
-import omnibus._
+import omnibus.it.OmnibusSimulation
 
-class WideTopicTree extends Simulation {
-
-  // starting app
-  val app = omnibus.Boot
+class WideTopicTree extends OmnibusSimulation {
+  
   val width = 10
   val topicNameLength = 5
 
   def randomTopic(length: Int): String = "/" + Random.alphanumeric.take(topicNameLength).mkString
 
   val scenarioOmnibus = scenario("Publish on topic")
+    .pause(5)
     .exec(session => session.set("topicBase", randomTopic(topicNameLength)))
     .exec(
       http("create random topic")
@@ -33,7 +32,10 @@ class WideTopicTree extends Simulation {
     scenarioOmnibus.inject(rampUsers(10) over (10 seconds)))
     .protocols(
       http.baseURL("http://localhost:8080")
+       .warmUp("http://localhost:8080/stats/metrics")
     )
     .assertions(
-      global.successfulRequests.percent.greaterThan(95), global.responseTime.max.lessThan(400))
+      global.successfulRequests.percent.greaterThan(miniSuccessPercentage),
+      global.responseTime.max.lessThan(maxResponseTime)
+    )
 }
