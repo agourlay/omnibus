@@ -5,9 +5,10 @@ import akka.actor.{ Actor, ActorRef, Props, ActorContext }
 import spray.routing._
 import spray.routing.authentication._
 
+import omnibus.api.endpoint.RestRequest._
+import omnibus.service.classic.{ AllSubscribers, DeleteSubscriber, DeleteTopic, Subscriber }
 import omnibus.configuration.Security
 import omnibus.domain.topic.TopicPath
-import omnibus.api.request._
 
 class AdminRoute(topicRepo: ActorRef, subRepo: ActorRef)(implicit context: ActorContext) extends Directives {
 
@@ -19,22 +20,30 @@ class AdminRoute(topicRepo: ActorRef, subRepo: ActorRef)(implicit context: Actor
         pathPrefix("topics" / Rest) { topic ⇒
           validate(!topic.isEmpty, "topic name cannot be empty \n") {
             delete { ctx ⇒
-              context.actorOf(DeleteTopic.props(TopicPath(topic), ctx, topicRepo))
+              perRequest(ctx) {
+                DeleteTopic.props(TopicPath(topic), topicRepo)
+              }
             }
           }
         } ~
           path("subscribers") {
             get { ctx ⇒
-              context.actorOf(AllSubscribers.props(ctx, subRepo))
+              perRequest(ctx) {
+                AllSubscribers.props(subRepo)
+              }
             }
           } ~
           path("subscribers" / Rest) { sub ⇒
             validate(!sub.isEmpty, "sub id cannot be empty \n") {
               get { ctx ⇒
-                context.actorOf(Subscriber.props(sub, ctx, subRepo))
+                perRequest(ctx) {
+                  Subscriber.props(sub, subRepo)
+                }
               } ~
                 delete { ctx ⇒
-                  context.actorOf(DeleteSubscriber.props(sub, ctx, subRepo))
+                  perRequest(ctx) {
+                    DeleteSubscriber.props(sub, subRepo)
+                  }
                 }
             }
           }

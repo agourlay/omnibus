@@ -11,7 +11,8 @@ import omnibus.domain.topic._
 import omnibus.domain.subscriber.SubscriptionDescription
 import omnibus.domain.subscriber.SubscriberSupport
 import omnibus.domain.subscriber.SubscriberSupport._
-import omnibus.api.request._
+import omnibus.api.endpoint.RestRequest._
+import omnibus.service.classic.{ CreateTopic, Publish, ViewTopic, RootTopics }
 import omnibus.service.streamed.StreamTopicEvent
 import omnibus.api.streaming.sse.ServerSentEventSupport._
 import omnibus.api.streaming.sse.ServerSentEventResponse
@@ -24,20 +25,30 @@ class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: Actor
   val route =
     path("topics") {
       get { ctx ⇒
-        context.actorOf(RootTopics.props(ctx, topicRepo))
+        perRequest(ctx) {
+          RootTopics.props(topicRepo)
+        }
       }
     } ~
       pathPrefix("topics" / Rest) { topic ⇒
         validate(!topic.isEmpty, "topic name cannot be empty \n") {
           val topicPath = TopicPath(topic)
           get { ctx ⇒
-            context.actorOf(ViewTopic.props(topicPath, ctx, topicRepo))
+            perRequest(ctx) {
+              ViewTopic.props(topicPath, topicRepo)
+            }
           } ~
             post { ctx ⇒
-              context.actorOf(CreateTopic.props(topicPath, ctx, topicRepo))
+              perRequest(ctx) {
+                CreateTopic.props(topicPath, topicRepo)
+              }
             } ~
             entity(as[String]) { message ⇒
-              put { ctx ⇒ context.actorOf(Publish.props(topicPath, message, ctx, topicRepo)) }
+              put { ctx ⇒
+                perRequest(ctx) {
+                  Publish.props(topicPath, message, topicRepo)
+                }
+              }
             }
         }
       } ~

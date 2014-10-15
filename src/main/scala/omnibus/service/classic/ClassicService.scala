@@ -1,4 +1,4 @@
-package omnibus.service.streamed
+package omnibus.service.classic
 
 import akka.actor._
 
@@ -15,7 +15,7 @@ trait ClassicService extends CommonActor {
 
   context.setReceiveTimeout(timeout.duration)
 
-  val timerCtx = metrics.timer("classic").timerContext()
+  val timerCtx = metrics.timer("service").timerContext()
 
   override def postStop() = {
     timerCtx.stop()

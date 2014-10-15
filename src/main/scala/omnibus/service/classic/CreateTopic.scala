@@ -1,0 +1,31 @@
+package omnibus.service.classic
+
+import akka.actor._
+
+import omnibus.domain.topic._
+import omnibus.domain.topic.TopicProtocol._
+import omnibus.domain.topic.TopicRepositoryProtocol._
+
+class CreateTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicService {
+
+  topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
+
+  override def receive = super.receive orElse waitingLookup
+
+  def waitingAck: Receive = {
+    case t @ TopicCreated(topicRef) ⇒ context.parent forward t
+  }
+
+  def waitingLookup: Receive = {
+    case TopicPathRef(topicPath, topicRef) ⇒ topicRef match {
+      case Some(ref) ⇒ context.parent ! new TopicAlreadyExistsException(topicPath.prettyStr())
+      case None ⇒
+        topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)
+        context.become(super.receive orElse waitingAck)
+    }
+  }
+}
+
+object CreateTopic {
+  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[CreateTopic], topicPath, topicRepo).withDispatcher("requests-dispatcher")
+}

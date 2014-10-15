@@ -1,18 +1,12 @@
-package omnibus.api.request
+package omnibus.service.classic
 
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor._
 
-import spray.httpx.SprayJsonSupport._
-import spray.routing._
-import spray.json._
-
-import DefaultJsonProtocol._
-
-import omnibus.api.endpoint.JsonSupport._
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
+import omnibus.service.classic.RootTopics.RootTopicsSet
 
-class RootTopics(ctx: RequestContext, topicRepo: ActorRef) extends RestRequest(ctx) {
+class RootTopics(topicRepo: ActorRef) extends ClassicService {
 
   topicRepo ! TopicRepositoryProtocol.AllRoots
 
@@ -22,7 +16,7 @@ class RootTopics(ctx: RequestContext, topicRepo: ActorRef) extends RestRequest(c
 
   def waitingTopicsPathRef: Receive = {
     case Roots(rootsPath) ⇒
-      if (rootsPath.isEmpty) requestOver(roots)
+      if (rootsPath.isEmpty) context.parent ! RootTopicsSet(roots)
       else {
         rootsPath.foreach(_.topicRef.get ! TopicProtocol.View)
         context.become(super.receive orElse waitingTopicsView(rootsPath.size))
@@ -32,11 +26,12 @@ class RootTopics(ctx: RequestContext, topicRepo: ActorRef) extends RestRequest(c
   def waitingTopicsView(expected: Integer): Receive = {
     case rootView: TopicView ⇒ {
       roots += rootView
-      if (roots.size == expected) requestOver(roots)
+      if (roots.size == expected) context.parent ! RootTopicsSet(roots)
     }
   }
 }
 
 object RootTopics {
-  def props(ctx: RequestContext, topicRepo: ActorRef) = Props(classOf[RootTopics], ctx, topicRepo).withDispatcher("requests-dispatcher")
+  def props(topicRepo: ActorRef) = Props(classOf[RootTopics], topicRepo).withDispatcher("requests-dispatcher")
+  case class RootTopicsSet(roots: Set[TopicView])
 }

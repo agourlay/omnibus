@@ -1,6 +1,7 @@
 package omnibus.api.streaming
 
 import akka.actor._
+import akka.actor.SupervisorStrategy.Stop
 
 import scala.util.Failure
 
@@ -33,6 +34,15 @@ trait StreamingResponse[B] extends CommonActor {
   def streamTimeout()
 
   def endOfStream()
+
+  override val supervisorStrategy =
+    OneForOneStrategy() {
+      case e ⇒ {
+        handleException(e)
+        timerCtx.stop()
+        Stop
+      }
+    }
 }
 
 trait StreamingFormat[A, B] {
