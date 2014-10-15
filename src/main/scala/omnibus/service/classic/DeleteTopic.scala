@@ -1,6 +1,6 @@
 package omnibus.service.classic
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
@@ -12,7 +12,7 @@ class DeleteTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServ
   override def receive = super.receive orElse waitingLookup
 
   def waitingAck: Receive = {
-    case t @ TopicDeletedFromRepo(topicPath) ⇒ context.parent forward t
+    case t @ TopicDeletedFromRepo(topicPath) ⇒ returnResult(t)
   }
 
   def waitingLookup: Receive = {
@@ -22,7 +22,7 @@ class DeleteTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServ
           ref ! TopicProtocol.Delete
           topicRepo ! TopicRepositoryProtocol.DeleteTopic(topicPath)
           context.become(super.receive orElse waitingAck)
-        case None ⇒ context.parent ! new TopicNotFoundException(topicPath.prettyStr)
+        case None ⇒ returnError(new TopicNotFoundException(topicPath.prettyStr))
       }
   }
 }

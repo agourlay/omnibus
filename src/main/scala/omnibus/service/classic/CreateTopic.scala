@@ -1,6 +1,6 @@
 package omnibus.service.classic
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicProtocol._
@@ -13,12 +13,12 @@ class CreateTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServ
   override def receive = super.receive orElse waitingLookup
 
   def waitingAck: Receive = {
-    case t @ TopicCreated(topicRef) ⇒ context.parent forward t
+    case t @ TopicCreated(topicRef) ⇒ returnResult(t)
   }
 
   def waitingLookup: Receive = {
     case TopicPathRef(topicPath, topicRef) ⇒ topicRef match {
-      case Some(ref) ⇒ context.parent ! new TopicAlreadyExistsException(topicPath.prettyStr())
+      case Some(ref) ⇒ returnError(new TopicAlreadyExistsException(topicPath.prettyStr()))
       case None ⇒
         topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)
         context.become(super.receive orElse waitingAck)

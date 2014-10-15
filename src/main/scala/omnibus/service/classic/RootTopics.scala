@@ -1,6 +1,6 @@
 package omnibus.service.classic
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
@@ -16,7 +16,7 @@ class RootTopics(topicRepo: ActorRef) extends ClassicService {
 
   def waitingTopicsPathRef: Receive = {
     case Roots(rootsPath) ⇒
-      if (rootsPath.isEmpty) context.parent ! RootTopicsSet(roots)
+      if (rootsPath.isEmpty) returnResult(RootTopicsSet(roots))
       else {
         rootsPath.foreach(_.topicRef.get ! TopicProtocol.View)
         context.become(super.receive orElse waitingTopicsView(rootsPath.size))
@@ -26,7 +26,7 @@ class RootTopics(topicRepo: ActorRef) extends ClassicService {
   def waitingTopicsView(expected: Integer): Receive = {
     case rootView: TopicView ⇒ {
       roots += rootView
-      if (roots.size == expected) context.parent ! RootTopicsSet(roots)
+      if (roots.size == expected) returnResult(RootTopicsSet(roots))
     }
   }
 }

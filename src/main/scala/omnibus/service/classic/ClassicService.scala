@@ -16,18 +16,33 @@ trait ClassicService extends CommonActor {
   context.setReceiveTimeout(timeout.duration)
 
   val timerCtx = metrics.timer("service").timerContext()
+  val exceptionMeter = metrics.meter("exception")
 
   override def postStop() = {
     timerCtx.stop()
   }
 
+  def returnResult(result: Any) {
+    context.parent ! result
+    timerCtx.stop()
+    self ! PoisonPill
+  }
+
+  def returnError(t: Throwable) {
+    context.parent ! ServiceError(t)
+    timerCtx.stop()
+    exceptionMeter.mark()
+    self ! PoisonPill
+  }
+
   def receive = {
-    case ReceiveTimeout ⇒ context.parent ! TimeOutService
-    case Failure(e)     ⇒ context.parent ! ErrorService(e)
-    case e: Exception   ⇒ context.parent ! ErrorService(e)
+    case ReceiveTimeout ⇒ context.parent ! ServiceError(new ServiceTimeoutException())
+    case Failure(e)     ⇒ context.parent ! ServiceError(e)
+    case e: Exception   ⇒ context.parent ! ServiceError(e)
   }
 }
 
+class ServiceTimeoutException extends Exception("The service is taking longer than expected")
+
 trait ServiceResult
-case class ErrorService(e: Throwable)
-case object TimeOutService
+case class ServiceError(e: Throwable)

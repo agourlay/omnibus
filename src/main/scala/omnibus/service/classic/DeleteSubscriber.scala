@@ -1,6 +1,6 @@
 package omnibus.service.classic
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.subscriber._
@@ -14,7 +14,7 @@ class DeleteSubscriber(subId: String, subRepo: ActorRef) extends ClassicService 
   def waitingLookup: Receive = {
     case SubLookup(optView) ⇒
       optView match {
-        case None ⇒ context.parent ! new SubscriberNotFoundException(subId)
+        case None ⇒ returnError(new SubscriberNotFoundException(subId))
         case Some(subView) ⇒
           subRepo ! SubscriberRepositoryProtocol.KillSub(subId)
           context.become(super.receive orElse waitingAck)
@@ -22,7 +22,7 @@ class DeleteSubscriber(subId: String, subRepo: ActorRef) extends ClassicService 
   }
 
   def waitingAck: Receive = {
-    case s @ SubKilled(id) ⇒ context.parent forward s
+    case s @ SubKilled(id) ⇒ returnResult(s)
   }
 }
 

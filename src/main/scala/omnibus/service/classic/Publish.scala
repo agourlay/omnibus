@@ -1,6 +1,6 @@
 package omnibus.service.classic
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicProtocol._
@@ -13,7 +13,7 @@ class Publish(topicPath: TopicPath, message: String, topicRepo: ActorRef) extend
   override def receive = super.receive orElse waitingLookup
 
   def waitingAck: Receive = {
-    case t @ MessagePublished ⇒ context.parent forward t
+    case t @ MessagePublished ⇒ returnResult(t)
   }
 
   def waitingLookup: Receive = {
@@ -22,7 +22,7 @@ class Publish(topicPath: TopicPath, message: String, topicRepo: ActorRef) extend
         case Some(ref) ⇒
           ref ! TopicProtocol.PublishMessage(message)
           context.become(super.receive orElse waitingAck)
-        case None ⇒ context.parent ! new TopicNotFoundException(topicPath.prettyStr)
+        case None ⇒ returnError(new TopicNotFoundException(topicPath.prettyStr))
       }
   }
 }

@@ -1,6 +1,6 @@
 package omnibus.service.classic
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._
@@ -12,7 +12,7 @@ class ViewTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServic
   override def receive = super.receive orElse waitingLookup
 
   def waitingTopicView: Receive = {
-    case tv: TopicView ⇒ context.parent forward tv
+    case tv: TopicView ⇒ returnResult(tv)
   }
 
   def waitingLookup: Receive = {
@@ -21,7 +21,7 @@ class ViewTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServic
         case Some(ref) ⇒
           ref ! TopicProtocol.View
           context.become(super.receive orElse waitingTopicView)
-        case None ⇒ context.parent ! new TopicNotFoundException(topicPath.prettyStr)
+        case None ⇒ returnError(new TopicNotFoundException(topicPath.prettyStr))
       }
   }
 }

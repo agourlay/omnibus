@@ -10,6 +10,7 @@ import HttpHeaders._
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
 import omnibus.core.metrics.Instrumented
+import omnibus.service.classic.ServiceTimeoutException
 
 trait RestFailureHandling extends Instrumented {
   this: HttpService ⇒
@@ -18,6 +19,7 @@ trait RestFailureHandling extends Instrumented {
   val topicAlreadyExists = metrics.meter("TopicAlreadyExistsException")
   val subscriberNotFound = metrics.meter("SubscriberNotFoundException")
   val requestTimeout = metrics.meter("RequestTimeoutException")
+  val serviceTimeout = metrics.meter("ServiceTimeoutException")
   val illegalArgument = metrics.meter("IllegalArgumentException")
   val circuitBreaker = metrics.meter("CircuitBreakerException")
   val otherException = metrics.meter("OtherException")
@@ -49,6 +51,14 @@ trait RestFailureHandling extends Instrumented {
         requestTimeout.mark()
         log.error("Request to {} could not be handled normally -> RestRequestTimeout", uri)
         log.error("RestRequestTimeout : {} ", e)
+        complete(StatusCodes.InternalServerError, "Something is taking longer than expected, retry later \n")
+      }
+
+    case e: ServiceTimeoutException ⇒
+      requestUri { uri ⇒
+        serviceTimeout.mark()
+        log.error("Request to {} could not be handled normally -> ServiceTimeoutException", uri)
+        log.error("ServiceTimeoutException : {} ", e)
         complete(StatusCodes.InternalServerError, "Something is taking longer than expected, retry later \n")
       }
 

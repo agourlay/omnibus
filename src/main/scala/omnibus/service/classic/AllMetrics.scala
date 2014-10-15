@@ -1,6 +1,6 @@
 package omnibus.service.classic
 
-import akka.actor._
+import akka.actor.{ Actor, ActorRef, Props }
 
 import omnibus.core.metrics.MetricsReporter._
 import omnibus.core.metrics.MetricsReporterProtocol._
@@ -13,7 +13,7 @@ class AllMetrics(metricsRepo: ActorRef) extends ClassicService {
   override def receive = super.receive orElse waitingMetrics
 
   def waitingMetrics: Receive = {
-    case m @ MetricsReport(metrics) ⇒ context.parent forward m
+    case m @ MetricsReport(metrics) ⇒ returnResult(m)
   }
 }
 

@@ -26,6 +26,7 @@ import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.domain.topic.TopicProtocol._
 import omnibus.domain.topic.TopicView
 import omnibus.service.classic.RootTopics.RootTopicsSet
+import omnibus.service.classic.ServiceError
 
 class RestRequest(ctx: RequestContext, props: Props) extends CommonActor {
 
@@ -43,6 +44,7 @@ class RestRequest(ctx: RequestContext, props: Props) extends CommonActor {
     case ReceiveTimeout                  ⇒ requestOver(new RequestTimeoutException())
     case Failure(e)                      ⇒ requestOver(e)
     case e: Exception                    ⇒ requestOver(e)
+    case ServiceError(e)                 ⇒ requestOver(e)
     // TODO add generic event handling from classic services
     case MetricsReport(metrics)          ⇒ requestOver(metrics)
     case Subscribers(subs)               ⇒ requestOver(subs)
