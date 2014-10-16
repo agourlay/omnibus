@@ -47,11 +47,11 @@ class MetricsReporter extends CommonActor {
   }
 
   def receive = {
-    case All       ⇒ sender ! metricsByName(MetricsReporter.allMetrics)
-    case Requests  ⇒ sender ! metricsByName(MetricsReporter.requestsMetrics)
-    case Streaming ⇒ sender ! metricsByName(MetricsReporter.streamingMetrics)
-    case TopicRepo ⇒ sender ! metricsByName(MetricsReporter.topicMetrics)
-    case SubRepo   ⇒ sender ! metricsByName(MetricsReporter.subRepoMetrics)
+    case All           ⇒ sender ! metricsByName(MetricsReporter.allMetrics)
+    case Api           ⇒ sender ! metricsByName(MetricsReporter.apiMetrics)
+    case Service       ⇒ sender ! metricsByName(MetricsReporter.serviceMetrics)
+    case Topics        ⇒ sender ! metricsByName(MetricsReporter.topicMetrics)
+    case Subscriptions ⇒ sender ! metricsByName(MetricsReporter.subRepoMetrics)
   }
 
   def metricsByName(name: String) = {
@@ -71,17 +71,17 @@ class MetricsReporter extends CommonActor {
 object MetricsReporter {
   def props = Props(classOf[MetricsReporter]).withDispatcher("statistics-dispatcher")
   val allMetrics = "omnibus"
-  val requestsMetrics = "omnibus.api.request"
-  val streamingMetrics = "omnibus.api.streaming"
+  val apiMetrics = "omnibus.api"
+  val serviceMetrics = "omnibus.service"
   val topicMetrics = "omnibus.domain.topic"
   val subRepoMetrics = "omnibus.domain.subscriber"
 }
 
 object MetricsReporterProtocol {
   case object All
-  case object Requests
-  case object Streaming
-  case object TopicRepo
-  case object SubRepo
+  case object Api
+  case object Service
+  case object Topics
+  case object Subscriptions
   case class MetricsReport(metrics: Map[String, JsValue])
 }

@@ -39,7 +39,6 @@ trait StreamingResponse[B] extends CommonActor {
     OneForOneStrategy() {
       case e ⇒ {
         handleException(e)
-        timerCtx.stop()
         Stop
       }
     }

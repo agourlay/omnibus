@@ -18,10 +18,6 @@ trait ClassicService extends CommonActor {
   val timerCtx = metrics.timer("serviceCall").timerContext()
   val exceptionMeter = metrics.meter("exception")
 
-  override def postStop() = {
-    timerCtx.stop()
-  }
-
   def returnResult(result: Any) {
     context.parent ! result
     timerCtx.stop()
@@ -36,9 +32,9 @@ trait ClassicService extends CommonActor {
   }
 
   def receive = {
-    case ReceiveTimeout ⇒ context.parent ! ServiceError(new ServiceTimeoutException())
-    case Failure(e)     ⇒ context.parent ! ServiceError(e)
-    case e: Exception   ⇒ context.parent ! ServiceError(e)
+    case ReceiveTimeout ⇒ returnError(new ServiceTimeoutException())
+    case Failure(e)     ⇒ returnError(e)
+    case e: Exception   ⇒ returnError(e)
   }
 }
 
