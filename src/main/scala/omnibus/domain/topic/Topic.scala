@@ -12,18 +12,17 @@ class Topic(val topic: String) extends CommonActor {
 
   var numEvents = 0L
   var lastReceivedTS = System.currentTimeMillis
-  var subscribers = Set.empty[ActorRef]
-  var subTopics = Map.empty[String, ActorRef]
 
+  val subscribers = scala.collection.mutable.Set.empty[ActorRef]
+  val subTopics = scala.collection.mutable.Map.empty[String, ActorRef]
   val creationDate = System.currentTimeMillis / 1000L
   val topicPath = TopicPath(self)
   val prettyPath = TopicPath.prettyStr(self)
+  val contentHolder = context.actorOf(TopicContent.props(topicPath), "internal-topic-content")
 
   val messageReceived = metrics.meter(s"$prettyPath.events")
   val subscribersNumber = metrics.gauge(s"$prettyPath.subscribers")(subscribers.size)
   val subTopicsNumber = metrics.gauge(s"$prettyPath.sub-topics")(subTopics.size)
-
-  val contentHolder = context.actorOf(TopicContent.props(topicPath), "internal-topic-content")
 
   def receive = {
     case PublishMessage(message)                        ⇒ contentHolder ! TopicContentProtocol.Publish(message, sender)
@@ -43,7 +42,7 @@ class Topic(val topic: String) extends CommonActor {
   }
 
   def view() = {
-    val prettyChildren = subTopics.values.map(TopicPath.prettyStr(_)).toSeq
+    val prettyChildren = subTopics.values.map(TopicPath.prettyStr(_)).toVector
     val throughput = if (System.currentTimeMillis - lastReceivedTS > 5000) 0 else Math.round(messageReceived.oneMinuteRate * 100.0) / 100.0
     TopicView(prettyPath, subTopics.size, prettyChildren, subscribers.size, numEvents, throughput, creationDate)
   }
@@ -108,7 +107,7 @@ class Topic(val topic: String) extends CommonActor {
     // FIXME it is SUPER ugly there
     if (subTopics.values.toSeq.contains(ref)) {
       val key = subTopics.find(_._2 == ref).get._1
-      subTopics -= (key)
+      subTopics -= key
       log.debug(s"subtopic $key died")
     } else {
       unsubscribe(ref)

@@ -15,7 +15,7 @@ trait ClassicService extends CommonActor {
 
   context.setReceiveTimeout(timeout.duration)
 
-  val timerCtx = metrics.timer("service").timerContext()
+  val timerCtx = metrics.timer("serviceCall").timerContext()
   val exceptionMeter = metrics.meter("exception")
 
   override def postStop() = {

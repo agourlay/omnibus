@@ -54,7 +54,7 @@ class BasicRestComplianceIt extends OmnibusSimulation {
         .check(status.is(200)))
     .exec(
       http("subscriber list")
-        .delete("/admin/subscribers")
+        .get("/admin/subscribers")
         .basicAuth(httpBasicUser, httpBasicPwd)
         .check(status.is(200)))
     .exec(

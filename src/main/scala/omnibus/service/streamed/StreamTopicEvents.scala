@@ -11,8 +11,8 @@ import omnibus.domain.subscriber.SubscriberSupport._
 
 class StreamTopicEvent(sd: SubscriptionDescription, subRepo: ActorRef, topicRepo: ActorRef) extends StreamedService {
 
-  var pendingTopics = Set.empty[TopicPath]
-  var validTopics = Set.empty[ActorRef]
+  val pendingTopics = scala.collection.mutable.Set.empty[TopicPath]
+  val validTopics = scala.collection.mutable.Set.empty[ActorRef]
 
   val topics = TopicPath.multi(sd.topicPath.prettyStr)
   topics foreach { topic ⇒
@@ -27,7 +27,7 @@ class StreamTopicEvent(sd: SubscriptionDescription, subRepo: ActorRef, topicRepo
         case Some(ref) ⇒
           validTopics += ref
           if (validTopics.size == pendingTopics.size) {
-            subRepo ! SubscriberRepositoryProtocol.CreateSub(validTopics, context.parent, sd.reactiveCmd, sd.ip, sd.subSupport)
+            subRepo ! SubscriberRepositoryProtocol.CreateSub(validTopics.toSet, context.parent, sd.reactiveCmd, sd.ip, sd.subSupport)
           }
       }
   }

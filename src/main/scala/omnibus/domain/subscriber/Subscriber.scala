@@ -13,10 +13,8 @@ class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveC
 
   implicit def executionContext = context.dispatcher
 
-  var pendingTopic = topics
-  var topicListened = Set.empty[ActorRef]
-  val topicsPath = topics.map(TopicPath(_))
-
+  val pendingTopic = scala.collection.mutable.Set.empty[ActorRef] ++ (topics)
+  val topicListened = scala.collection.mutable.Set.empty[ActorRef]
   var pendingScheduler: Cancellable = _
 
   override def preStart() = {

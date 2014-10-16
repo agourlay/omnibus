@@ -14,8 +14,7 @@ import omnibus.domain.subscriber.SubscriberSupport._
 
 class SubscriberRepository extends CommonActor {
 
-  var subs = Set.empty[SubscriberView]
-
+  val subs = scala.collection.mutable.Set.empty[SubscriberView]
   val random = new SecureRandom()
 
   val subNumber = metrics.gauge("subscribers")(subs.size)
@@ -24,7 +23,7 @@ class SubscriberRepository extends CommonActor {
   def receive = {
     case CreateSub(topics, responder, reactiveCmd, ip, support) ⇒ createSub(topics, responder, reactiveCmd, ip, support)
     case KillSub(id)                                            ⇒ killSub(id, sender)
-    case AllSubs                                                ⇒ sender ! Subscribers(subs.toList)
+    case AllSubs                                                ⇒ sender ! Subscribers(subs.toVector)
     case Terminated(refSub)                                     ⇒ handleTerminated(refSub)
     case SubById(id)                                            ⇒ sender ! subLookup(id)
   }
@@ -49,7 +48,7 @@ class SubscriberRepository extends CommonActor {
       case None ⇒ log.info(s"Cannot delete unknown subscriber $id")
       case Some(sub) ⇒
         sub.ref ! PoisonPill
-        subs -= (sub)
+        subs -= sub
         replyTo ! SubKilled(id)
         log.info(s"Sub $sub deleted")
     }
@@ -57,7 +56,7 @@ class SubscriberRepository extends CommonActor {
 
   def handleTerminated(deadRef: ActorRef) = {
     subs.find(_.ref == deadRef) match {
-      case Some(sub) ⇒ subs -= (sub)
+      case Some(sub) ⇒ subs -= sub
       case None      ⇒ log.debug(s"Can not find dead subscriber in repository")
     }
   }
@@ -69,7 +68,7 @@ object SubscriberRepositoryProtocol {
   case class SubKilled(id: String)
   case class SubById(id: String)
   case class SubLookup(opt: Option[SubscriberView])
-  case class Subscribers(subs: List[SubscriberView])
+  case class Subscribers(subs: Vector[SubscriberView])
   case object AllSubs
 }
 

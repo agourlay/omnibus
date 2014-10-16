@@ -12,11 +12,11 @@ class RootTopics(topicRepo: ActorRef) extends ClassicService {
 
   override def receive = super.receive orElse waitingTopicsPathRef
 
-  var roots = Set.empty[TopicView]
+  val roots = scala.collection.mutable.Set.empty[TopicView]
 
   def waitingTopicsPathRef: Receive = {
     case Roots(rootsPath) ⇒
-      if (rootsPath.isEmpty) returnResult(RootTopicsSet(roots))
+      if (rootsPath.isEmpty) returnResult(RootTopicsSet(roots.toSet))
       else {
         rootsPath.foreach(_.topicRef.get ! TopicProtocol.View)
         context.become(super.receive orElse waitingTopicsView(rootsPath.size))
@@ -24,10 +24,9 @@ class RootTopics(topicRepo: ActorRef) extends ClassicService {
   }
 
   def waitingTopicsView(expected: Integer): Receive = {
-    case rootView: TopicView ⇒ {
+    case rootView: TopicView ⇒
       roots += rootView
-      if (roots.size == expected) returnResult(RootTopicsSet(roots))
-    }
+      if (roots.size == expected) returnResult(RootTopicsSet(roots.toSet))
   }
 }
 

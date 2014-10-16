@@ -22,7 +22,7 @@ class ServerSentEventResponse(ctx: RequestContext, props: Props) extends Streami
   val responder = ctx.responder
   val streamingService = context.actorOf(props)
 
-  lazy val responseStart = HttpResponse(
+  val responseStart = HttpResponse(
     entity = HttpEntity(EventStreamType, "Omnibus SSE streaming...\n"),
     headers = `Cache-Control`(CacheDirectives.`no-cache`) :: Nil
   )

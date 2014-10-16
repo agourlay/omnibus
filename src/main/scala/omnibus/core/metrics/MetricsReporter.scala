@@ -19,26 +19,25 @@ import com.codahale.metrics.graphite._
 import nl.grons.metrics.scala._
 
 import omnibus.configuration._
+import omnibus.core.actors.CommonActor
 import omnibus.core.metrics.MetricsReporterProtocol._
 import omnibus.api.endpoint.JsonSupport._
 
-class MetricsReporter extends Actor with ActorLogging with Instrumented {
-
-  val system = context.system
+class MetricsReporter extends CommonActor {
 
   JmxReporter.forRegistry(metricRegistry).build().start()
 
   log.info("Starting MetricsReporter to JMX")
 
-  if (Settings(system).Graphite.Enable) {
-    val graphiteHost = Settings(system).Graphite.Host
-    val graphitePort = Settings(system).Graphite.Port
+  if (Settings(context.system).Graphite.Enable) {
+    val graphiteHost = Settings(context.system).Graphite.Host
+    val graphitePort = Settings(context.system).Graphite.Port
 
     log.info(s"Starting MetricsReporter to Graphite $graphiteHost:$graphitePort")
 
     val graphite = new Graphite(graphiteHost, graphitePort)
     val graphiteReporter = GraphiteReporter.forRegistry(metricRegistry)
-      .prefixedWith(Settings(system).Graphite.Prefix)
+      .prefixedWith(Settings(context.system).Graphite.Prefix)
       .convertRatesTo(TimeUnit.SECONDS)
       .convertDurationsTo(TimeUnit.MILLISECONDS)
       .filter(MetricFilter.ALL)

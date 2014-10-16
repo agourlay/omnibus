@@ -23,14 +23,10 @@ class TopicRepository extends PersistentActor with CommonActor {
 
   override def persistenceId = self.path.toStringWithoutAddress
 
-  var rootTopics = Map.empty[String, ActorRef]
+  val rootTopics = scala.collection.mutable.Map.empty[String, ActorRef]
 
   val rootTopicsNumber = metrics.gauge("root-topics")(rootTopics.size)
   val topicsNumber = metrics.counter("topics")
-
-  val openCbMeter = metrics.meter("cb-open")
-  val closeCbMeter = metrics.meter("cb-close")
-  val halfCbMeter = metrics.meter("cb-half")
 
   var state = TopicRepoState()
   def updateState(msg: TopicRepoStateValue): Unit = { state = state.update(msg) }
@@ -38,43 +34,19 @@ class TopicRepository extends PersistentActor with CommonActor {
   // cache of most looked up topicRef, conf values to be tuned
   val mostAskedTopic: Cache[ActorRef] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
 
-  val cb = new CircuitBreaker(context.system.scheduler,
-    maxFailures = 5,
-    callTimeout = timeout.duration,
-    resetTimeout = timeout.duration * 10).onOpen(circuitBreakerOpen())
-    .onClose(circuitBreakerClose())
-    .onHalfOpen(circuitBreakerHalf())
-
-  def circuitBreakerOpen() {
-    openCbMeter.mark()
-    log.warning("CircuitBreaker is now open")
-  }
-
-  def circuitBreakerClose() {
-    closeCbMeter.mark()
-    log.warning("CircuitBreaker is now closed")
-  }
-
-  def circuitBreakerHalf() {
-    halfCbMeter.mark()
-    log.warning("CircuitBreaker is now half-open")
-  }
-
   val receiveRecover: Receive = {
-    case t: TopicRepoStateValue ⇒ {
+    case t: TopicRepoStateValue ⇒
       createTopic(t.topicPath, context.system.deadLetters) //no need for ACK
       updateState(TopicRepoStateValue(t.seqNumber, t.topicPath))
-    }
-    case SnapshotOffer(_, snapshot: TopicRepoState) ⇒ {
+    case SnapshotOffer(_, snapshot: TopicRepoState) ⇒
       state = snapshot
       state.events foreach { t ⇒ createTopic(t.topicPath, context.system.deadLetters) } //no need for ACK
-    }
   }
 
   val receiveCommand: Receive = {
-    case CreateTopic(topic)                 ⇒ cb.withSyncCircuitBreaker(persistTopic(topic, sender))
-    case DeleteTopic(topic)                 ⇒ sender ! cb.withSyncCircuitBreaker(deleteTopic(topic))
-    case AllRoots                           ⇒ sender ! cb.withSyncCircuitBreaker(allRoots())
+    case CreateTopic(topic)                 ⇒ persistTopic(topic, sender)
+    case DeleteTopic(topic)                 ⇒ sender ! deleteTopic(topic)
+    case AllRoots                           ⇒ sender ! Roots(rootTopics.values.toVector.map(TopicPathRef(_)))
     case LookupTopic(topic)                 ⇒ lookUpTopic(topic) pipeTo sender()
     case TopicProtocol.Propagation(op, dir) ⇒ log.debug("message propagation reached Repo")
   }
@@ -126,11 +98,6 @@ class TopicRepository extends PersistentActor with CommonActor {
     }
     TopicDeletedFromRepo(topicPath)
   }
-
-  def allRoots() = {
-    val roots = rootTopics.values.toList.map(TopicPathRef(_))
-    Roots(roots)
-  }
 }
 
 object TopicRepositoryProtocol {
@@ -138,7 +105,7 @@ object TopicRepositoryProtocol {
   case class DeleteTopic(topicName: TopicPath)
   case class LookupTopic(topicName: TopicPath)
   case class TopicDeletedFromRepo(topicName: TopicPath)
-  case class Roots(refs: List[TopicPathRef])
+  case class Roots(refs: Vector[TopicPathRef])
   case object AllRoots
 }
 
