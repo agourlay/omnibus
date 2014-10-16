@@ -24,9 +24,9 @@ trait HttpEndpoint extends HttpService with RestFailureHandling {
     // '/admin/topics'
     val adminRoute = new AdminRoute(core.topicRepo, core.subRepo).route
     // '/ '
-    val adminUIRoute = new AdminUIRoute().route
+    val staticFilesRoute = new StaticFilesRoute().route
 
-    topicRoute ~ statsRoute ~ adminRoute ~ adminUIRoute
+    topicRoute ~ statsRoute ~ adminRoute ~ staticFilesRoute
   }
 }
 

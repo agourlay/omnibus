@@ -26,19 +26,20 @@ class Topic(val topic: String) extends CommonActor {
   val contentHolder = context.actorOf(TopicContent.props(topicPath), "internal-topic-content")
 
   def receive = {
-    case PublishMessage(message)             ⇒ contentHolder ! TopicContentProtocol.Publish(message, sender)
-    case Subscribe(subscriber)               ⇒ subscribe(subscriber)
-    case Unsubscribe(subscriber)             ⇒ unsubscribe(subscriber)
-    case CreateSubTopic(topics, replyTo)     ⇒ createSubTopic(topics, replyTo)
-    case Terminated(refSub)                  ⇒ handleTerminated(refSub)
-    case Delete                              ⇒ deleteTopic()
-    case Leaves(replyTo)                     ⇒ leaves(replyTo)
-    case View                                ⇒ sender ! view()
-    case CascadeProcessorId(replyTo)         ⇒ cascadeProcessorId(replyTo)
-    case ProcessorId(replyTo)                ⇒ contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
-    case Propagation(operation, direction)   ⇒ handlePropagation(operation, direction)
-    case NewTopicDownTheTree(newTopic)       ⇒ notifySubscribersOnNewTopic(newTopic)
-    case TopicContentProtocol.Saved(replyTo) ⇒ messageSaved(replyTo)
+    case PublishMessage(message)                        ⇒ contentHolder ! TopicContentProtocol.Publish(message, sender)
+    case Subscribe(subscriber)                          ⇒ subscribe(subscriber)
+    case Unsubscribe(subscriber)                        ⇒ unsubscribe(subscriber)
+    case CreateSubTopic(topics, replyTo)                ⇒ createSubTopic(topics, replyTo)
+    case Terminated(refSub)                             ⇒ handleTerminated(refSub)
+    case Delete                                         ⇒ deleteTopic()
+    case Leaves(replyTo)                                ⇒ leaves(replyTo)
+    case View                                           ⇒ sender ! view()
+    case CascadeProcessorId(replyTo)                    ⇒ cascadeProcessorId(replyTo)
+    case ProcessorId(replyTo)                           ⇒ contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
+    case Propagation(operation, direction)              ⇒ handlePropagation(operation, direction)
+    case NewTopicDownTheTree(newTopic)                  ⇒ notifySubscribersOnNewTopic(newTopic)
+    case TopicContentProtocol.Saved(replyTo)            ⇒ messageSaved(replyTo)
+    case TopicContentProtocol.NbEventRecovered(eventNb) ⇒ numEvents = numEvents + eventNb
   }
 
   def view() = {

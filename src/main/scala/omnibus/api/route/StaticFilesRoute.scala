@@ -8,7 +8,7 @@ import spray.routing.authentication._
 
 import omnibus.configuration.Security
 
-class AdminUIRoute(implicit context: ActorContext) extends Directives {
+class StaticFilesRoute(implicit context: ActorContext) extends Directives {
 
   implicit def executionContext = context.dispatcher
 

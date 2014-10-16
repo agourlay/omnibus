@@ -10,6 +10,8 @@ trait OmnibusSimulation extends Simulation {
 
 	val miniSuccessPercentage = 95
 	val maxResponseTime = 500
+	val httpBasicUser = "admin"	
+	val httpBasicPwd = "omnibus"
 
 	before {
 	  // starting app

@@ -19,6 +19,7 @@ class TopicContent(val topicPath: TopicPath) extends PersistentActor with Common
   val timeout = akka.util.Timeout(Settings(context.system).Timeout)
   val retentionTime = Settings(system).Topic.RetentionTime
   var purgeScheduler: Cancellable = _
+  var eventRecoveredCounter = 0L
 
   override def preStart() = {
     purgeScheduler = system.scheduler.schedule(retentionTime, retentionTime, self, TopicContentProtocol.PurgeTopicContent)
@@ -26,7 +27,8 @@ class TopicContent(val topicPath: TopicPath) extends PersistentActor with Common
   }
 
   val receiveRecover: Receive = {
-    case _ ⇒ log.debug("no recovery write only model")
+    case RecoveryCompleted ⇒ context.parent ! NbEventRecovered(eventRecoveredCounter)
+    case te: TopicEvent    ⇒ eventRecoveredCounter = eventRecoveredCounter + 1
   }
 
   val receiveCommand: Receive = {
@@ -69,6 +71,7 @@ object TopicContentProtocol {
   case class FwProcessorId(subscriber: ActorRef)
   case class ProcessorId(processorId: String)
   case class PurgeFrom(id: Long)
+  case class NbEventRecovered(counter: Long)
   case object DeleteContent
   case object PurgeTopicContent
 }
