@@ -28,5 +28,5 @@ class StreamTopicLeaves(topicRepo: ActorRef) extends StreamedService {
 }
 
 object StreamTopicLeaves {
-  def props(topicRepo: ActorRef) = Props(classOf[StreamTopicLeaves], topicRepo).withDispatcher("streaming-dispatcher")
+  def props(topicRepo: ActorRef) = Props(classOf[StreamTopicLeaves], topicRepo)
 }

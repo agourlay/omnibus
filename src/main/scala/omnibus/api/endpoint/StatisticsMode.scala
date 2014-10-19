@@ -12,7 +12,7 @@ object StatisticsMode extends Enumeration {
     def apply(value: String): Either[DeserializationError, StatisticsMode] = {
       try Right(StatisticsMode.withName(value))
       catch {
-        case e: Exception => Left(MalformedContent(s"The statisticMode is not valid - please use one of ${StatisticsMode.values}"))
+        case e: Exception ⇒ Left(MalformedContent(s"The statisticMode is not valid - please use one of ${StatisticsMode.values}"))
       }
     }
   }

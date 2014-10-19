@@ -17,5 +17,5 @@ class AllSubscribers(subRepo: ActorRef) extends ClassicService {
 }
 
 object AllSubscribers {
-  def props(subRepo: ActorRef) = Props(classOf[AllSubscribers], subRepo).withDispatcher("requests-dispatcher")
+  def props(subRepo: ActorRef) = Props(classOf[AllSubscribers], subRepo)
 }

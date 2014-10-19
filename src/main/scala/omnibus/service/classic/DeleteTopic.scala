@@ -28,5 +28,5 @@ class DeleteTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServ
 }
 
 object DeleteTopic {
-  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[DeleteTopic], topicPath, topicRepo).withDispatcher("requests-dispatcher")
+  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[DeleteTopic], topicPath, topicRepo)
 }

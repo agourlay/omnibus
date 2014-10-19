@@ -88,7 +88,7 @@ class RestRequest(ctx: RequestContext, props: Props) extends CommonActor {
 
 object RestRequest {
 
-  def props(ctx: RequestContext, props: Props) = Props(classOf[RestRequest], ctx, props).withDispatcher("requests-dispatcher")
+  def props(ctx: RequestContext, props: Props) = Props(classOf[RestRequest], ctx, props)
 
   def perRequest(ctx: RequestContext)(props: Props)(implicit context: ActorContext) {
     context.actorOf(RestRequest.props(ctx, props))

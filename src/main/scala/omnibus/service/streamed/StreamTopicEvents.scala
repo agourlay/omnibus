@@ -35,5 +35,5 @@ class StreamTopicEvent(sd: SubscriptionDescription, subRepo: ActorRef, topicRepo
 
 object StreamTopicEvent {
   def props(sd: SubscriptionDescription, subRepo: ActorRef, topicRepo: ActorRef) =
-    Props(classOf[StreamTopicEvent], sd, subRepo, topicRepo).withDispatcher("requests-dispatcher")
+    Props(classOf[StreamTopicEvent], sd, subRepo, topicRepo)
 }

@@ -27,5 +27,5 @@ class CreateTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServ
 }
 
 object CreateTopic {
-  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[CreateTopic], topicPath, topicRepo).withDispatcher("requests-dispatcher")
+  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[CreateTopic], topicPath, topicRepo)
 }

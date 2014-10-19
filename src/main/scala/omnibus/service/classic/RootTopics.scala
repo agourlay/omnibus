@@ -31,6 +31,6 @@ class RootTopics(topicRepo: ActorRef) extends ClassicService {
 }
 
 object RootTopics {
-  def props(topicRepo: ActorRef) = Props(classOf[RootTopics], topicRepo).withDispatcher("requests-dispatcher")
+  def props(topicRepo: ActorRef) = Props(classOf[RootTopics], topicRepo)
   case class RootTopicsSet(roots: Set[TopicView])
 }

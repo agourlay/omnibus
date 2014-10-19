@@ -69,7 +69,7 @@ class MetricsReporter extends CommonActor {
 }
 
 object MetricsReporter {
-  def props = Props(classOf[MetricsReporter]).withDispatcher("statistics-dispatcher")
+  def props = Props(classOf[MetricsReporter])
   val allMetrics = "omnibus"
   val apiMetrics = "omnibus.api"
   val serviceMetrics = "omnibus.service"

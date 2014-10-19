@@ -17,7 +17,7 @@ object ReactiveMode extends Enumeration {
     def apply(value: String): Either[DeserializationError, ReactiveMode] = {
       try Right(ReactiveMode.withName(value))
       catch {
-        case e: Exception => Left(MalformedContent(s"The reactiveMode is not valid - please use one of ${ReactiveMode.values} \n"))
+        case e: Exception ⇒ Left(MalformedContent(s"The reactiveMode is not valid - please use one of ${ReactiveMode.values} \n"))
       }
     }
   }

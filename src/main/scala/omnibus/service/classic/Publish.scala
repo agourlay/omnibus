@@ -28,5 +28,5 @@ class Publish(topicPath: TopicPath, message: String, topicRepo: ActorRef) extend
 }
 
 object Publish {
-  def props(topicPath: TopicPath, message: String, topicRepo: ActorRef) = Props(classOf[Publish], topicPath, message, topicRepo).withDispatcher("requests-dispatcher")
+  def props(topicPath: TopicPath, message: String, topicRepo: ActorRef) = Props(classOf[Publish], topicPath, message, topicRepo)
 }

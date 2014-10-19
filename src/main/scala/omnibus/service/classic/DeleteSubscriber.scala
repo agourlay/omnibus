@@ -27,5 +27,5 @@ class DeleteSubscriber(subId: String, subRepo: ActorRef) extends ClassicService 
 }
 
 object DeleteSubscriber {
-  def props(subId: String, subRepo: ActorRef) = Props(classOf[DeleteSubscriber], subId, subRepo).withDispatcher("requests-dispatcher")
+  def props(subId: String, subRepo: ActorRef) = Props(classOf[DeleteSubscriber], subId, subRepo)
 }

@@ -67,5 +67,5 @@ class ServerSentEventResponse(ctx: RequestContext, props: Props) extends Streami
 }
 
 object ServerSentEventResponse {
-  def props(ctx: RequestContext, props: Props) = Props(classOf[ServerSentEventResponse], ctx, props).withDispatcher("streaming-dispatcher")
+  def props(ctx: RequestContext, props: Props) = Props(classOf[ServerSentEventResponse], ctx, props)
 }

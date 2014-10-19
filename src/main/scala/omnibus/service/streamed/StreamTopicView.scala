@@ -41,5 +41,5 @@ object HttpTopicStatProtocol {
 }
 
 object StreamTopicView {
-  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[StreamTopicView], topicPath, topicRepo).withDispatcher("streaming-dispatcher")
+  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[StreamTopicView], topicPath, topicRepo)
 }

@@ -27,5 +27,5 @@ class ViewTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServic
 }
 
 object ViewTopic {
-  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[ViewTopic], topicPath, topicRepo).withDispatcher("requests-dispatcher")
+  def props(topicPath: TopicPath, topicRepo: ActorRef) = Props(classOf[ViewTopic], topicPath, topicRepo)
 }

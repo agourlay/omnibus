@@ -18,5 +18,5 @@ class AllMetrics(metricsRepo: ActorRef) extends ClassicService {
 }
 
 object AllMetrics {
-  def props(metricsRepo: ActorRef) = Props(classOf[AllMetrics], metricsRepo).withDispatcher("requests-dispatcher")
+  def props(metricsRepo: ActorRef) = Props(classOf[AllMetrics], metricsRepo)
 }
