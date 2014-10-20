@@ -32,7 +32,7 @@ object TopicPath {
 
   def splitMultiTopic(topics: String): List[String] = topics.split("[/]\\+[/]").toList
 
-  // FIXME : find a way to remove the hardcoded string
+  // TODO : find a way to remove the hardcoded string
   def prettyStr(ref: ActorRef) = ref.path.toString.split("/topic-repository/").toList(1)
 
   def prettySubscription(topics: Set[ActorRef]): String = {

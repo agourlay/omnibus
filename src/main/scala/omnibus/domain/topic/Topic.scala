@@ -102,16 +102,19 @@ class Topic(val topic: String) extends CommonActor {
     subscriber ! SubscriberProtocol.AcknowledgeUnsub(self)
   }
 
-  // It is either a subtopic or a subscriber
   def handleTerminated(ref: ActorRef) = {
-    // FIXME it is SUPER ugly there
-    if (subTopics.values.toSeq.contains(ref)) {
-      val key = subTopics.find(_._2 == ref).get._1
-      subTopics -= key
-      log.debug(s"subtopic $key died")
-    } else {
+    // It is either a subtopic or a subscriber
+    if (subscribers.contains(ref)) {
       unsubscribe(ref)
       log.debug(s"subscriber $ref died")
+    } else {
+      // Reverse lookup by actorRef
+      val key = subTopics.map(_.swap).get(ref) match {
+        case None ⇒ log.info("unknown terminated ActorŔef received")
+        case Some(key) ⇒
+          subTopics -= key
+          log.debug(s"subtopic $key died")
+      }
     }
   }
 

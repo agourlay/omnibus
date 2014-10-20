@@ -18,7 +18,7 @@ class SubscriberRepository extends CommonActor {
   val random = new SecureRandom()
 
   val subNumber = metrics.gauge("subscribers")(subs.size)
-  val lookupMeter = metrics.meter("lookup")
+  val lookupMeter = metrics.timer("lookup")
 
   def receive = {
     case CreateSub(topics, responder, reactiveCmd, ip, support) ⇒ createSub(topics, responder, reactiveCmd, ip, support)
@@ -30,8 +30,7 @@ class SubscriberRepository extends CommonActor {
 
   def nextSubId = new BigInteger(130, random).toString(32)
 
-  def subLookup(id: String) = {
-    lookupMeter.mark()
+  def subLookup(id: String) = lookupMeter.time {
     SubLookup(subs.find(_.id == id))
   }
 

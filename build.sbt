@@ -43,6 +43,11 @@ mappings in Universal += {
 
 scriptClasspath += "../conf/omnibus.conf"
 
+resolvers ++= Seq(
+  "typesafe repo" at "http://repo.typesafe.com/typesafe/releases/"
+  ,"spray"        at "http://repo.spray.io"
+)
+
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
@@ -70,7 +75,6 @@ libraryDependencies ++= {
   Seq(
      "io.spray"                  %% "spray-can"                     % sprayV
     ,"io.spray"                  %% "spray-routing"                 % sprayV
-    ,"io.spray"                  %% "spray-caching"                 % sprayV
     ,"io.spray"                  %% "spray-json"                    % sprayJsonV
     ,"com.wandoulabs.akka"       %% "spray-websocket"               % sprayWsV
     ,"com.typesafe.akka"         %% "akka-actor"                    % akkaV

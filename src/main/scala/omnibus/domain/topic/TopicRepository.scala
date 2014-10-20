@@ -8,8 +8,6 @@ import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-import spray.caching.{ LruCache, Cache }
-
 import omnibus.core.actors.CommonActor
 import omnibus.configuration.Settings
 import omnibus.domain.topic._
@@ -30,9 +28,6 @@ class TopicRepository extends PersistentActor with CommonActor {
 
   var state = TopicRepoState()
   def updateState(msg: TopicRepoStateValue): Unit = { state = state.update(msg) }
-
-  // cache of most looked up topicRef, conf values to be tuned
-  val mostAskedTopic: Cache[ActorRef] = LruCache(maxCapacity = 100, timeToLive = 10 minute)
 
   val receiveRecover: Receive = {
     case t: TopicRepoStateValue ⇒
@@ -73,26 +68,23 @@ class TopicRepository extends PersistentActor with CommonActor {
     }
   }
 
-  //FIXME this is somewhat scary...
+  // TODO clean the crazy Future mapping
   def lookUpTopic(topicPath: TopicPath): Future[TopicPathRef] = timing("lookup") {
-    val topic = topicPath.prettyStr
-    log.debug(s"Lookup in cache for topic $topic")
-    val futureOpt: Future[ActorRef] = mostAskedTopic(topicPath) { context.actorSelection(topic).resolveOne }
+    val futureOpt: Future[ActorRef] = context.actorSelection(topicPath.prettyStr).resolveOne
     futureOpt.map { topicRef ⇒ Some(topicRef) }
-      .recover { case e: Exception ⇒ log.debug(s"$e"); mostAskedTopic.remove(topicPath); None }
+      .recover { case e: Exception ⇒ log.debug(s"$e"); None }
       .map { optTopicRef ⇒ TopicPathRef(topicPath, optTopicRef) }
   }
 
   def deleteTopic(topicPath: TopicPath) = {
     val topicName = topicPath.prettyStr
     log.debug(s"trying to delete topic $topicName")
-    mostAskedTopic.remove(topicPath)
     if (rootTopics.contains(topicName)) rootTopics -= topicName
     state.events.find(_.topicPath == topicPath) match {
       case None ⇒ log.info(s"Cannot find topic in repo state")
       case Some(topic) ⇒
         topicsNumber -= 1
-        // FIXME : should not delete message if it is valid
+        // TODO : should not delete message if it is valid
         deleteMessage(topic.seqNumber, true)
         state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
     }

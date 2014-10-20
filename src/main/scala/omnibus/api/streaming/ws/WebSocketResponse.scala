@@ -44,7 +44,7 @@ class WebSocketResponse(val serverConnection: ActorRef, val coreActors: CoreActo
     val param = request.uri.query
     val ip = request.headers.filter(_.name == "Remote-Address").head.value
     log.debug(s"Incoming websocket request $path $param from $ip")
-    // FIXME improve routing
+    // TODO improve routing
     if (path.toString.startsWith("/streams/topics/")) {
       val reactiveMode = ReactiveMode.withName(param.get("react").getOrElse("simple"))
       val reactiveCmd = ReactiveCmd(reactiveMode, param.get("since").map(_.toLong), param.get("to").map(_.toLong))
