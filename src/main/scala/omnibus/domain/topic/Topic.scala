@@ -161,7 +161,6 @@ object TopicProtocol {
   case class TopicCreated(topicRef: ActorRef)
   case class CascadeProcessorId(subscriber: ActorRef)
   case class NewTopicDownTheTree(topicRef: ActorRef) extends Operation
-  case object SubscriberNumber
   case object Delete
   case object View
   case object MessagePublished

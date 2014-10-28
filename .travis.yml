@@ -5,4 +5,4 @@ jdk:
   - openjdk7
   - oraclejdk7
   - oraclejdk8
-script: sbt test:test
+script: sbt gatling-it:testOnly omnibus.it.contract.*It

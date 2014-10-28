@@ -16,12 +16,12 @@ scalaVersion := "2.10.4"
 
 scalacOptions := Seq(
   "-unchecked",
-  "-Xlint",
   "-deprecation",
   "-target:jvm-1.7",
   "-encoding", "UTF-8",
   "-Ywarn-dead-code",
-  "-language:_",
+  "-language:implicitConversions",
+  "-language:postfixOps",
   "-feature"
 )
 
@@ -65,7 +65,7 @@ val test = project.in(file("."))
 libraryDependencies ++= {
   val akkaV         = "2.3.6"
   val sprayV        = "1.3.2"
-  val sprayJsonV    = "1.3.0"
+  val sprayJsonV    = "1.3.1"
   val sprayWsV      = "0.1.3"
   val logbackV      = "1.1.2"
   val scalaTestV    = "2.2.2"

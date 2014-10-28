@@ -74,7 +74,7 @@ class BasicRestComplianceIt extends OmnibusSimulation {
       .warmUp("http://localhost:8080/stats/metrics")
     )
     .assertions(
-      global.responseTime.max.lessThan(maxResponseTime),
-      global.successfulRequests.percent.greaterThan(miniSuccessPercentage)
+      global.responseTime.percentile1.lessThan(maxResponseTimePercentile1),
+      global.successfulRequests.percent.greaterThan(minSuccessPercentage)
     )
 }

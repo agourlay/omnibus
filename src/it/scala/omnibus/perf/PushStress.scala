@@ -56,7 +56,7 @@ class PushStress extends OmnibusSimulation {
        .warmUp("http://localhost:8080/stats/metrics")
     )
     .assertions(
-      global.successfulRequests.percent.greaterThan(miniSuccessPercentage),
-      global.responseTime.max.lessThan(maxResponseTime)
+      global.successfulRequests.percent.greaterThan(minSuccessPercentage),
+      global.responseTime.percentile1.lessThan(maxResponseTimePercentile1)
     )
 }

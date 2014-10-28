@@ -37,6 +37,6 @@ class ReplaySubscriptionIt extends OmnibusSimulation {
         .warmUp("http://localhost:8080/stats/metrics")
     )
     .assertions(
-      global.successfulRequests.percent.greaterThan(miniSuccessPercentage)
+      global.successfulRequests.percent.greaterThan(minSuccessPercentage)
     )
 }

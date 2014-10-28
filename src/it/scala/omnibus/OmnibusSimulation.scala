@@ -12,8 +12,8 @@ import omnibus._
 
 trait OmnibusSimulation extends Simulation {
 
-	val miniSuccessPercentage = 95
-	val maxResponseTime = 500
+	val minSuccessPercentage = 95
+	val maxResponseTimePercentile1 = 500
 	
 	// TODO access value via config
 	val httpBasicUser = "admin"	
