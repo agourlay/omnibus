@@ -1,10 +1,4 @@
-import com.typesafe.sbt.SbtNativePackager.Universal
-
-import com.typesafe.sbt.packager.Keys._
-
 import scalariform.formatter.preferences._
-
-packageArchetype.java_application
 
 organization := "com.agourlay"
 
@@ -37,6 +31,8 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(PreserveDanglingCloseParenthesis, true)
   .setPreference(RewriteArrowSymbols, true)
 
+enablePlugins(JavaAppPackaging)  
+
 mappings in Universal += {
   file("src/main/resources/application.conf") -> "conf/omnibus.conf"
 }
@@ -51,7 +47,7 @@ resolvers ++= Seq(
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
-    val gatlingV     = "2.0.1"
+    val gatlingV     = "2.0.2"
     val gatlingTestV = "1.0"
     val commonIoV    = "2.4"
     Seq(
