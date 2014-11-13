@@ -57,7 +57,6 @@ val test = project.in(file("."))
     )
   })
 
-
 libraryDependencies ++= {
   val akkaV         = "2.3.7"
   val sprayV        = "1.3.2"
