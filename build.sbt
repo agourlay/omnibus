@@ -6,7 +6,7 @@ name := "omnibus"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.4"
 
 scalacOptions := Seq(
   "-unchecked",
@@ -47,7 +47,7 @@ resolvers ++= Seq(
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
-    val gatlingV     = "2.0.2"
+    val gatlingV     = "2.1.0"
     val gatlingTestV = "1.0"
     val commonIoV    = "2.4"
     Seq(
