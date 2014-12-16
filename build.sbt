@@ -48,12 +48,11 @@ val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
     val gatlingV     = "2.1.1"
-    val gatlingTestV = "1.0"
     val commonIoV    = "2.4"
     Seq(
-       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV     % "it"
-      ,"io.gatling"            % "test-framework"            % gatlingTestV % "it"
-      ,"commons-io"            % "commons-io"                % commonIoV    % "it"
+       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV  % "it"
+      ,"io.gatling"            % "gatling-test-framework"    % gatlingV  % "it"
+      ,"commons-io"            % "commons-io"                % commonIoV % "it"
     )
   })
 
