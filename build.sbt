@@ -47,7 +47,7 @@ resolvers ++= Seq(
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
-    val gatlingV     = "2.1.0"
+    val gatlingV     = "2.1.1"
     val gatlingTestV = "1.0"
     val commonIoV    = "2.4"
     Seq(
