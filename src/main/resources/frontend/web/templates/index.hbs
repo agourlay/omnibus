@@ -5,8 +5,8 @@
         Root topics
     </div>
     <ul class="summary-box-content">
-	    {{#each view.content.rootTopics}}
-		   <li>{{#link-to 'topic' name}}{{name}}{{/link-to}}</b></li>
+	    {{#each t in view.content.rootTopics}}
+		   <li>{{#link-to 'topic' t.name}}{{t.name}}{{/link-to}}</b></li>
 		{{else}}
             No root topics
         {{/each}}
@@ -18,8 +18,8 @@
         Subscriptions
     </div>
     <ul class="summary-box-content">
-        {{#each view.content.subscriptions}}
-           <li>from <b>{{ip}}</b> on {{#link-to 'topic' topic}}{{topic}}{{/link-to}}</li>
+        {{#each s in view.content.subscriptions}}
+           <li>from <b>{{s.ip}}</b> on {{#link-to 'topic' s.topic}}{{s.topic}}{{/link-to}}</li>
         {{else}}
             No subscriptions
         {{/each}}

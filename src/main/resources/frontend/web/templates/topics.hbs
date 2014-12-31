@@ -23,8 +23,8 @@
 	    </tr>
 	</thead>
 	<tbody>
-		{{#each controller}}
-			{{#view 'topicRow' topicBinding="this"}}
+		{{#each topic in controller}}
+			{{#view 'topicRow' topicBinding='topic'}}
 				<td>
 					{{#if view.topic.hasSubTopics}}
 						{{#if view.isExpanded}}

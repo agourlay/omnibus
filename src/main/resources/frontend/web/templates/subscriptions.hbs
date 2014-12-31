@@ -12,15 +12,15 @@
 	    </tr>
 	</thead>
 	<tbody>
-  		{{#each controller}}
+  		{{#each sub in controller}}
   			<tr>
-  			    <td><b>{{#link-to 'topic' topic}}{{topic}}{{/link-to}}</b></td>
-  			    <td>{{ip}}</td>
-  			    <td>{{mode}}</td>
-  			    <td>{{support}}</td>
-  		     	<td>{{prettyCreationDate}}</td>
+  			    <td><b>{{#link-to 'topic' sub.topic}}{{sub.topic}}{{/link-to}}</b></td>
+  			    <td>{{sub.ip}}</td>
+  			    <td>{{sub.mode}}</td>
+  			    <td>{{sub.support}}</td>
+  		     	<td>{{sub.prettyCreationDate}}</td>
  				 <td>
-					<button class="pure-button delete-button" {{action "deleteSubscriber" id}}>
+					<button class="pure-button delete-button" {{action "deleteSubscriber" sub.id}}>
 						<i class="fa fa-trash-o"></i>
 					</button>
 			    </td>
