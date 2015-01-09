@@ -1,7 +1,6 @@
 package omnibus.domain.subscriber
 
 import spray.httpx.unmarshalling._
-import spray.http._
 
 object ReactiveMode extends Enumeration {
   type ReactiveMode = Value

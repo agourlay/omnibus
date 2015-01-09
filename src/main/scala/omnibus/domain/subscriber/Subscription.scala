@@ -1,6 +1,6 @@
 package omnibus.domain.subscriber
 
-import akka.actor.{ Actor, ActorRef, Props, ActorLogging }
+import akka.actor.{ Props, ActorLogging }
 import akka.persistence._
 
 import omnibus.domain.topic.TopicEvent

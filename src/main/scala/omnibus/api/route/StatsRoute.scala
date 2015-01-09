@@ -1,6 +1,6 @@
 package omnibus.api.route
 
-import akka.actor.{ Actor, ActorRef, Props, ActorContext }
+import akka.actor.{ ActorRef, ActorContext }
 
 import spray.routing._
 
@@ -11,7 +11,6 @@ import omnibus.service.streamed.StreamTopicView
 import omnibus.service.classic.{ AllMetrics, ViewTopic }
 import omnibus.api.endpoint.RestRequest._
 import omnibus.api.streaming.sse.ServerSentEventSupport._
-import omnibus.api.streaming.sse.ServerSentEventResponse
 
 class StatsRoute(topicRepo: ActorRef, metricsRepo: ActorRef)(implicit context: ActorContext) extends Directives {
 

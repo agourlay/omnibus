@@ -1,7 +1,5 @@
 package omnibus.service.streamed
 
-import akka.actor._
-
 import omnibus.core.actors.CommonActor
 
 trait StreamedService extends CommonActor {

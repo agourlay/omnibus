@@ -1,22 +1,17 @@
 package omnibus.api.streaming.ws
 
 import akka.actor._
-import akka.io.IO
 
-import spray.can.Http
 import spray.can.server.UHttp
 import spray.can.websocket
-import spray.can.websocket.frame.{ BinaryFrame, TextFrame }
+import spray.can.websocket.frame.TextFrame
 import spray.http.HttpRequest
-import spray.http.Uri.Path
-import spray.http.Uri.Query
 import spray.can.websocket.FrameCommandFailed
 import spray.routing.HttpServiceActor
 
 import omnibus.api.streaming.StreamingResponse
 import omnibus.core.actors.CoreActors
 import omnibus.domain.subscriber._
-import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 import omnibus.domain.topic._
 import omnibus.api.streaming.ws.WebSocketSupport._
 import omnibus.service.streamed.StreamTopicEvent

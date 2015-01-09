@@ -1,6 +1,6 @@
 package omnibus.core.metrics
 
-import akka.actor.{ Actor, ActorRef, Props, ActorLogging }
+import akka.actor.Props
 
 import java.util.concurrent.TimeUnit
 

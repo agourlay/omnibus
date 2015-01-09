@@ -1,13 +1,11 @@
 package omnibus.service.streamed
 
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor.{ ActorRef, Props }
 
 import scala.util.Failure
 
 import omnibus.domain.topic._
 import omnibus.domain.subscriber._
-import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
-import omnibus.domain.subscriber.SubscriberSupport._
 
 class StreamTopicEvent(sd: SubscriptionDescription, subRepo: ActorRef, topicRepo: ActorRef) extends StreamedService {
 

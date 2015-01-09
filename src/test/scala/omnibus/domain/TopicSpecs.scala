@@ -1,27 +1,16 @@
 package omnibus.test.domain
 
-import scala.util.Random
-
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
+import org.scalatest.{ BeforeAndAfterAll, WordSpecLike, Matchers }
 
 import com.typesafe.config.ConfigFactory
 
-import akka.actor.Actor
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.testkit.DefaultTimeout
-import akka.testkit.ImplicitSender
-import akka.testkit.TestKit
+import akka.actor._
+import akka.testkit.{ DefaultTimeout, ImplicitSender, TestKit }
+
 import scala.concurrent.duration._
-import scala.collection.immutable
 
 import omnibus.domain.topic.Topic
-import omnibus.domain.topic.Topic._
 import omnibus.domain.topic._
-import omnibus.domain.topic.TopicProtocol._
 
 class TestKitTopicSpec extends TestKit(ActorSystem("TestKitTopicSpec", ConfigFactory.parseString(TestKitTopicSpec.config)))
     with DefaultTimeout with ImplicitSender
@@ -104,7 +93,6 @@ akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
     """
 
   class RepoActor(senderReply: ActorRef) extends Actor {
-    import omnibus.domain.topic.TopicProtocol._
     val topicRef = context.actorOf(Topic.props("batman"), "batman")
 
     def receive = {

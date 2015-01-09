@@ -1,21 +1,17 @@
 package omnibus.api.route
 
-import akka.actor.{ Actor, ActorRef, Props, ActorContext }
+import akka.actor.{ ActorRef, ActorContext }
 
 import spray.routing._
-
-import scala.concurrent.duration._
 
 import omnibus.domain.subscriber.ReactiveCmd
 import omnibus.domain.topic._
 import omnibus.domain.subscriber.SubscriptionDescription
 import omnibus.domain.subscriber.SubscriberSupport
-import omnibus.domain.subscriber.SubscriberSupport._
 import omnibus.api.endpoint.RestRequest._
 import omnibus.service.classic.{ CreateTopic, Publish, ViewTopic, RootTopics }
 import omnibus.service.streamed.StreamTopicEvent
 import omnibus.api.streaming.sse.ServerSentEventSupport._
-import omnibus.api.streaming.sse.ServerSentEventResponse
 import omnibus.service.streamed.StreamTopicLeaves
 
 class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: ActorContext) extends Directives {

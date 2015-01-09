@@ -1,6 +1,6 @@
 package omnibus.service.classic
 
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor.{ ActorRef, Props }
 
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicRepositoryProtocol._

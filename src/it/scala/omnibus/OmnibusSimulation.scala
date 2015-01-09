@@ -3,7 +3,6 @@ package omnibus.it
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 
-import scala.concurrent.duration._
 import java.io.File
 
 import org.apache.commons.io.FileUtils

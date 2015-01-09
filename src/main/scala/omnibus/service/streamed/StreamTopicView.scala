@@ -1,17 +1,13 @@
 package omnibus.service.streamed
 
-import akka.actor.{ Actor, ActorRef, Props, PoisonPill }
+import akka.actor.{ ActorRef, Props, PoisonPill }
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Failure
 
 import omnibus.domain.topic._
-import omnibus.domain.topic.TopicRepositoryProtocol._
 import omnibus.domain.topic.TopicProtocol._
-import omnibus.configuration._
-import omnibus.api.streaming.sse.ServerSentEventResponse
-import omnibus.api.streaming.sse.ServerSentEventSupport._
 
 class StreamTopicView(topicPath: TopicPath, topicRepo: ActorRef) extends StreamedService {
 

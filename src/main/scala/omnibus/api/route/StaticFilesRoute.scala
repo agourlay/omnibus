@@ -1,6 +1,6 @@
 package omnibus.api.route
 
-import akka.actor.{ Actor, ActorRef, Props, ActorContext }
+import akka.actor.ActorContext
 
 import spray.httpx.encoding._
 import spray.routing._

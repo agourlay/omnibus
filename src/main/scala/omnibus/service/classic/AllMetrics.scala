@@ -1,8 +1,7 @@
 package omnibus.service.classic
 
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor.{ ActorRef, Props }
 
-import omnibus.core.metrics.MetricsReporter._
 import omnibus.core.metrics.MetricsReporterProtocol._
 import omnibus.core.metrics.MetricsReporterProtocol
 

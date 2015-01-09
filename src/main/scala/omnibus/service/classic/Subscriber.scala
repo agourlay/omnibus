@@ -1,9 +1,8 @@
 package omnibus.service.classic
 
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor.{ ActorRef, Props }
 
 import omnibus.domain.subscriber._
-import omnibus.domain.subscriber.SubscriberRepositoryProtocol._
 
 class Subscriber(subId: String, subRepo: ActorRef) extends ClassicService {
 

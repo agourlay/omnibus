@@ -1,6 +1,6 @@
 package omnibus.api.route
 
-import akka.actor.{ Actor, ActorRef, Props, ActorContext }
+import akka.actor.{ ActorRef, ActorContext }
 
 import spray.routing._
 import spray.routing.authentication._

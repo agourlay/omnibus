@@ -1,10 +1,9 @@
 package omnibus.service.classic
 
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor.{ ActorRef, Props }
 
 import omnibus.domain.topic._
 import omnibus.domain.topic.TopicProtocol._
-import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class CreateTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicService {
 

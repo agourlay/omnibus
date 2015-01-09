@@ -4,14 +4,11 @@ import akka.actor._
 import akka.pattern._
 import akka.persistence._
 
-import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.language.postfixOps
 
 import omnibus.core.actors.CommonActor
 import omnibus.configuration.Settings
-import omnibus.domain.topic._
-import omnibus.api.streaming.sse.ServerSentEventResponse
 import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class TopicRepository extends PersistentActor with CommonActor {

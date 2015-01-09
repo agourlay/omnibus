@@ -1,11 +1,6 @@
 package omnibus.api.streaming.ws
 
-import spray.http._
-import spray.http.MediaTypes._
-import spray.routing._
-import Directives._
-
-import spray.can.websocket.frame.{ BinaryFrame, TextFrame }
+import spray.can.websocket.frame.TextFrame
 
 import omnibus.domain.topic.{ TopicEvent, TopicView }
 import omnibus.api.streaming.StreamingFormat

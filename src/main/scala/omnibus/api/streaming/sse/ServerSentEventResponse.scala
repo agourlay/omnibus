@@ -2,16 +2,11 @@ package omnibus.api.streaming.sse
 
 import akka.actor._
 
-import scala.util.Failure
-
 import spray.http._
 import spray.routing._
 import HttpHeaders._
 import spray.can.Http
-import spray.httpx.marshalling._
-import spray.json._
 
-import omnibus.core.actors.CommonActor
 import omnibus.domain.topic.{ TopicView, TopicEvent }
 import omnibus.api.streaming.StreamingResponse
 import omnibus.api.streaming.sse.ServerSentEventSupport.EventStreamType
