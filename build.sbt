@@ -47,7 +47,7 @@ resolvers ++= Seq(
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
-    val gatlingV     = "2.1.3"
+    val gatlingV     = "2.1.4"
     val commonIoV    = "2.4"
     Seq(
        "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV  % "it"
@@ -57,18 +57,18 @@ val test = project.in(file("."))
   })
 
 libraryDependencies ++= {
-  val akkaV         = "2.3.8"
+  val akkaV         = "2.3.9"
   val sprayV        = "1.3.2"
   val sprayJsonV    = "1.3.1"
-  val sprayWsV      = "0.1.3"
+  val sprayWsV      = "0.1.4"
   val logbackV      = "1.1.2"
-  val scalaTestV    = "2.2.3"
+  val scalaTestV    = "2.2.4"
   val scalaMetricsV = "3.3.0_a2.3"
   val metricsV      = "3.1.0"
   val levelDbV      = "1.8"
   Seq(
      "io.spray"                  %% "spray-can"                     % sprayV
-    ,"io.spray"                  %% "spray-routing"                 % sprayV
+    ,"io.spray"                  %% "spray-routing-shapeless2"      % sprayV
     ,"io.spray"                  %% "spray-json"                    % sprayJsonV
     ,"com.wandoulabs.akka"       %% "spray-websocket"               % sprayWsV
     ,"com.typesafe.akka"         %% "akka-actor"                    % akkaV
