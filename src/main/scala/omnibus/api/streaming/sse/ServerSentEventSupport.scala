@@ -34,7 +34,7 @@ object ServerSentEventSupport {
   implicit def topicEventSSE: ServerSentEventFormat[TopicEvent] = new ServerSentEventFormat[TopicEvent] {
     def format(te: TopicEvent): MessageChunk =
       MessageChunk("id: " + te.id + "\n" +
-        "event: " + te.topicPath.prettyStr() + "\n" +
+        "event: " + te.topicPath.prettyStr + "\n" +
         "data: " + te.payload + "\n" +
         "timestamp: " + te.timestamp + "\n\n")
   }

@@ -30,8 +30,8 @@ import omnibus.service.classic.ServiceError
 
 class RestRequest(ctx: RequestContext, props: Props) extends CommonActor {
 
-  implicit def system = context.system
-  implicit def executionContext = context.dispatcher
+  implicit val system = context.system
+  implicit val executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(system).Timeout)
 
   val classicService = context.actorOf(props)
@@ -74,15 +74,14 @@ class RestRequest(ctx: RequestContext, props: Props) extends CommonActor {
 
   def requestOver[T](status: StatusCode, headers: Seq[HttpHeader], payload: T)(implicit marshaller: ToResponseMarshaller[(StatusCode, Seq[HttpHeader], T)]) = {
     ctx.complete(status, headers, payload)
-    closeThings
+    closeThings()
   }
 
   override val supervisorStrategy =
     OneForOneStrategy() {
-      case e ⇒ {
+      case e ⇒
         requestOver(e)
         Stop
-      }
     }
 }
 

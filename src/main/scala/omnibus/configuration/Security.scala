@@ -6,8 +6,8 @@ import scala.concurrent.Future
 
 object Security {
   def adminPassAuthenticator(userPass: Option[UserPass])(implicit context: ActorContext) = {
-    implicit def system = context.system
-    implicit def executionContext = context.dispatcher
+    implicit val system = context.system
+    implicit val executionContext = context.dispatcher
 
     Future {
       if (userPass.exists(up ⇒ up.user == Settings(system).Admin.Name && up.pass == Settings(system).Admin.Password))

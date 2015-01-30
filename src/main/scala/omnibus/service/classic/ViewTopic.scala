@@ -15,12 +15,12 @@ class ViewTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServic
   }
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, topicRef) ⇒
+    case TopicPathRef(path, topicRef) ⇒
       topicRef match {
         case Some(ref) ⇒
           ref ! TopicProtocol.View
           context.become(super.receive orElse waitingTopicView)
-        case None ⇒ returnError(new TopicNotFoundException(topicPath.prettyStr))
+        case None ⇒ returnError(new TopicNotFoundException(path.prettyStr))
       }
   }
 }

@@ -17,7 +17,7 @@ class StreamTopicLeaves(topicRepo: ActorRef) extends StreamedService {
 
   override def receive: Receive = {
     case ReceiveTimeout ⇒
-      // getting the leaves is a stream service within a bounded timeframe
+      // getting the leaves is a stream service within a bounded time window
       // i.e. you will not receive leaves created after the request
       context.parent ! EndOfStream
       self ! PoisonPill

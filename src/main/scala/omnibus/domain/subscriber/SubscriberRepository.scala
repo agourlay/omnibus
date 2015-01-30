@@ -22,7 +22,7 @@ class SubscriberRepository extends CommonActor {
 
   def receive = {
     case CreateSub(topics, responder, reactiveCmd, ip, support) ⇒ createSub(topics, responder, reactiveCmd, ip, support)
-    case KillSub(id)                                            ⇒ killSub(id, sender)
+    case KillSub(id)                                            ⇒ killSub(id, sender())
     case AllSubs                                                ⇒ sender ! Subscribers(subs.toVector)
     case Terminated(refSub)                                     ⇒ handleTerminated(refSub)
     case SubById(id)                                            ⇒ sender ! subLookup(id)
@@ -37,7 +37,7 @@ class SubscriberRepository extends CommonActor {
   def createSub(topics: Set[ActorRef], responder: ActorRef, cmd: ReactiveCmd, ip: String, support: SubscriberSupport) = {
     log.info(s"Creating sub on topics $topics with support $support and channel $responder with react $cmd")
     val newSub = context.actorOf(Subscriber.props(responder, topics, cmd))
-    val newView = SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr(_)).mkString("+"), ip, cmd.react.toString, support.toString)
+    val newView = SubscriberView(newSub, nextSubId, topics.map(TopicPath.prettyStr).mkString("+"), ip, cmd.react.toString, support.toString)
     subs += newView
     context.watch(newSub)
   }

@@ -16,10 +16,10 @@ class CreateTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServ
   }
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, topicRef) ⇒ topicRef match {
-      case Some(ref) ⇒ returnError(new TopicAlreadyExistsException(topicPath.prettyStr()))
+    case TopicPathRef(path, topicRef) ⇒ topicRef match {
+      case Some(ref) ⇒ returnError(new TopicAlreadyExistsException(path.prettyStr))
       case None ⇒
-        topicRepo ! TopicRepositoryProtocol.CreateTopic(topicPath)
+        topicRepo ! TopicRepositoryProtocol.CreateTopic(path)
         context.become(super.receive orElse waitingAck)
     }
   }

@@ -11,18 +11,18 @@ import omnibus.domain.topic.TopicProtocol._
 
 class StreamTopicView(topicPath: TopicPath, topicRepo: ActorRef) extends StreamedService {
 
-  implicit def executionContext = context.dispatcher
+  implicit val executionContext = context.dispatcher
 
   topicRepo ! TopicRepositoryProtocol.LookupTopic(topicPath)
 
   override def receive = {
-    case TopicPathRef(topicPath, topicRef) ⇒
+    case TopicPathRef(path, topicRef) ⇒
       topicRef match {
-        case Some(topicRef) ⇒
-          context.system.scheduler.schedule(1.second, 1.second, topicRef, View)
+        case Some(ref) ⇒
+          context.system.scheduler.schedule(1.second, 1.second, ref, View)
           context.become(handleStream)
         case None ⇒
-          context.parent ! Failure(new TopicNotFoundException(topicPath.prettyStr))
+          context.parent ! Failure(new TopicNotFoundException(path.prettyStr))
           self ! PoisonPill
       }
   }

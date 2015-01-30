@@ -12,17 +12,17 @@ class DeleteTopic(topicPath: TopicPath, topicRepo: ActorRef) extends ClassicServ
   override def receive = super.receive orElse waitingLookup
 
   def waitingAck: Receive = {
-    case t @ TopicDeletedFromRepo(topicPath) ⇒ returnResult(t)
+    case t @ TopicDeletedFromRepo(_) ⇒ returnResult(t)
   }
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, topicRef) ⇒
+    case TopicPathRef(path, topicRef) ⇒
       topicRef match {
         case Some(ref) ⇒
           ref ! TopicProtocol.Delete
-          topicRepo ! TopicRepositoryProtocol.DeleteTopic(topicPath)
+          topicRepo ! TopicRepositoryProtocol.DeleteTopic(path)
           context.become(super.receive orElse waitingAck)
-        case None ⇒ returnError(new TopicNotFoundException(topicPath.prettyStr))
+        case None ⇒ returnError(new TopicNotFoundException(path.prettyStr))
       }
   }
 }

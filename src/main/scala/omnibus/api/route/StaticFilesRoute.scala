@@ -10,7 +10,7 @@ import omnibus.configuration.Security
 
 class StaticFilesRoute(implicit context: ActorContext) extends Directives {
 
-  implicit def executionContext = context.dispatcher
+  implicit val executionContext = context.dispatcher
 
   val route =
     authenticate(BasicAuth(Security.adminPassAuthenticator _, realm = "secure site")) { userName ⇒

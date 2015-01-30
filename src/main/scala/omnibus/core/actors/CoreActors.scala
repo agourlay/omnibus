@@ -14,5 +14,5 @@ trait CoreActors {
 
   val metricsReporter = system.actorOf(MetricsReporter.props, "metrics-reporter")
 
-  val unHandledlistener = system.actorOf(UnhandledMessageListener.props, "unhandled-message-listener")
+  val unhandledlistener = system.actorOf(UnhandledMessageListener.props, "unhandled-message-listener")
 }

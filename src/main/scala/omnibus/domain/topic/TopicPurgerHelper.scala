@@ -12,7 +12,7 @@ import omnibus.domain.topic.TopicPurgerHelperProtocol._
 class TopicPurgerHelper(val topicId: String, val timeLimit: Long) extends PersistentView with CommonActor {
 
   implicit val system = context.system
-  implicit def executionContext = context.dispatcher
+  implicit val executionContext = context.dispatcher
 
   override def persistenceId = topicId
   override def viewId = topicId + "-view"

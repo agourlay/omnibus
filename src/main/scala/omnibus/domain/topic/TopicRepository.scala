@@ -13,7 +13,7 @@ import omnibus.domain.topic.TopicRepositoryProtocol._
 
 class TopicRepository extends PersistentActor with CommonActor {
 
-  implicit def executionContext = context.dispatcher
+  implicit val executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(context.system).Timeout)
 
   override def persistenceId = self.path.toStringWithoutAddress
@@ -36,7 +36,7 @@ class TopicRepository extends PersistentActor with CommonActor {
   }
 
   val receiveCommand: Receive = {
-    case CreateTopic(topic)                 ⇒ persistTopic(topic, sender)
+    case CreateTopic(topic)                 ⇒ persistTopic(topic, sender())
     case DeleteTopic(topic)                 ⇒ sender ! deleteTopic(topic)
     case AllRoots                           ⇒ sender ! Roots(rootTopics.values.toVector.map(TopicPathRef(_)))
     case LookupTopic(topic)                 ⇒ lookUpTopic(topic) pipeTo sender()
@@ -82,7 +82,7 @@ class TopicRepository extends PersistentActor with CommonActor {
       case Some(topic) ⇒
         topicsNumber -= 1
         // TODO : should not delete message if it is valid
-        deleteMessage(topic.seqNumber, true)
+        deleteMessage(topic.seqNumber, permanent = true)
         state = TopicRepoState(state.events.filterNot(_.topicPath == topicPath))
     }
     TopicDeletedFromRepo(topicPath)

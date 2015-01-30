@@ -13,9 +13,9 @@ case class TopicPath(segments: List[String]) {
   require(segments.size < 50, s"Topic path is too long \n")
   require(segments.exists(_.size < 20), s"Topic path contains overlong segment \n")
   require(!segments.exists(_.isEmpty), s"Topic path contains an empty segment \n")
-  require(segments.map(TopicPath.containsBadChars(_)).exists(_ == false), s"Topic path contains forbidden chars \n")
+  require(segments.map(TopicPath.containsBadChars).contains(false), s"Topic path contains forbidden chars \n")
 
-  def prettyStr() = segments.mkString("/")
+  def prettyStr = segments.mkString("/")
 }
 
 object TopicPath {
@@ -36,7 +36,7 @@ object TopicPath {
   def prettyStr(ref: ActorRef) = ref.path.toString.split("/topic-repository/").toList(1)
 
   def prettySubscription(topics: Set[ActorRef]): String = {
-    val setOfTopic = topics.map(TopicPath.prettyStr(_))
+    val setOfTopic = topics.map(TopicPath.prettyStr)
     setOfTopic.mkString(" + ")
   }
 

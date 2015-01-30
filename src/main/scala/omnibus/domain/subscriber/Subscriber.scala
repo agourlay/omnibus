@@ -11,9 +11,9 @@ import omnibus.domain.subscriber.SubscriberProtocol._
 
 class Subscriber(val channel: ActorRef, val topics: Set[ActorRef], val reactiveCmd: ReactiveCmd, val timestamp: Long) extends CommonActor {
 
-  implicit def executionContext = context.dispatcher
+  implicit val executionContext = context.dispatcher
 
-  val pendingTopic = scala.collection.mutable.Set.empty[ActorRef] ++ (topics)
+  val pendingTopic = scala.collection.mutable.Set.empty[ActorRef] ++ topics
   val topicListened = scala.collection.mutable.Set.empty[ActorRef]
   var pendingScheduler: Cancellable = _
 

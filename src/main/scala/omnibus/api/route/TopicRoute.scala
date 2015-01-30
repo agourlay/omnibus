@@ -16,7 +16,7 @@ import omnibus.service.streamed.StreamTopicLeaves
 
 class TopicRoute(subRepo: ActorRef, topicRepo: ActorRef)(implicit context: ActorContext) extends Directives {
 
-  implicit def executionContext = context.dispatcher
+  implicit val executionContext = context.dispatcher
 
   val route =
     path("topics") {

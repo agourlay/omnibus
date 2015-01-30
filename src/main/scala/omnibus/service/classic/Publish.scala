@@ -16,12 +16,12 @@ class Publish(topicPath: TopicPath, message: String, topicRepo: ActorRef) extend
   }
 
   def waitingLookup: Receive = {
-    case TopicPathRef(topicPath, topicRef) ⇒
+    case TopicPathRef(path, topicRef) ⇒
       topicRef match {
         case Some(ref) ⇒
           ref ! TopicProtocol.PublishMessage(message)
           context.become(super.receive orElse waitingAck)
-        case None ⇒ returnError(new TopicNotFoundException(topicPath.prettyStr))
+        case None ⇒ returnError(new TopicNotFoundException(path.prettyStr))
       }
   }
 }

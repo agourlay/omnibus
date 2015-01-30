@@ -11,7 +11,7 @@ import omnibus.domain.topic.TopicContentProtocol._
 
 class TopicContent(val topicPath: TopicPath) extends PersistentActor with CommonActor {
 
-  implicit def executionContext = context.dispatcher
+  implicit val executionContext = context.dispatcher
   val system = context.system
 
   override def persistenceId = self.path.toStringWithoutAddress
@@ -35,7 +35,7 @@ class TopicContent(val topicPath: TopicPath) extends PersistentActor with Common
     case Publish(message, replyTo) ⇒ publishEvent(message, replyTo)
     case DeleteContent             ⇒ deleteTopicContent()
     case PurgeTopicContent         ⇒ purgeOldContent()
-    case PurgeFrom(id)             ⇒ deleteMessages(id, true)
+    case PurgeFrom(id)             ⇒ deleteMessages(id, permanent = true)
     case FwProcessorId(replyTo)    ⇒ replyTo ! TopicContentProtocol.ProcessorId(persistenceId)
   }
 

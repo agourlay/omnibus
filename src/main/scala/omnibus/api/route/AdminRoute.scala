@@ -12,7 +12,7 @@ import omnibus.domain.topic.TopicPath
 
 class AdminRoute(topicRepo: ActorRef, subRepo: ActorRef)(implicit context: ActorContext) extends Directives {
 
-  implicit def executionContext = context.dispatcher
+  implicit val executionContext = context.dispatcher
 
   val route =
     pathPrefix("admin") {

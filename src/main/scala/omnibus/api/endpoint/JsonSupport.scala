@@ -12,7 +12,7 @@ object JsonSupport {
 
   implicit val formatTopicPath = new RootJsonFormat[TopicPath] {
     def write(obj: TopicPath) = JsObject(
-      "topicPath" -> JsString(obj.prettyStr())
+      "topicPath" -> JsString(obj.prettyStr)
     )
     // we don't need to deserialize the TopicPath
     def read(json: JsValue): TopicPath = ???

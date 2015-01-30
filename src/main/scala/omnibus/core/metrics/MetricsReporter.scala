@@ -55,7 +55,7 @@ class MetricsReporter extends CommonActor {
   }
 
   def metricsByName(name: String) = {
-    val rawMap = metricRegistry.getMetrics().filterKeys(_.contains(name))
+    val rawMap = metricRegistry.getMetrics.filterKeys(_.contains(name))
     MetricsReport(rawMap.toMap.mapValues(toJsValue(_)))
   }
 

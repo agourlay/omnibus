@@ -25,7 +25,7 @@ class Topic(val topic: String) extends CommonActor {
   val subTopicsNumber = metrics.gauge(s"$prettyPath.sub-topics")(subTopics.size)
 
   def receive = {
-    case PublishMessage(message)                        ⇒ contentHolder ! TopicContentProtocol.Publish(message, sender)
+    case PublishMessage(message)                        ⇒ contentHolder ! TopicContentProtocol.Publish(message, sender())
     case Subscribe(subscriber)                          ⇒ subscribe(subscriber)
     case Unsubscribe(subscriber)                        ⇒ unsubscribe(subscriber)
     case CreateSubTopic(topics, replyTo)                ⇒ createSubTopic(topics, replyTo)
@@ -42,7 +42,7 @@ class Topic(val topic: String) extends CommonActor {
   }
 
   def view() = {
-    val prettyChildren = subTopics.values.map(TopicPath.prettyStr(_)).toVector
+    val prettyChildren = subTopics.values.map(TopicPath.prettyStr).toVector
     val throughput = if (System.currentTimeMillis - lastReceivedTS > 5000) 0 else Math.round(messageReceived.oneMinuteRate * 100.0) / 100.0
     TopicView(prettyPath, subTopics.size, prettyChildren, subscribers.size, numEvents, throughput, creationDate)
   }
@@ -109,7 +109,7 @@ class Topic(val topic: String) extends CommonActor {
       log.debug(s"subscriber $ref died")
     } else {
       // Reverse lookup by actorRef
-      val key = subTopics.map(_.swap).get(ref) match {
+      subTopics.map(_.swap).get(ref) match {
         case None ⇒ log.info("unknown terminated ActorŔef received")
         case Some(key) ⇒
           subTopics -= key

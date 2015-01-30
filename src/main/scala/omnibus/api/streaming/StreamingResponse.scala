@@ -12,9 +12,7 @@ trait StreamingResponse[B] extends CommonActor {
 
   val timerCtx = metrics.timer("streaming").timerContext()
 
-  override def postStop() = {
-    timerCtx.stop()
-  }
+  override def postStop() = timerCtx.stop()
 
   override def receive = {
     case TimeOutStream ⇒ streamTimeout()

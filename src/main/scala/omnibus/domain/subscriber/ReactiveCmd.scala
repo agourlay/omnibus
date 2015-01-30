@@ -2,7 +2,7 @@ package omnibus.domain.subscriber
 
 import omnibus.domain.subscriber.ReactiveMode._
 
-case class ReactiveCmd(val react: ReactiveMode, val since: Option[Long], val to: Option[Long]) {
+case class ReactiveCmd(react: ReactiveMode, since: Option[Long], to: Option[Long]) {
   require(react match {
     case SIMPLE     ⇒ true
     case REPLAY     ⇒ true

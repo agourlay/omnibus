@@ -15,7 +15,7 @@ object WebSocketSupport {
   implicit def topicEventWS: WebSocketFormat[TopicEvent] = new WebSocketFormat[TopicEvent] {
     def format(te: TopicEvent): TextFrame =
       TextFrame("id: " + te.id + "\n" +
-        "event: " + te.topicPath.prettyStr() + "\n" +
+        "event: " + te.topicPath.prettyStr + "\n" +
         "data: " + te.payload + "\n" +
         "timestamp: " + te.timestamp + "\n\n")
   }
