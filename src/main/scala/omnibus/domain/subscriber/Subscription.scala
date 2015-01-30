@@ -22,7 +22,7 @@ class Subscription(val topicId: String, val cmd: ReactiveCmd) extends Persistent
 
   def triggerRecoveryWindow() = {
     cmd.react match {
-      case ReactiveMode.SIMPLE     ⇒ self ! Recover() // TODO should be skipped but does not work without
+      case ReactiveMode.SIMPLE     ⇒ self ! Recover(toSequenceNr = 0L) //skip recover
       case ReactiveMode.REPLAY     ⇒ self ! Recover()
       case ReactiveMode.SINCE_ID   ⇒ self ! Recover()
       case ReactiveMode.SINCE_TS   ⇒ self ! Recover()
