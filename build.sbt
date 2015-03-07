@@ -6,7 +6,7 @@ name := "omnibus"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.11.6"
 
 scalacOptions := Seq(
   "-unchecked",
@@ -64,7 +64,7 @@ libraryDependencies ++= {
   val logbackV      = "1.1.2"
   val scalaTestV    = "2.2.4"
   val scalaMetricsV = "3.3.0_a2.3"
-  val metricsV      = "3.1.0"
+  val metricsV      = "3.1.1"
   val levelDbV      = "1.8"
   Seq(
      "io.spray"                  %% "spray-can"                     % sprayV
