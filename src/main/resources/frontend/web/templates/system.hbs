@@ -22,24 +22,24 @@
 	    </tr>
 	</thead>
 	<tbody>
-		{{#each view.content.timers}}
+		{{#each t in view.content.timers}}
 			<tr>
-				<td class="left">{{name}}</td>
-				<td>{{count}}</td>
-				<td>{{duration max 2}}</td>
-				<td>{{duration min 2}}</td>
-				<td>{{duration mean 2}}</td>
-				<td>{{duration stdDev 2}}</td>
-				<td>{{duration 50p 2}}</td>
-				<td>{{duration 75p 2}}</td>
-				<td>{{duration 95p 2}}</td>
-				<td>{{duration 98p 2}}</td>
-				<td>{{duration 99p 2}}</td>
-				<td>{{duration 999p 2}}</td>
-				<td>{{toFixed fifteenMinuteRate 2}} / sec</td>
-				<td>{{toFixed fiveMinuteRate 2}} / sec</td>
-			    <td>{{toFixed oneMinuteRate 2}} / sec</td>
-				<td>{{toFixed meanRate 2}} / sec</td>
+				<td class="left">{{t.name}}</td>
+				<td>{{t.count}}</td>
+				<td>{{duration-format t.max 2}}</td>
+				<td>{{duration-format t.min 2}}</td>
+				<td>{{duration-format t.mean 2}}</td>
+				<td>{{duration-format t.stdDev 2}}</td>
+				<td>{{duration-format t.50p 2}}</td>
+				<td>{{duration-format t.75p 2}}</td>
+				<td>{{duration-format t.95p 2}}</td>
+				<td>{{duration-format t.98p 2}}</td>
+				<td>{{duration-format t.99p 2}}</td>
+				<td>{{duration-format t.999p 2}}</td>
+				<td>{{to-fixed t.fifteenMinuteRate 2}} / sec</td>
+				<td>{{to-fixed t.fiveMinuteRate 2}} / sec</td>
+			    <td>{{to-fixed t.oneMinuteRate 2}} / sec</td>
+				<td>{{to-fixed t.meanRate 2}} / sec</td>
 			</tr>
 		{{/each}}
 	</tbody>
@@ -59,14 +59,14 @@
 	    </tr>
 	</thead>
 	<tbody>
-		{{#each view.content.meters}}
+		{{#each m in view.content.meters}}
 			<tr>
-				<td class="left">{{name}}</td>
-				<td>{{count}}</td>
-				<td>{{toFixed fifteenMinuteRate 2}} / sec</td>
-				<td>{{toFixed fiveMinuteRate 2}} / sec</td>
-				<td>{{toFixed meanRate 2}} / sec</td>
-				<td>{{toFixed oneMinuteRate 2}} / sec</td>
+				<td class="left">{{m.name}}</td>
+				<td>{{m.count}}</td>
+				<td>{{to-fixed m.fifteenMinuteRate 2}} / sec</td>
+				<td>{{to-fixed m.fiveMinuteRate 2}} / sec</td>
+				<td>{{to-fixed m.meanRate 2}} / sec</td>
+				<td>{{to-fixed m.oneMinuteRate 2}} / sec</td>
 			</tr>
 		{{/each}}
 	</tbody>
@@ -82,10 +82,10 @@
 	    </tr>
 	</thead>
 	<tbody>
-		{{#each view.content.counters}}
+		{{#each c in view.content.counters}}
 			<tr>
-				<td class="left">{{name}}</td>
-				<td>{{count}}</td>
+				<td class="left">{{c.name}}</td>
+				<td>{{c.count}}</td>
 			</tr>
 		{{/each}}
 	</tbody>

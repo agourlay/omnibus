@@ -2,16 +2,6 @@ a{
 	text-decoration:none !important;
 }
 
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
-
-#issue{
-    float: right;
-}
-
 #main-menu {
     background-color: rgb(61, 79, 93);
     z-index: 500;
@@ -26,6 +16,12 @@ ul {
 
 .pure-menu a {
     color: rgb(176, 202, 219);
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 
 #main-content {

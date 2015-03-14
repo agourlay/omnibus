@@ -1,10 +1,11 @@
 module.exports = function(grunt) {
-  // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     emberTemplates: {
-       compile: {
+      compile: {
         options: {
+          templateCompilerPath: 'web/bower_components/ember/ember-template-compiler.js',
+          handlebarsPath: 'node_modules/handlebars/dist/handlebars.js',
           templateBasePath: /web\/templates\//,
           templateFileExtensions: /\.hbs/
         },
@@ -17,8 +18,7 @@ module.exports = function(grunt) {
       libjs : {
         src : [
           "web/bower_components/jquery/dist/jquery.min.js",
-          "web/bower_components/handlebars/handlebars.runtime.min.js",
-          "web/bower_components/ember/ember.min.js",
+          "web/bower_components/ember/ember.prod.js",
           "web/bower_components/momentjs/min/moment.min.js",
           "web/bower_components/bacon/dist/Bacon.min.js",
           "web/bower_components/d3/d3.min.js",

@@ -4,12 +4,12 @@
     "bower": "^1.3.12",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
-    "grunt-ember-templates": "^0.5.0-alpha",
-    "grunt-contrib-uglify": "^0.7.0",
-    "grunt-contrib-cssmin": "^0.11.0",
-    "grunt-contrib-concat": "^0.5.0",
+    "grunt-ember-templates": "^0.5.0",
+    "grunt-contrib-uglify": "^0.8.0",
+    "grunt-contrib-cssmin": "^0.12.2",
+    "grunt-contrib-concat": "^0.5.1",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-contrib-copy": "^0.7.0",
-    "grunt-contrib-htmlmin": "^0.3.0"
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-htmlmin": "^0.4.0"
   }
 }

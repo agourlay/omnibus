@@ -6,7 +6,7 @@
     </div>
     <ul class="summary-box-content">
 	    {{#each t in view.content.rootTopics}}
-		   <li>{{#link-to 'topic' t.name}}{{t.name}}{{/link-to}}</b></li>
+		   <li>{{#link-to 'topic' t.name}}{{t.name}}{{/link-to}}</li>
 		{{else}}
             No root topics
         {{/each}}

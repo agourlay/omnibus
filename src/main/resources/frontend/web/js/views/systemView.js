@@ -4,15 +4,19 @@ App.SystemView = Em.View.extend({
     contentBinding: 'controller.content'      
 });
 
-Handlebars.registerHelper('duration', function(number, digits) {
-	var value = Ember.get(this,number);
+App.DurationFormatHelper = Ember.HTMLBars.makeBoundHelper(function(params, hash, options, env) {
+    var number = params[0];
+    var digits = params[1];
+	var value = number;
 	if (value > 1000) {
 		return (value / 1000).toFixed(digits) + " s";
 	} else {
 		return value.toFixed(digits) + " ms";
-	}	
+	}
 });
 
-Handlebars.registerHelper('toFixed', function(number, digits) {
-  return Ember.get(this,number).toFixed(digits);
+App.ToFixedHelper = Ember.HTMLBars.makeBoundHelper(function(params, hash, options, env) {
+  var number = params[0];
+  var digits = params[1];
+  return number.toFixed(digits);
 });
