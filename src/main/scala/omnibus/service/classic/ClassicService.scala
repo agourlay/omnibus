@@ -9,8 +9,8 @@ import omnibus.core.actors.CommonActor
 
 trait ClassicService extends CommonActor {
 
-  implicit def system = context.system
-  implicit def executionContext = context.dispatcher
+  implicit val system = context.system
+  implicit val executionContext = context.dispatcher
   implicit val timeout = akka.util.Timeout(Settings(system).Timeout)
 
   context.setReceiveTimeout(timeout.duration)

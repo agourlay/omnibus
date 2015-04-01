@@ -11,7 +11,7 @@ object TopicPathRef {
 case class TopicPath(segments: List[String]) {
   require(segments.size != 0, s"Topic path is empty \n")
   require(segments.size < 50, s"Topic path is too long \n")
-  require(segments.exists(_.size < 20), s"Topic path contains overlong segment \n")
+  require(segments.exists(_.length < 20), s"Topic path contains overlong segment \n")
   require(!segments.exists(_.isEmpty), s"Topic path contains an empty segment \n")
   require(segments.map(TopicPath.containsBadChars).contains(false), s"Topic path contains forbidden chars \n")
 

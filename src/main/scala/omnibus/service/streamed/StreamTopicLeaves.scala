@@ -8,7 +8,7 @@ import omnibus.configuration._
 
 class StreamTopicLeaves(topicRepo: ActorRef) extends StreamedService {
 
-  implicit def system = context.system
+  implicit val system = context.system
   implicit val timeout = akka.util.Timeout(Settings(system).Timeout)
 
   context.setReceiveTimeout(timeout.duration)

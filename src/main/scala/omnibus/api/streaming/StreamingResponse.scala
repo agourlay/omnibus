@@ -35,10 +35,9 @@ trait StreamingResponse[B] extends CommonActor {
 
   override val supervisorStrategy =
     OneForOneStrategy() {
-      case e ⇒ {
+      case e ⇒
         handleException(e)
         Stop
-      }
     }
 }
 

@@ -44,7 +44,7 @@ object JsonSupport {
       "creationDate" -> JsNumber(obj.creationDate),
       "timestamp" -> JsNumber(obj.timestamp),
       "_embedded" -> JsObject("children" -> JsArray(
-        obj.children.map(child ⇒ JsObject(child.split("/").last -> JsObject("href" -> JsString("/topics/" + child)))).toVector
+        obj.children.map(child ⇒ JsObject(child.split("/").last -> JsObject("href" -> JsString("/topics/" + child))))
       )
       ),
       "_links" -> JsArray(

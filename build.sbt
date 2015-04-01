@@ -58,12 +58,12 @@ val test = project.in(file("."))
 
 libraryDependencies ++= {
   val akkaV         = "2.3.9"
-  val sprayV        = "1.3.2"
+  val sprayV        = "1.3.3"
   val sprayJsonV    = "1.3.1"
   val sprayWsV      = "0.1.4"
-  val logbackV      = "1.1.2"
+  val logbackV      = "1.1.3"
   val scalaTestV    = "2.2.4"
-  val scalaMetricsV = "3.3.0_a2.3"
+  val scalaMetricsV = "3.4.0_a2.3"
   val metricsV      = "3.1.1"
   val levelDbV      = "1.8"
   Seq(
@@ -84,4 +84,4 @@ libraryDependencies ++= {
   )
 }
 
-seq(Revolver.settings: _*)
+Seq(Revolver.settings: _*)

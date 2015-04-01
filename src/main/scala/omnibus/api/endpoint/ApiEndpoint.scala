@@ -9,7 +9,7 @@ import omnibus.api.route._
 import omnibus.api.exceptions.RestFailureHandling
 
 class ApiEndpoint(coreActors: CoreActors) extends HttpEndpoint with Actor {
-  implicit def actorRefFactory = context
+  implicit val actorRefFactory = context
   def receive = runRoute(routes(coreActors))
 }
 
