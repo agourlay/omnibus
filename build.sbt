@@ -16,6 +16,7 @@ scalacOptions := Seq(
   "-Ywarn-dead-code",
   "-language:implicitConversions",
   "-language:postfixOps",
+  "-Ywarn-unused-import",
   "-feature"
 )
 
@@ -47,7 +48,7 @@ resolvers ++= Seq(
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
-    val gatlingV     = "2.1.4"
+    val gatlingV     = "2.1.5"
     val commonIoV    = "2.4"
     Seq(
        "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV  % "it"

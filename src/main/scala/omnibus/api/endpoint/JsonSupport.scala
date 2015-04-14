@@ -97,12 +97,12 @@ object JsonSupport {
       "fiveMinuteRate" -> JsNumber(obj.fiveMinuteRate),
       "meanRate" -> JsNumber(obj.meanRate),
       "oneMinuteRate" -> JsNumber(obj.oneMinuteRate),
-      "50p" -> JsNumber(obj.snapshot.getMedian() / 1000000),
-      "75p" -> JsNumber(obj.snapshot.get75thPercentile() / 1000000),
-      "95p" -> JsNumber(obj.snapshot.get95thPercentile() / 1000000),
-      "98p" -> JsNumber(obj.snapshot.get98thPercentile() / 1000000),
-      "99p" -> JsNumber(obj.snapshot.get99thPercentile() / 1000000),
-      "999p" -> JsNumber(obj.snapshot.get999thPercentile() / 1000000)
+      "50p" -> JsNumber(obj.snapshot.getMedian / 1000000),
+      "75p" -> JsNumber(obj.snapshot.get75thPercentile / 1000000),
+      "95p" -> JsNumber(obj.snapshot.get95thPercentile / 1000000),
+      "98p" -> JsNumber(obj.snapshot.get98thPercentile / 1000000),
+      "99p" -> JsNumber(obj.snapshot.get99thPercentile / 1000000),
+      "999p" -> JsNumber(obj.snapshot.get999thPercentile / 1000000)
     )
     // we don't need to deserialize
     def read(json: JsValue): Timer = ???

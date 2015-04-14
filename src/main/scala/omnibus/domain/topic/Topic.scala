@@ -57,7 +57,7 @@ class Topic(val topic: String) extends CommonActor {
     self ! PoisonPill
   }
 
-  def handlePropagation(operation: Operation, direction: PropagationDirection) = {
+  def handlePropagation(operation: Operation, direction: PropagationDirection) {
     propagateToDirection(operation, direction)
     self ! operation
   }
@@ -67,27 +67,27 @@ class Topic(val topic: String) extends CommonActor {
     case PropagationDirection.DOWN ⇒ propagateToSubTopics(operation)
   }
 
-  def propagateToParent(operation: Operation) = {
+  def propagateToParent(operation: Operation) {
     context.parent ! TopicProtocol.Propagation(operation, PropagationDirection.UP)
   }
 
-  def propagateToSubTopics(operation: Operation) = {
+  def propagateToSubTopics(operation: Operation) {
     subTopics.values foreach { subTopic ⇒ subTopic ! TopicProtocol.Propagation(operation, PropagationDirection.DOWN) }
   }
 
-  def cascadeProcessorId(replyTo: ActorRef) = {
+  def cascadeProcessorId(replyTo: ActorRef) {
     propagateToDirection(ProcessorId(replyTo), PropagationDirection.DOWN)
     contentHolder ! TopicContentProtocol.FwProcessorId(replyTo)
   }
 
-  def messageSaved(replyTo: ActorRef) = {
+  def messageSaved(replyTo: ActorRef) {
     replyTo ! TopicProtocol.MessagePublished
     messageReceived.mark()
     numEvents += 1
     lastReceivedTS = System.currentTimeMillis
   }
 
-  def subscribe(subscriber: ActorRef) = {
+  def subscribe(subscriber: ActorRef) {
     if (!subscribers.contains(subscriber)) {
       context.watch(subscriber)
       subscribers += subscriber
@@ -96,13 +96,13 @@ class Topic(val topic: String) extends CommonActor {
     }
   }
 
-  def unsubscribe(subscriber: ActorRef) = {
+  def unsubscribe(subscriber: ActorRef) {
     context.unwatch(subscriber)
     subscribers -= subscriber
     subscriber ! SubscriberProtocol.AcknowledgeUnsub(self)
   }
 
-  def handleTerminated(ref: ActorRef) = {
+  def handleTerminated(ref: ActorRef) {
     // It is either a subtopic or a subscriber
     if (subscribers.contains(ref)) {
       unsubscribe(ref)
@@ -123,7 +123,7 @@ class Topic(val topic: String) extends CommonActor {
     case _            ⇒ onTopicCreation(replyTo)
   }
 
-  def onTopicCreation(replyTo: ActorRef) = {
+  def onTopicCreation(replyTo: ActorRef) {
     // notify author
     replyTo ! TopicProtocol.TopicCreated(self)
     // notify subs by sending new processorId
@@ -136,7 +136,7 @@ class Topic(val topic: String) extends CommonActor {
 
   def sendToSubscribers(stuff: Any) = subscribers.foreach { actorRef ⇒ actorRef ! stuff }
 
-  def createTopicAndForward(subTopic: String, topics: List[String], replyTo: ActorRef) = {
+  def createTopicAndForward(subTopic: String, topics: List[String], replyTo: ActorRef) {
     log.debug(s"Create sub topic $subTopic and forward $topics")
     if (subTopics.contains(subTopic)) {
       log.debug(s"sub topic $subTopic already exists, forward to its sub topics")

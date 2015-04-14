@@ -1,13 +1,10 @@
 package omnibus.it
 
 import io.gatling.core.Predef._
-import io.gatling.http.Predef._
 
 import java.io.File
 
 import org.apache.commons.io.FileUtils
-
-import omnibus._
 
 trait OmnibusSimulation extends Simulation {
 

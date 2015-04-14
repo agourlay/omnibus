@@ -19,7 +19,7 @@ class TopicPurgerHelper(val topicId: String, val timeLimit: Long) extends Persis
 
   var lastMatchingId: Option[Long] = None
 
-  val replyDelay = 30 seconds
+  val replyDelay = 30.seconds
 
   val replyScheduler = system.scheduler.schedule(replyDelay, replyDelay, self, Reply)
 

@@ -24,7 +24,7 @@ class TopicRepository extends PersistentActor with CommonActor {
   val topicsNumber = metrics.counter("topics")
 
   var state = TopicRepoState()
-  def updateState(msg: TopicRepoStateValue): Unit = { state = state.update(msg) }
+  def updateState(msg: TopicRepoStateValue) { state = state.update(msg) }
 
   val receiveRecover: Receive = {
     case t: TopicRepoStateValue ⇒
