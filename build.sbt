@@ -32,7 +32,7 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(PreserveDanglingCloseParenthesis, true)
   .setPreference(RewriteArrowSymbols, true)
 
-enablePlugins(JavaAppPackaging)  
+enablePlugins(JavaServerAppPackaging)
 
 mappings in Universal += {
   file("src/main/resources/application.conf") -> "conf/omnibus.conf"
@@ -48,8 +48,8 @@ resolvers ++= Seq(
 val test = project.in(file("."))
   .enablePlugins(GatlingPlugin)
   .settings(libraryDependencies ++= {
-    val gatlingV     = "2.1.5"
-    val commonIoV    = "2.4"
+    val gatlingV  = "2.1.5"
+    val commonIoV = "2.4"
     Seq(
        "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingV  % "it"
       ,"io.gatling"            % "gatling-test-framework"    % gatlingV  % "it"
@@ -58,14 +58,14 @@ val test = project.in(file("."))
   })
 
 libraryDependencies ++= {
-  val akkaV         = "2.3.9"
+  val akkaV         = "2.3.10"
   val sprayV        = "1.3.3"
   val sprayJsonV    = "1.3.1"
   val sprayWsV      = "0.1.4"
   val logbackV      = "1.1.3"
   val scalaTestV    = "2.2.4"
-  val scalaMetricsV = "3.4.0_a2.3"
-  val metricsV      = "3.1.1"
+  val scalaMetricsV = "3.5.0_a2.3"
+  val metricsV      = "3.1.2"
   val levelDbV      = "1.8"
   Seq(
      "io.spray"                  %% "spray-can"                     % sprayV
