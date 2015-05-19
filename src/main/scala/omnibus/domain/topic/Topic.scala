@@ -24,6 +24,11 @@ class Topic(val topic: String) extends CommonActor {
   val subscribersNumber = metrics.gauge(s"$prettyPath.subscribers")(subscribers.size)
   val subTopicsNumber = metrics.gauge(s"$prettyPath.sub-topics")(subTopics.size)
 
+  override def postStop(): Unit = {
+    metrics.registry.remove(this.getClass.getCanonicalName + s".$prettyPath.subscribers")
+    metrics.registry.remove(this.getClass.getCanonicalName + s".$prettyPath.sub-topics")
+  }
+
   def receive = {
     case PublishMessage(message)                        ⇒ contentHolder ! TopicContentProtocol.Publish(message, sender())
     case Subscribe(subscriber)                          ⇒ subscribe(subscriber)

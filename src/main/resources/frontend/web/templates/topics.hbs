@@ -1,7 +1,7 @@
 <h4>Create topics</h4>
 
 <form class="pure-form">
-	{{input valueBinding="newTopicName" placeholder="new/topic" }}
+	{{input value=newTopicName placeholder="new/topic" }}
 	<button class="pure-button pure-button-primary" {{action 'createTopic' newTopicName}}>
 		<i class="fa fa-plus-circle"></i>
 	</button>
@@ -24,30 +24,30 @@
 	</thead>
 	<tbody>
 		{{#each topic in controller}}
-			{{#view 'topicRow' topicBinding='topic'}}
+			{{#view 'topicRow' topicv=topic}}
 				<td>
-					{{#if view.topic.hasSubTopics}}
+					{{#if topic.hasSubTopics}}
 						{{#if view.isExpanded}}
-						    <a href="#" {{action "expand" view.topic.subTopics target="view"}}>
+						    <a href="#" {{action "expand" target="view"}}>
 						        <i class="fa fa-minus-square-o"></i>
 						    </a>
 						{{else}} 
-							<a href="#" {{action "expand" view.topic.subTopics target="view"}}>
+							<a href="#" {{action "expand" target="view"}}>
 						        <i class="fa fa-plus-square-o"></i>
 						    </a>
 						{{/if}}   
 					{{/if}}
 				</td>
 			    <td style="text-align: left;">
-			    	<b>{{#link-to 'topic' view.topic.name}}{{view.topic.name}}{{/link-to}}</b>
+			    	<b>{{#link-to 'topic' topic.name}}{{topic.name}}{{/link-to}}</b>
 			    </td>
-			    <td>{{view.topic.subscribersNumber}}</td>
-			    <td>{{view.topic.eventsNumber}}</td>
-			    <td>{{view.topic.throughputPerSec}} msg / sec</td>
-			    <td>{{view.topic.subTopicsNumber}}</td>
-			    <td>{{view.topic.prettyCreationDate}}</td>
+			    <td>{{topic.subscribersNumber}}</td>
+			    <td>{{topic.eventsNumber}}</td>
+			    <td>{{topic.throughputPerSec}} msg / sec</td>
+			    <td>{{topic.subTopicsNumber}}</td>
+			    <td>{{topic.prettyCreationDate}}</td>
 			    <td>
-					<button class="pure-button delete-button" {{action "deleteTopic" view.topic.name }}>
+					<button class="pure-button delete-button" {{action "deleteTopic" topic.name }}>
 						<i class="fa fa-trash-o"></i>
 					</button>
 			    </td>

@@ -28,7 +28,7 @@ App.TopicsController = Ember.ArrayController.extend({
       var exist = controller.findProperty('name', topic);
       if (!exist) {
         App.Dao.topic(topic).then(function (sub) {
-          controller.model.pushObject(sub); 
+          controller.get('model').pushObject(sub); 
         });
       }
     });
@@ -37,21 +37,21 @@ App.TopicsController = Ember.ArrayController.extend({
   collapseTopic: function(topicName, subTopicsName){
     var controller = this;
     var toDelete = [];
-    $.each(controller.model, function(i, model){
+    $.each(controller.get("model"), function(i, topic){
       $.each(subTopicsName, function(i, sub){
-        if (model.name.indexOf(sub) == 0 ) {
-          toDelete.push(model);
+        if (topic.name.indexOf(sub) == 0 ) {
+          toDelete.push(topic);
         }
       }); 
     }); 
-    controller.model.removeObjects(toDelete); 
+    controller.get('model').removeObjects(toDelete); 
   },
 
   reloadContent : function() {
     var controller = this;
     App.Dao.topics().then(function(topics){
-      controller.model.clear();
-      controller.model.pushObjects(topics);  
+      controller.get('model').clear();
+      controller.get('model').pushObjects(topics);  
     });
   },
 })

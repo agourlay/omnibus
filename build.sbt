@@ -63,8 +63,8 @@ libraryDependencies ++= {
   val sprayJsonV    = "1.3.2"
   val sprayWsV      = "0.1.4"
   val logbackV      = "1.1.3"
-  val scalaTestV    = "2.2.4"
-  val scalaMetricsV = "3.5.0_a2.3"
+  val scalaTestV    = "2.2.5"
+  val scalaMetricsV = "3.5.1_a2.3"
   val metricsV      = "3.1.2"
   val levelDbV      = "1.8"
   Seq(

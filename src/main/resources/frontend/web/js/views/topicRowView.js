@@ -1,16 +1,16 @@
 App.TopicRowView = Em.View.extend({
 	tagName: 'tr',
-    topic: null,
+    topicv: null,
     isExpanded : false,
 
     actions : {
     	expand: function() {
-		    var topic = this.get('topic');
+		    var topic = this.get('topicv');
 		    if (this.get("isExpanded")){
-		    	this.get("controller").collapseTopic(topic.name, topic.subTopics);
+		    	this.get("controller").collapseTopic(topic.name, topic.get("subTopics"));
 		    	this.set("isExpanded", false);
 		    } else {
-		    	this.get("controller").expandTopic(topic.subTopics);
+		    	this.get("controller").expandTopic(topic.get("subTopics"));
 		    	this.set("isExpanded", true);
 		    }
 	    }
