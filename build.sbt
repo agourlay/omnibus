@@ -6,7 +6,7 @@ name := "omnibus"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
 scalacOptions := Seq(
   "-unchecked",
@@ -58,7 +58,7 @@ val test = project.in(file("."))
   })
 
 libraryDependencies ++= {
-  val akkaV         = "2.3.11"
+  val akkaV         = "2.3.12"
   val sprayV        = "1.3.3"
   val sprayJsonV    = "1.3.2"
   val sprayWsV      = "0.1.4"
