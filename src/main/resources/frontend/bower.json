@@ -10,12 +10,12 @@
   ],
   "dependencies": {
     "jquery": "2.1.4",
-    "ember": "1.13.3",
+    "ember": "1.13.4",
     "pure" : "0.6.0",
-    "momentjs": "2.10.3",
+    "momentjs": "2.10.6",
     "rickshaw" : "1.5.1",
-    "font-awesome": "4.3.0",
+    "font-awesome": "4.4.0",
     "d3" : "3.5.6",
-    "bacon" : "0.7.70"
+    "bacon" : "0.7.71"
   }
 }
