@@ -18,7 +18,7 @@ module.exports = function(grunt) {
       libjs : {
         src : [
           "web/bower_components/jquery/dist/jquery.min.js",
-          "web/bower_components/ember/ember.prod.js",
+          "web/bower_components/ember/ember.js",
           "web/bower_components/momentjs/min/moment.min.js",
           "web/bower_components/bacon/dist/Bacon.min.js",
           "web/bower_components/d3/d3.min.js",

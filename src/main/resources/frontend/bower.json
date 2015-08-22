@@ -10,7 +10,7 @@
   ],
   "dependencies": {
     "jquery": "2.1.4",
-    "ember": "1.13.4",
+    "ember": "1.13.8",
     "pure" : "0.6.0",
     "momentjs": "2.10.6",
     "rickshaw" : "1.5.1",

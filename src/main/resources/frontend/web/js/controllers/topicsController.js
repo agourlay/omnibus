@@ -25,7 +25,7 @@ App.TopicsController = Ember.ArrayController.extend({
   expandTopic: function(topicsName){
     var controller = this;
     $.each(topicsName, function(i, topic){
-      var exist = controller.findProperty('name', topic);
+      var exist = controller.findBy('name', topic);
       if (!exist) {
         App.Dao.topic(topic).then(function (sub) {
           controller.get('model').pushObject(sub); 
